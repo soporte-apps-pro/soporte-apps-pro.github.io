@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>Congregación Pro - v65 Final</title>
+    <title>Congregación Pro - Web</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -177,6 +177,16 @@
 
             <div class="settings-group">
                 <div style="padding:15px;">
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">🌐 Versión Web (iPhone/PC)</div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                         <p style="font-size:0.8rem; color:var(--text-muted); margin:0; flex:1;">Para usar en navegador sin instalar.</p>
+                         <button class="btn info" onclick="shareWebLink()" style="padding:8px 12px;">🔗 Compartir</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div style="padding:15px;">
                     <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">💾 Respaldo Local</div>
                     <div class="action-row">
                         <div class="icon-btn" onclick="exportBackup()"><span>📥</span><small>Descargar</small></div>
@@ -210,7 +220,7 @@
             </details>
 
             <div class="admin-only" style="padding:15px; text-align:center; font-size:0.75rem; color:var(--text-muted); background:#f9fafb; border-radius: 12px; display:flex; flex-direction:column; gap:10px; align-items:center;">
-                <span>v1.0.65 • Release</span>
+                <span>v1.0.66 • Web/App</span>
                 <button class="btn ghost" style="font-size:0.75rem; padding: 4px 10px; border-color: var(--border-light);" onclick="document.getElementById('modalSupport').style.display='flex'">
                     ☕ Acerca de & Soporte
                 </button>
@@ -226,10 +236,10 @@
             <button class="btn ghost" onclick="document.getElementById('modalSupport').style.display='none'" style="border:none; font-size:1.2rem; padding:4px; color:var(--text-muted);">✕</button>
         </h3>
         <div style="font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 25px;">
-            <p style="margin-bottom: 15px;">Esta aplicación fue creada con el objetivo de facilitar el trabajo de quienes están encargados de llevar los registros.</p>
-            <p style="margin-bottom: 15px; font-weight:600;">Es una herramienta totalmente gratuita y de desarrollo independiente.</p>
+            <p style="margin-bottom: 15px;">Herramienta para llevar un registro organizado de manera eficiente, segura y fácil.</p>
+            <p style="margin-bottom: 15px; font-weight:600;">Desarrollo independiente y gratuito.</p>
             <div style="background:#eef2ff; color:#4338ca; padding:10px; border-radius:8px; font-size:0.8rem; margin-bottom:15px;">
-                <b>¿Necesitas ayuda?</b><br>
+                <b>Contacto:</b><br>
                 📧 desarrollo.independiente.app@gmail.com
             </div>
             <p style="font-size:0.8rem;"><a href="https://soporte-apps-pro.github.io/privacidad.html" target="_blank" style="color:var(--primary);">Ver Política de Privacidad</a></p>
@@ -426,24 +436,35 @@
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
     
-    // 🛡️ INICIALIZACIÓN A PRUEBA DE FALLOS: SIEMPRE ARRAYS VACÍOS
     let state = { personas: [], activity: {}, attendance: {}, config: { pwd: '12345', totalGroups: 5, groups: {} } };
     let CURRENT_ROLE = 'ADMIN'; 
     let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
     let actY = curY, actM = curM, asistY = curY, asistM = curM;
 
-    // --- NUEVAS FUNCIONES DE COPIADO CON PRIVACIDAD BLINDADA ---
-    window.copyInstructions = function() {
-        // ENLACE PROFESIONAL (Ya no sale tu nombre personal)
-        // Puedes cambiar esto por el link de la Play Store en el futuro
-        const urlOficial = "https://soporte-apps-pro.github.io/"; 
+    // --- NUEVO: FUNCIÓN PARA COMPARTIR ENLACE WEB ---
+    window.shareWebLink = function() {
+        const urlWeb = "https://soporte-apps-pro.github.io/app/";
+        const msg = `Hola, puedes usar la App "Congregación Pro" desde tu iPhone o PC entrando aquí:\n${urlWeb}`;
         
+        if (navigator.share) {
+            navigator.share({
+                title: 'Congregación Pro Web',
+                text: msg,
+                url: urlWeb
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(msg).then(() => showToast("🔗 Enlace copiado"));
+        }
+    }
+    // ------------------------------------------------
+
+    window.copyInstructions = function() {
+        const urlOficial = "https://soporte-apps-pro.github.io/"; 
         const msg = `Hola hermano, aquí tienes los datos para conectar la App.\n\n` +
                     `1. Asegúrate de tener la App instalada.\n` +
                     `   (Descárgala aquí si no la tienes: ${urlOficial})\n\n` +
                     `2. Ve a Ajustes (⚙️) y busca donde dice "🔑 Conexión Rápida".\n\n` +
                     `3. Te enviaré la LLAVE en el siguiente mensaje. Cópiala y pégala ahí.`;
-                    
         navigator.clipboard.writeText(msg).then(() => showToast("📋 Instrucciones copiadas"));
     }
 
@@ -468,7 +489,6 @@
             } else { alert("Llave inválida."); }
         } catch(e) { alert("Error: La llave no es válida."); }
     }
-    // ---------------------------------------------
 
     window.openSettings = function() {
         $('#modalSettings').style.display = 'flex';
@@ -607,30 +627,22 @@
         }
     }
 
-    // 🛡️ SINCRONIZACIÓN BLINDADA: SI FALTA ALGO EN LA NUBE, LO RELLENA CON VACÍO
     function startRealtimeSync() {
         if(!db) return;
         onSnapshot(doc(db, "congregacion", "datos_generales"), (doc) => {
             if(doc.exists()) {
                 const cloudData = doc.data(); 
                 state = cloudData;
-                
-                // --- CHALECO ANTIBALAS: EVITA CRASH POR DATOS FALTANTES ---
                 if(!state.personas) state.personas = [];
                 if(!state.activity) state.activity = {};
                 if(!state.attendance) state.attendance = {};
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
-                // -----------------------------------------------------------
-
                 localStorage.setItem(DB_KEY, JSON.stringify(state));
                 renderAll();
-                // updateCloudUI(true, "");
             } else { save(); }
         }, (error) => { console.error("Sync error:", error); updateCloudUI(false); });
     }
 
-    // 🚨🚨🚨 AQUÍ ESTÁ EL CAMBIO IMPORTANTE 🚨🚨🚨
-    // AHORA EL SISTEMA GRITARÁ SI ALGO FALLA AL GUARDAR
     window.save = async function() {
         localStorage.setItem(DB_KEY, JSON.stringify(state));
         updateDatalist();
@@ -638,7 +650,6 @@
             try { 
                 await setDoc(doc(db, "congregacion", "datos_generales"), state); 
             } catch(e) { 
-                // AQUÍ SALDRÁ LA ALERTA ROJA CON EL ERROR
                 alert("❌ ERROR AL SUBIR A LA NUBE:\n\n" + e.message); 
             } 
         }
@@ -661,7 +672,6 @@
         const badge = $('#roleBadge');
         if(CURRENT_ROLE === 'ADMIN') {
             badge.innerText = 'Administrador'; badge.style.background = '#e0e7ff'; badge.style.color = '#4338ca';
-            // Abrir configuración manual automáticamente para admin
             const details = document.getElementById('manualConfigDetails');
             if(details) details.open = true;
         } else {
@@ -771,48 +781,28 @@
         const cEl = $('#cIna'); if(cEl) cEl.innerText = `(${countIna})`;
     }
 
-    // --- NUEVO: FUNCIÓN PARA LIMPIAR ESTILOS ANTES DE IMPRIMIR ---
     window.toggleS21Inputs = function() { const m=$('#s21Mode').value; $('#s21InputIndiv').style.display=(m==='individual')?'block':'none'; $('#s21InputGroup').style.display=(m==='group')?'block':'none'; $('#preview-viewport').innerHTML=''; }
     window.getS21HTML = function(p,sy) { let rows='',tH=0; CICLO_S88.forEach(m=>{ const y=(m>=9)?sy:sy+1, r=state.activity[ymKey(y,m)]?.[p.id]||{horas:0,est:0,pa:false,part:false}; tH+=(r.horas||0); rows+=`<tr><td>${MESES_NOM[m-1]}</td><td>${(r.horas||r.part)?'[X]':''}</td><td>${r.est||''}</td><td>${r.pa?'[X]':''}</td><td>${r.horas||''}</td><td></td></tr>`; }); const privs = [p.anciano?'Anciano':'', p.sm?'SM':'', p.pr?'PR':'', p.pe?'PE':''].filter(Boolean).join(', '); return `<div class="print-canvas"><div style="text-align:center; font-weight:800; font-size:12pt; margin-bottom:10px;">REGISTRO DE PUBLICADOR</div><div class="s21-header-box"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Nombre:</b> ${p.nombre}</span><span><b>Grupo:</b> ${p.grupo}</span></div><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>F. Nacimiento:</b> ${p.nac||'-'}</span><span><b>F. Bautismo:</b> ${p.bau||'-'}</span></div><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Sexo:</b> ${p.sexo}</span><span><b>Esperanza:</b> ${p.esp}</span></div><div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;"><b>Privilegios:</b> ${privs||'Publicador'}</div></div><table class="official-table"><thead><tr><th style="width:20%">Año ${sy}-${sy+1}</th><th>Partic.</th><th>Est</th><th>P. Aux</th><th>Horas</th><th>Notas</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="4" style="text-align:right; font-weight:bold;">Total Horas:</td><td>${tH}</td><td></td></tr></tfoot></table></div>`; }
     window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && !p.sacado);} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&!p.sacado);} else {l=state.personas.filter(p=>!p.sacado);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
     
-    // --- LÓGICA DE AHORRO DE TINTA APLICADA AQUI ---
     window.downloadPDFS21 = function() { 
         const el = document.getElementById('preview-viewport');
         if(!el.innerHTML) return alert("Ver primero");
-        
-        // 1. Quitar fondo y padding
-        el.style.background = 'white';
-        el.style.padding = '0';
-        
+        el.style.background = 'white'; el.style.padding = '0';
         html2pdf().set({margin:10, filename:'S21.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:1.5}, jsPDF:{unit:'mm',format:'a4'}})
-        .from(el).save()
-        .then(() => {
-            // 2. Restaurar al terminar
-            el.style.background = '#525252';
-            el.style.padding = '20px';
-        });
+        .from(el).save().then(() => { el.style.background = '#525252'; el.style.padding = '20px'; });
     }
 
     window.renderS88Preview = function() { const sy=parseInt($('#s88Year').value); const build=(t)=>{let rows='',tA=0,tR=0; CICLO_S88.forEach(m=>{const y=(m>=9)?sy:sy+1, d=state.attendance[ymKey(y,m)]?.[t]||[0,0,0,0,0,0], re=d.filter(v=>v>0).length, as=d.reduce((a,b)=>a+b,0), pr=re>0?Math.round(as/re):''; tA+=as; tR+=re; rows+=`<tr><td>${MESES_NOM[m-1]}</td><td>${re||''}</td><td>${as||''}</td><td><b>${pr}</b></td></tr>`;}); return {h:rows,avg:tR>0?Math.round(tA/tR):''};}; const es=build('es'), fs=build('fs'); $('#s88-preview-viewport').innerHTML=`<div class="print-canvas"><div style="text-align:center; font-weight:800;">REGISTRO ASISTENCIA</div><br><b>REUNIÓN VIDA Y MINISTERIO</b><table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${es.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${es.avg}</td></tr></tfoot></table><br><b>REUNIÓN PÚBLICA</b><table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${fs.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${fs.avg}</td></tr></tfoot></table></div>`; }
     
-    // --- LÓGICA DE AHORRO DE TINTA APLICADA AQUI TAMBIÉN ---
     window.generatePDF = function() { 
         const el = document.getElementById('s88-preview-viewport');
         if(!el) return;
-        
-        el.style.background = 'white';
-        el.style.padding = '0';
-
+        el.style.background = 'white'; el.style.padding = '0';
         html2pdf().set({margin:10, filename:'S88.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:1.5}, jsPDF:{unit:'mm',format:'a4'}})
-        .from(el).save()
-        .then(() => {
-            el.style.background = '#525252';
-            el.style.padding = '20px';
-        });
+        .from(el).save().then(() => { el.style.background = '#525252'; el.style.padding = '20px'; });
     }
     
-    // DASHBOARD RESUMEN
     window.renderResumenMensual = function(y, m) { 
         const k=ymKey(y,m), act=state.activity[k]||{}, att=state.attendance[k]||{es:[],fs:[]}; 
         let tM=0,activos=0,pubC=0,pubE=0,prC=0,prH=0,prE=0,paC=0,paH=0,paE=0; 
@@ -877,7 +867,7 @@
                 const data = JSON.parse(e.target.result);
                 if(data.personas && Array.isArray(data.personas)) {
                     state = data; save(); alert("✅ Datos restaurados correctamente. La página se recargará."); location.reload();
-                } else { alert("❌ El archivo no parece ser un backup válido de Congregación Pro."); }
+                } else { alert("❌ El archivo no parece ser un backup válido."); }
             } catch(err) { alert("❌ Error leyendo el archivo: " + err.message); } 
         }; 
         reader.readAsText(file); 
