@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Congregación Pro - v65 Final</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-hover: #4338ca; --bg-body: #f3f4f6;
+            --surface: #ffffff; --text-main: #1f2937; --text-muted: #6b7280;
+            --border-light: #e5e7eb; --success: #10b981; --danger: #ef4444;
+            --warning: #f59e0b; --info: #3b82f6; --radius-md: 16px; --radius-sm: 10px;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; font-size: 14px; margin: 0; }
+
+        /* HEADER & TABS */
+        header.top { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-light); padding: 0.8rem 1.5rem; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 10px; }
+        h1 { font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -0.5px; }
+        .tabs-container { background: var(--surface); border-bottom: 1px solid var(--border-light); padding: 0 1.5rem; position: sticky; top: 60px; z-index: 90; overflow-x: auto; white-space: nowrap; }
+        .tabs-container::-webkit-scrollbar { height: 0px; background: transparent; }
+        .tabs { display: flex; gap: 20px; }
+        .tabs button { padding: 14px 4px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .tabs button:hover { color: var(--primary); }
+        .tabs button.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* UI ELEMENTS */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: var(--surface); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); margin-bottom: 1.5rem; }
+        .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-main); border-bottom: 1px solid var(--border-light); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .count-badge { background: #f3f4f6; color: var(--text-muted); padding: 2px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; margin-left: 8px; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+        input:not([type="checkbox"]), select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-size: 0.95rem; transition: 0.2s; background: #fff; color: var(--text-main); font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; border: none; gap: 8px; font-size: 0.9rem; transition: 0.2s; }
+        .btn:active { transform: scale(0.97); }
+        .btn.primary { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3); }
+        .btn.success { background: var(--success); color: white; }
+        .btn.danger { background: var(--danger); color: white; }
+        .btn.warning { background: var(--warning); color: white; }
+        .btn.info { background: var(--info); color: white; }
+        .btn.ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-light); }
+        .btn.ghost:hover { background: var(--bg-body); color: var(--text-main); }
+        .admin-tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #f9fafb; padding: 1.2rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid var(--border-light); }
+        .table-container { border-radius: var(--radius-md); border: 1px solid var(--border-light); overflow-x: auto; -webkit-overflow-scrolling: touch; background: white; }
+        .table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .table th { background: #f9fafb; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; padding: 12px 16px; text-align: left; text-transform: uppercase; border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+        .table td { padding: 12px 16px; border-bottom: 1px solid var(--border-light); color: var(--text-main); font-size: 0.9rem; }
+        .table tbody tr:hover { background-color: #f8fafc; }
+        .row-sacado td { color: var(--text-muted); text-decoration: line-through; background: #fef2f2; }
+
+        /* DASHBOARD */
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        .dash-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-light); transition: 0.2s; display: flex; flex-direction: column; }
+        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .dash-header { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid #f3f4f6; padding-bottom: 10px; }
+        .dash-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; flex: 1; }
+        .dash-stat { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .dash-num { font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 4px; color: var(--text-main); }
+        .dash-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+        .num-blue { color: var(--primary); } .num-green { color: var(--success); } .num-orange { color: var(--warning); } .num-purple { color: #8b5cf6; }
+        .asist-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 15px; }
+        
+        #roleBadge { background: #e0e7ff; color: #4338ca; font-weight: 700; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; text-transform: uppercase; }
+        .status-badge { font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; transition: 0.3s; display: inline-flex; align-items: center; gap: 4px; }
+        .status-badge.sync { background: #dcfce7; color: #166534; }
+        .status-badge.offline { background: #fee2e2; color: #991b1b; }
+        #toast { position: fixed; top: 20px; right: 20px; background: #1f2937; color: white; padding: 12px 24px; border-radius: 10px; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; z-index: 2000; border-left: 4px solid #10b981; }
+        
+        /* SETTINGS MODAL */
+        #modalAuth, #modalPwd, #modalSettings, #modalSupport { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+        #modalSupport { z-index: 10000; } 
+
+        .settings-card { width: 420px; max-width: 100%; background: var(--surface); border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; }
+        .settings-header { padding: 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 10; }
+        .settings-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .settings-group { border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; }
+        .settings-group summary { padding: 15px; background: #fafafa; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); font-size: 0.95rem; }
+        .settings-content { padding: 15px; border-top: 1px solid var(--border-light); background: white; }
+        .status-card { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 10px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .status-card.offline { background: #fef2f2; border-color: #fecaca; }
+        .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .icon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; border: 1px solid var(--border-light); border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; color: var(--text-main); text-align: center; gap: 5px; }
+        .icon-btn:hover { background: #f9fafb; border-color: var(--primary); }
+
+        /* PREVIEW AREA */
+        #preview-viewport, #s88-preview-viewport { padding: 20px; background: #525252; display:flex; flex-direction:column; align-items:center; margin-top: 20px; border-radius: 8px; }
+        .print-canvas { width: 190mm; min-width: 190mm; background: #ffffff !important; color: #000; padding: 10mm; font-family: 'Inter', sans-serif; page-break-after: always; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .official-table { width: 100%; border-collapse: collapse !important; border: 1.5px solid #000 !important; margin-top: 5px; }
+        .official-table th, .official-table td { border: 1.2px solid #000 !important; padding: 4px; font-size: 8.5pt; text-align: center; color: #000; }
+        
+        #app-content { display: none; }
+        .tab { display: none; }
+        .tab.active { display: block; animation: fadeIn 0.3s ease; }
+        body.role-restricted .admin-only { display: none !important; }
+        body.role-restricted .tabs button:not([data-tab="actividad"]) { display: none !important; }
+        body.role-admin .restricted-only { display: none !important; }
+
+        @media (max-width: 768px) {
+            header.top { flex-direction: column; align-items: stretch; gap: 12px; }
+            .tabs-container { top: 115px; } 
+            .admin-tools-grid, .asist-grid-layout, .stat-grid, .dash-grid { grid-template-columns: 1fr; } 
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="modalAuth" style="display: flex;">
+    <div class="card" style="width:360px; max-width:90%; text-align:center; margin-bottom:0; padding: 40px 20px;">
+        <div style="background:var(--primary); width:60px; height:60px; border-radius:16px; margin:0 auto 20px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:1.8rem;">🔐</div>
+        <h2 style="font-weight:800; margin-bottom:10px; color:var(--text-main);">Bienvenido</h2>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:30px;">Introduce tu clave de acceso.<br><small style="opacity:0.7;">(Clave inicial sugerida: 12345)</small></p>
+        <input type="password" id="mPwd" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:12px; margin-bottom:30px; font-weight:700; border-radius: 12px; padding: 15px;">
+        <button class="btn primary" id="mEnter" onclick="window.attemptLogin()" style="width:100%; padding:16px; font-size:1rem;">ENTRAR AL SISTEMA</button>
+    </div>
+</div>
+
+<div id="modalSettings">
+    <div class="settings-card">
+        <div class="settings-header">
+            <h3 style="margin:0; font-size: 1.2rem;">⚙️ Ajustes</h3>
+            <button class="btn ghost" onclick="closeSettings()" style="padding:6px 12px; border-radius:50%; border:none; font-size:1.2rem;">✕</button>
+        </div>
+        <div class="settings-body">
+            
+            <div class="settings-group">
+                <div style="padding:15px;">
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">☁️ Conexión y Datos</div>
+                    
+                    <div id="cloudStatusCard" class="status-card offline">
+                        <div class="status-icon" id="cloudIcon">⚡</div>
+                        <div class="status-text"><h4 id="cloudTitle">Modo Local</h4><p id="cloudDesc">Sin sincronización.</p></div>
+                    </div>
+
+                    <div id="smartConnectBox" class="restricted-only" style="margin-top:15px;">
+                        <label>🔑 Conexión Rápida</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="smartTokenInput" placeholder="Pega aquí la Llave de Acceso..." style="margin-bottom:0;">
+                            <button class="btn primary" onclick="applySmartToken()">Conectar</button>
+                        </div>
+                        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">
+                            Pídele esta llave al administrador.
+                        </p>
+                    </div>
+
+                    <details id="manualConfigDetails" style="margin-top:15px;">
+                        <summary style="font-size:0.8rem; color:var(--primary);">⚙️ Configuración Manual (Admin)</summary>
+                        <div class="settings-content" style="border:none; padding-top:10px;">
+                            <input type="text" id="fbApiKey" placeholder="API Key" style="margin-bottom:10px;">
+                            <input type="text" id="fbProjectId" placeholder="Project ID" style="margin-bottom:10px;">
+                            <button class="btn ghost" onclick="saveCloudCredentials()" style="width:100%;">Guardar Manualmente</button>
+                            
+                            <div class="admin-only" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--border-light);">
+                                <label>Compartir con Encargados</label>
+                                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
+                                    ⚠️ Para facilitar el copiado en WhatsApp, envía primero las instrucciones y luego <b>solo la llave</b> en un segundo mensaje.
+                                </p>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <button class="btn info" onclick="copyInstructions()" style="width:100%;">1️⃣ Copiar Instrucciones</button>
+                                    <button class="btn warning" onclick="copyRawToken()" style="width:100%; font-weight:800;">2️⃣ Copiar SOLO LA LLAVE</button>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div style="padding:15px;">
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">💾 Respaldo Local</div>
+                    <div class="action-row">
+                        <div class="icon-btn" onclick="exportBackup()"><span>📥</span><small>Descargar</small></div>
+                        <div class="icon-btn" style="position:relative;"><span>📤</span><small>Restaurar</small><input type="file" accept=".json,application/json" onchange="window.importData(this)" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <details class="settings-group admin-only">
+                <summary>🔐 Gestión de Accesos</summary>
+                <div class="settings-content">
+                    <label>Cambiar Clave Administrador</label>
+                    <button class="btn warning" style="width:100%; margin-bottom:20px;" onclick="document.getElementById('modalPwd').style.display='flex'">🔑 Cambiar Clave Principal</button>
+                    
+                    <div style="border-top:1px solid var(--border-light); padding-top:15px; margin-top:10px;">
+                        <label>Cantidad de Grupos</label>
+                        <div style="display:flex; gap:10px; margin-bottom:15px;">
+                            <input type="number" id="totalGroupsInput" min="1" max="50" placeholder="Ej: 5" style="width:80px; text-align:center;">
+                            <button class="btn primary" onclick="updateTotalGroups()" style="flex:1;">Actualizar</button>
+                        </div>
+                        <label>Claves de Grupos</label>
+                        <div style="display:flex; gap:10px;">
+                            <select id="groupSelector" onchange="loadGroupPassword()" style="flex:1;"></select>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <input type="text" id="groupPwdInput" placeholder="Clave..." style="flex:1; text-align:center; font-weight:bold;">
+                            <button class="btn success" onclick="saveSingleGroupPassword()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <div class="admin-only" style="padding:15px; text-align:center; font-size:0.75rem; color:var(--text-muted); background:#f9fafb; border-radius: 12px; display:flex; flex-direction:column; gap:10px; align-items:center;">
+                <span>v1.0.65 • Release</span>
+                <button class="btn ghost" style="font-size:0.75rem; padding: 4px 10px; border-color: var(--border-light);" onclick="document.getElementById('modalSupport').style.display='flex'">
+                    ☕ Acerca de & Soporte
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalSupport">
+    <div class="card" style="width: 380px; max-width: 90%; margin: 0;">
+        <h3 style="display:flex; justify-content:space-between; align-items:center; border:none; padding-bottom:0; margin-bottom:15px;">
+            <span>ℹ️ Acerca de la App</span>
+            <button class="btn ghost" onclick="document.getElementById('modalSupport').style.display='none'" style="border:none; font-size:1.2rem; padding:4px; color:var(--text-muted);">✕</button>
+        </h3>
+        <div style="font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 25px;">
+            <p style="margin-bottom: 15px;">Esta aplicación fue creada con el objetivo de facilitar el trabajo de quienes están encargados de llevar los registros.</p>
+            <p style="margin-bottom: 15px; font-weight:600;">Es una herramienta totalmente gratuita y de desarrollo independiente.</p>
+            <div style="background:#eef2ff; color:#4338ca; padding:10px; border-radius:8px; font-size:0.8rem; margin-bottom:15px;">
+                <b>¿Necesitas ayuda?</b><br>
+                📧 desarrollo.independiente.app@gmail.com
+            </div>
+            <p style="font-size:0.8rem;"><a href="https://soporte-apps-pro.github.io/privacidad.html" target="_blank" style="color:var(--primary);">Ver Política de Privacidad</a></p>
+        </div>
+        <button onclick="window.open('TU_LINK_MERCADOPAGO', '_blank')" style="background:#f59e0b; color:white; border:none; padding:12px 20px; border-radius:50px; font-weight:700; cursor:pointer; box-shadow:0 4px 6px rgba(245, 158, 11, 0.3); display:flex; align-items:center; gap:10px; width:100%; justify-content:center; transition:0.2s;">
+            <span style="font-size:1.2rem;">☕</span> Invítame un Café
+        </button>
+    </div>
+</div>
+
+
+<div id="modalPwd" style="display:none;">
+    <div class="card" style="width:300px; margin-bottom:0; text-align: center;">
+        <h3>Cambiar Clave Admin</h3>
+        <input type="password" id="pNew" placeholder="Nueva clave" style="margin-bottom:15px; text-align: center;">
+        <button class="btn primary" onclick="updatePassword()" style="width:100%; margin-bottom:10px;">Guardar</button>
+        <button class="btn ghost" onclick="document.getElementById('modalPwd').style.display='none'" style="width:100%;">Cancelar</button>
+    </div>
+</div>
+
+<div id="app-content">
+    <header class="top">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="background:var(--primary); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:1.1rem;">CP</div>
+            <div>
+                <h1 style="font-size: 1.1rem; font-weight: 800; margin:0;">Congregación Pro</h1>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span id="roleBadge">...</span>
+                    <span id="headerStatus" class="status-badge offline">⚪ Offline</span>
+                </div>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button class="btn ghost" onclick="openSettings()">⚙️ Ajustes</button>
+            <div style="display:flex; gap:5px; align-items:center; background:#fff; padding:4px; border-radius:8px; border:1px solid var(--border-light);">
+                <input type="number" id="headerYear" style="width:70px; border:none; box-shadow:none; padding:5px; font-weight:bold; text-align:center;">
+                <select id="headerMonth" style="width:110px; border:none; box-shadow:none; padding:5px; font-weight:bold;"></select>
+            </div>
+            <button class="btn danger" onclick="location.reload()" style="padding:8px 12px;">🔒</button>
+        </div>
+    </header>
+
+    <div class="tabs-container">
+        <div class="tabs">
+            <button data-tab="personas" class="active admin-only">1. Gestión</button>
+            <button data-tab="lista_global" class="admin-only">2. Lista General</button>
+            <button data-tab="actividad" id="tabActividad">3. Informes</button>
+            <button data-tab="asistencia" class="admin-only">4. Asistencia</button>
+            <button data-tab="precursores" class="admin-only">5. Precursores</button>
+            <button data-tab="tarjeta" class="admin-only">6. Tarjeta Publicador</button>
+            <button data-tab="s88" class="admin-only">7. Registro Asistencia</button>
+            <button data-tab="resumen" class="admin-only">8. Resumen</button>
+            <button data-tab="sacados" class="admin-only" style="color:var(--danger)">9. Sacados</button>
+            <button data-tab="inactivos" class="admin-only" style="color:var(--warning)">10. Inactivos</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <section id="personas" class="tab active admin-only">
+            <div class="card">
+                <h3>👥 Gestión de Miembros</h3>
+                <div class="admin-tools-grid">
+                    <input type="hidden" id="pId">
+                    <div><label>Nombre Completo</label><input type="text" id="pNombre" placeholder="Ej: Juan Pérez"></div>
+                    <div><label>Grupo Predicación</label><select id="pGrupo" class="dynamic-group-select"></select></div>
+                    <div><label>Sexo</label><select id="pSexo"><option value="Hombre">Hombre</option><option value="Mujer">Mujer</option></select></div>
+                    <div><label>Esperanza</label><select id="pEsp"><option value="Otras ovejas">Otras ovejas</option><option value="Ungido">Ungido</option></select></div>
+                </div>
+                <div class="admin-tools-grid">
+                    <div><label>Fecha Nacimiento</label><input type="date" id="pNac"></div>
+                    <div><label>Fecha Bautismo</label><input type="date" id="pBau"></div>
+                    <div><label>Fecha Expulsión</label><input type="date" id="pFSac"></div>
+                    <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
+                        <button class="btn primary" id="btnSaveP">💾 Guardar Miembro</button>
+                        <div style="display:flex; gap:8px; width:100%;">
+                            <button class="btn danger" id="btnDeleteP" style="display:none; flex:1;">🗑️</button>
+                            <button class="btn ghost" id="btnCancelEdit" onclick="resetPForm()" style="display:none; flex:1;">✕</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-tools-grid" style="background:var(--bg-body);">
+                    <div style="grid-column:1/-1; display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
+                        <span style="font-weight:700; color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">Privilegios:</span>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pAnc"> Anciano</label>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pSM"> Siervo Min.</label>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pPR"> Prec. Regular</label>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pPE"> Prec. Especial</label>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pMis"> Misionero</label>
+                    </div>
+                </div>
+                <div class="admin-tools-grid" style="border-top:2px dashed var(--border-light); margin-top:20px;">
+                    <div style="grid-column: span 2;">
+                        <label>Buscar Miembro para Editar</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="search" id="qPersona" list="pList" placeholder="Escribe para buscar..." style="flex:1;">
+                            <button class="btn primary" id="btnQEdit">✏️ Editar</button>
+                        </div>
+                    </div>
+                </div>
+                <datalist id="pList"></datalist>
+            </div>
+        </section>
+
+        <section id="lista_global" class="tab admin-only">
+            <div class="card">
+                <h3><span>📖 Lista General</span> <span id="cGen" class="count-badge">0</span></h3>
+                <div class="table-container"><table class="table" id="tblMiembros"><thead><tr><th>Nombre</th><th>Grupo</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+            </div>
+        </section>
+
+        <section id="actividad" class="tab">
+            <div class="card">
+                <h3><span>📝 Registro de Informes</span> <span id="cAct" class="count-badge">0</span></h3>
+                <div class="admin-tools-grid">
+                    <div><label>Mes del Informe</label><select id="actMonthSelect"></select></div>
+                    <div><label>Año</label><input type="number" id="actYearInput"></div>
+                    <div><label>Grupo</label><select id="selGInforme" class="dynamic-group-select"></select></div>
+                    <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:5px;"><button class="btn success" id="btnSaveReports">💾 Guardar Cambios</button></div>
+                </div>
+                <div class="table-container"><table class="table" id="tblActividad"><thead><tr><th>Nombre</th><th>Part.</th><th>Horas</th><th>Cursos</th><th>P. Aux</th><th>Notas</th></tr></thead><tbody></tbody></table></div>
+            </div>
+        </section>
+
+        <section id="asistencia" class="tab admin-only">
+            <div class="card">
+                <h3>📊 Registro de Asistencia</h3>
+                <div class="admin-tools-grid"><div><label>Mes</label><select id="asistMonthSelect"></select></div><div><label>Año</label><input type="number" id="asistYearInput"></div></div>
+                <div class="asist-grid-layout"><div class="asist-col"><h4>Reunión Vida y Ministerio</h4><div id="contES"></div></div><div class="asist-col"><h4>Reunión Pública</h4><div id="contFS"></div></div></div>
+                <div style="margin-top:20px; text-align:right;"><button class="btn success" id="btnSaveAsist" style="width:200px;">💾 Guardar Asistencia</button></div>
+            </div>
+        </section>
+
+        <section id="precursores" class="tab admin-only">
+            <div class="card"><h3><span>🏅 Precursores Regulares</span> <span id="cPre" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblPrecursores"><tbody></tbody></table></div></div>
+            <div class="card" style="margin-top:20px;"><h3>🏃 Precursores Auxiliares (Mes Actual)</h3><div class="table-container"><table class="table" id="tblAuxiliares"><tbody></tbody></table></div></div>
+        </section>
+
+        <section id="tarjeta" class="tab admin-only">
+            <div class="card">
+                <h3>📇 Tarjeta de Publicador</h3>
+                <div class="admin-tools-grid">
+                    <div><label>Modo</label><select id="s21Mode" onchange="toggleS21Inputs()"><option value="individual">Individual</option><option value="group">Por Grupo</option><option value="pr">Solo Precursores</option><option value="all">Todos</option></select></div>
+                    <div id="s21InputIndiv"><label>Buscar Persona</label><input id="s21Search" list="pList" placeholder="Escribe nombre..."></div>
+                    <div id="s21InputGroup" style="display:none;"><label>Grupo</label><select id="s21GroupSel" class="dynamic-group-select"></select></div>
+                    <div><label>Año Servicio</label><input type="number" id="s21Year"></div>
+                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="previewS21()">👁️ Ver</button><button class="btn success" onclick="downloadPDFS21()">📥 PDF</button></div>
+                </div>
+                <div id="preview-viewport"></div>
+            </div>
+        </section>
+
+        <section id="s88" class="tab admin-only">
+            <div class="card">
+                <h3>📈 Registro de Asistencia</h3>
+                <div class="admin-tools-grid">
+                    <div><label>Año Servicio</label><input type="number" id="s88Year"></div>
+                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="renderS88Preview()">👁️ Ver</button><button class="btn success" onclick="generatePDF('s88')">📥 PDF</button></div>
+                </div>
+                <div id="s88-preview-viewport"></div>
+            </div>
+        </section>
+
+        <section id="resumen" class="tab admin-only">
+            <div class="card">
+                <h3>📊 Resumen Mensual</h3>
+                <div class="admin-tools-grid">
+                    <div><label>Mes</label><select id="resMonth"></select></div><div><label>Año</label><input type="number" id="resYear"></div>
+                    <div style="display:flex; align-items:flex-end;"><button class="btn primary" id="btnSearchRes" style="width:100%;">🔍 Analizar Datos</button></div>
+                </div>
+                <div id="resumenContent" style="margin-top:20px;"></div>
+            </div>
+        </section>
+
+        <section id="sacados" class="tab admin-only">
+            <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha Salida</th></tr></thead><tbody></tbody></table></div></div>
+        </section>
+
+        <section id="inactivos" class="tab admin-only">
+            <div class="card"><h3><span style="color:var(--danger)">💤 Inactivos</span> <span id="cIna" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblInactivos"><thead><tr><th>Nombre</th><th>Grupo</th><th>Última Actividad</th><th>Tiempo Inactivo</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--warning)">⚠️ Irregulares</span></h3><div class="table-container"><table class="table" id="tblIrregulares"><thead><tr><th>Nombre</th><th>Grupo</th><th>Meses Fallados</th></tr></thead><tbody></tbody></table></div></div>
+        </section>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    let app, db;
+    const DB_KEY = 'cong_pro_v108_master';
+    const CRED_KEY = 'cong_pro_firebase_creds';
+    const $ = s => document.querySelector(s);
+    const ymKey = (y,m) => `${y}-${String(m).padStart(2,'0')}`;
+    const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
+    
+    // 🛡️ INICIALIZACIÓN A PRUEBA DE FALLOS: SIEMPRE ARRAYS VACÍOS
+    let state = { personas: [], activity: {}, attendance: {}, config: { pwd: '12345', totalGroups: 5, groups: {} } };
+    let CURRENT_ROLE = 'ADMIN'; 
+    let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
+    let actY = curY, actM = curM, asistY = curY, asistM = curM;
+
+    // --- NUEVAS FUNCIONES DE COPIADO CON PRIVACIDAD BLINDADA ---
+    window.copyInstructions = function() {
+        // ENLACE PROFESIONAL (Ya no sale tu nombre personal)
+        // Puedes cambiar esto por el link de la Play Store en el futuro
+        const urlOficial = "https://soporte-apps-pro.github.io/"; 
+        
+        const msg = `Hola hermano, aquí tienes los datos para conectar la App.\n\n` +
+                    `1. Asegúrate de tener la App instalada.\n` +
+                    `   (Descárgala aquí si no la tienes: ${urlOficial})\n\n` +
+                    `2. Ve a Ajustes (⚙️) y busca donde dice "🔑 Conexión Rápida".\n\n` +
+                    `3. Te enviaré la LLAVE en el siguiente mensaje. Cópiala y pégala ahí.`;
+                    
+        navigator.clipboard.writeText(msg).then(() => showToast("📋 Instrucciones copiadas"));
+    }
+
+    window.copyRawToken = function() {
+        const k = $('#fbApiKey').value;
+        const p = $('#fbProjectId').value;
+        if(!k || !p) return alert("Primero debes conectar tu propia nube.");
+        const token = btoa(JSON.stringify({ k: k, p: p }));
+        navigator.clipboard.writeText(token).then(() => showToast("🔑 Llave copiada al portapapeles"));
+    }
+
+    window.applySmartToken = function() {
+        const token = $('#smartTokenInput').value.trim();
+        if(!token) return alert("Pega la llave primero.");
+        try {
+            const data = JSON.parse(atob(token));
+            if(data.k && data.p) {
+                $('#fbApiKey').value = data.k;
+                $('#fbProjectId').value = data.p;
+                saveCloudCredentials();
+                $('#smartTokenInput').value = '';
+            } else { alert("Llave inválida."); }
+        } catch(e) { alert("Error: La llave no es válida."); }
+    }
+    // ---------------------------------------------
+
+    window.openSettings = function() {
+        $('#modalSettings').style.display = 'flex';
+        const stored = localStorage.getItem(CRED_KEY);
+        if(stored) {
+            const c = JSON.parse(stored);
+            $('#fbApiKey').value = c.apiKey; $('#fbProjectId').value = c.projectId;
+            updateCloudUI(true, c.projectId);
+        } else { updateCloudUI(false); }
+        loadGroupPassword();
+        if($('#totalGroupsInput')) $('#totalGroupsInput').value = state.config.totalGroups || 5;
+    };
+
+    function updateCloudUI(connected, pid) {
+        const card = $('#cloudStatusCard'); const title = $('#cloudTitle'); const desc = $('#cloudDesc'); const icon = $('#cloudIcon');
+        const badge = $('#headerStatus');
+        
+        if(connected) { 
+            card.className = 'status-card'; icon.innerText = '🟢'; title.innerText = 'Conectado a Nube'; desc.innerText = 'ID: ' + pid; 
+            badge.className = 'status-badge sync'; badge.innerText = '🟢 Online';
+        } else { 
+            card.className = 'status-card offline'; icon.innerText = '⚡'; title.innerText = 'Modo Local'; desc.innerText = 'Datos solo en este dispositivo.'; 
+            badge.className = 'status-badge offline'; badge.innerText = '⚪ Offline';
+        }
+    }
+
+    window.closeSettings = function() { $('#modalSettings').style.display = 'none'; };
+
+    window.renderGroupOptions = function() {
+        const total = state.config.totalGroups || 5;
+        const selects = document.querySelectorAll('.dynamic-group-select'); 
+        const pwdSelect = $('#groupSelector');
+        let opts = ''; for(let i=1; i<=total; i++) { opts += `<option value="${i}">Grupo ${i}</option>`; }
+        selects.forEach(sel => { const v = sel.value; sel.innerHTML = opts; if(v && v <= total) sel.value = v; });
+        if(pwdSelect) { const v = pwdSelect.value; pwdSelect.innerHTML = opts; if(v && v <= total) pwdSelect.value = v; }
+    }
+
+    window.updateTotalGroups = function() {
+        const val = parseInt($('#totalGroupsInput').value);
+        if(!val || val < 1 || val > 50) return alert("Entre 1 y 50.");
+        state.config.totalGroups = val;
+        if(!state.config.groups) state.config.groups = {};
+        for(let i=1; i<=val; i++) { if(!state.config.groups[i]) state.config.groups[i] = 'grupo' + i; }
+        save(); renderGroupOptions(); showToast(`Grupos actualizados: ${val}`);
+    }
+
+    window.loadGroupPassword = function() {
+        if(!state.config.groups) state.config.groups = {};
+        const gID = $('#groupSelector').value;
+        const currentPwd = state.config.groups[gID] || ('grupo' + gID); 
+        $('#groupPwdInput').value = currentPwd;
+    }
+
+    window.saveSingleGroupPassword = function() {
+        if(!state.config.groups) state.config.groups = {};
+        const gID = $('#groupSelector').value;
+        const newPwd = $('#groupPwdInput').value.trim();
+        if(!newPwd) return alert("La clave no puede estar vacía");
+        state.config.groups[gID] = newPwd;
+        save();
+        showToast(`Clave del Grupo ${gID} guardada`);
+    }
+
+    window.init = function() {
+        $('#mEnter').onclick = attemptLogin;
+        $('#mPwd').onkeydown = (e) => { if(e.key==='Enter') attemptLogin(); };
+        const mSels = [$('#headerMonth'), $('#actMonthSelect'), $('#resMonth'), $('#asistMonthSelect')];
+        mSels.forEach(sel => { if(sel){ sel.innerHTML=''; MESES_NOM.forEach((m,i)=>{const o=document.createElement('option'); o.value=i+1; o.text=m; if(i+1===curM)o.selected=true; sel.appendChild(o);}); } });
+        if($('#headerYear')) $('#headerYear').value = curY;
+        if($('#actYearInput')) $('#actYearInput').value = curY;
+        if($('#asistYearInput')) $('#asistYearInput').value = curY;
+        if($('#resYear')) $('#resYear').value = curY;
+        if($('#s21Year')) $('#s21Year').value = (curM>=9)?curY:curY-1;
+        if($('#s88Year')) $('#s88Year').value = (curM>=9)?curY:curY-1;
+        
+        if($('#headerMonth')) $('#headerMonth').onchange = (e) => { curM=parseInt(e.target.value); renderAll(); };
+        if($('#headerYear')) $('#headerYear').onchange = (e) => { curY=parseInt(e.target.value); renderAll(); };
+        if($('#selGInforme')) $('#selGInforme').onchange = renderActividad;
+        if($('#actMonthSelect')) $('#actMonthSelect').onchange = (e) => { actM=parseInt(e.target.value); renderActividad(); };
+        if($('#actYearInput')) $('#actYearInput').onchange = (e) => { actY=parseInt(e.target.value); renderActividad(); };
+        if($('#asistMonthSelect')) $('#asistMonthSelect').onchange = (e) => { asistM=parseInt(e.target.value); renderAsistInputs(); };
+        if($('#asistYearInput')) $('#asistYearInput').onchange = (e) => { asistY=parseInt(e.target.value); renderAsistInputs(); };
+        if($('#btnSearchRes')) $('#btnSearchRes').onclick = () => renderResumenMensual(parseInt($('#resYear').value), parseInt($('#resMonth').value));
+        
+        if($('#btnSaveP')) $('#btnSaveP').onclick = savePersona;
+        if($('#btnDeleteP')) $('#btnDeleteP').onclick = deletePersona;
+        if($('#btnQEdit')) $('#btnQEdit').onclick = () => { const n=$('#qPersona').value; const p=state.personas.find(x=>x.nombre===n); if(p) { editP(p.id); document.querySelector('[data-tab="personas"]').click(); } };
+        if($('#btnSaveReports')) $('#btnSaveReports').onclick = () => { save(); showToast("Guardado ☁️"); };
+        if($('#btnSaveAsist')) $('#btnSaveAsist').onclick = () => { save(); showToast("Asistencia Guardada"); renderS88Preview(); };
+        
+        document.querySelectorAll('.tabs button').forEach(b => {
+            b.onclick = () => {
+                document.querySelectorAll('.tabs button, .tab').forEach(el=>el.classList.remove('active'));
+                b.classList.add('active');
+                if($(`#${b.dataset.tab}`)) $(`#${b.dataset.tab}`).classList.add('active');
+                if(b.dataset.tab === 'actividad') renderActividad();
+                if(b.dataset.tab === 'asistencia') renderAsistInputs();
+                if(b.dataset.tab === 'precursores') { renderPrecursores(); renderAuxiliares(); }
+                if(b.dataset.tab === 'resumen') renderResumenMensual(parseInt($('#resYear').value), parseInt($('#resMonth').value));
+                if(b.dataset.tab === 'sacados') renderSacados();
+                if(b.dataset.tab === 'inactivos') renderEstadoEspiritual();
+                if(b.dataset.tab === 'tarjeta') updateDatalist();
+                if(b.dataset.tab === 'lista_global') renderMiembros();
+            };
+        });
+
+        const storedCreds = localStorage.getItem(CRED_KEY);
+        if(storedCreds) {
+            const creds = JSON.parse(storedCreds);
+            connectFirebase(creds.apiKey, creds.projectId);
+        }
+    }
+
+    window.saveCloudCredentials = function() {
+        const apiKey = $('#fbApiKey').value.trim();
+        const projectId = $('#fbProjectId').value.trim();
+        if(!apiKey || !projectId) return alert("Ingresa ambos datos");
+        localStorage.setItem(CRED_KEY, JSON.stringify({ apiKey, projectId }));
+        connectFirebase(apiKey, projectId);
+    }
+
+    function connectFirebase(apiKey, projectId) {
+        const statusSpan = $('#statusIndicator');
+        if(statusSpan) statusSpan.innerHTML = '🟡...';
+        try {
+            const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            startRealtimeSync();
+            updateCloudUI(true, projectId);
+            if($('#modalSettings').style.display === 'flex') showToast("Conectado");
+        } catch(e) {
+            console.error(e);
+            alert("Error conectando.");
+            updateCloudUI(false);
+        }
+    }
+
+    // 🛡️ SINCRONIZACIÓN BLINDADA: SI FALTA ALGO EN LA NUBE, LO RELLENA CON VACÍO
+    function startRealtimeSync() {
+        if(!db) return;
+        onSnapshot(doc(db, "congregacion", "datos_generales"), (doc) => {
+            if(doc.exists()) {
+                const cloudData = doc.data(); 
+                state = cloudData;
+                
+                // --- CHALECO ANTIBALAS: EVITA CRASH POR DATOS FALTANTES ---
+                if(!state.personas) state.personas = [];
+                if(!state.activity) state.activity = {};
+                if(!state.attendance) state.attendance = {};
+                if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
+                // -----------------------------------------------------------
+
+                localStorage.setItem(DB_KEY, JSON.stringify(state));
+                renderAll();
+                // updateCloudUI(true, "");
+            } else { save(); }
+        }, (error) => { console.error("Sync error:", error); updateCloudUI(false); });
+    }
+
+    // 🚨🚨🚨 AQUÍ ESTÁ EL CAMBIO IMPORTANTE 🚨🚨🚨
+    // AHORA EL SISTEMA GRITARÁ SI ALGO FALLA AL GUARDAR
+    window.save = async function() {
+        localStorage.setItem(DB_KEY, JSON.stringify(state));
+        updateDatalist();
+        if(db) { 
+            try { 
+                await setDoc(doc(db, "congregacion", "datos_generales"), state); 
+            } catch(e) { 
+                // AQUÍ SALDRÁ LA ALERTA ROJA CON EL ERROR
+                alert("❌ ERROR AL SUBIR A LA NUBE:\n\n" + e.message); 
+            } 
+        }
+    }
+
+    window.attemptLogin = function() {
+        const pwd = $('#mPwd').value;
+        const adminPwd = (state.config && state.config.pwd) ? state.config.pwd : '12345';
+        if (pwd === adminPwd) { CURRENT_ROLE = 'ADMIN'; enterApp(); return; } 
+        let foundGroup = null;
+        const groups = state.config.groups || {};
+        for (const [grpNum, grpPwd] of Object.entries(groups)) { if (grpPwd === pwd) { foundGroup = grpNum; break; } }
+        if (foundGroup) { CURRENT_ROLE = 'G' + foundGroup; enterApp(); } else { alert("❌ Clave incorrecta"); }
+    }
+
+    function enterApp() {
+        $('#modalAuth').style.display = 'none';
+        $('#app-content').style.display = 'block';
+        document.body.className = (CURRENT_ROLE === 'ADMIN') ? 'role-admin' : 'role-restricted';
+        const badge = $('#roleBadge');
+        if(CURRENT_ROLE === 'ADMIN') {
+            badge.innerText = 'Administrador'; badge.style.background = '#e0e7ff'; badge.style.color = '#4338ca';
+            // Abrir configuración manual automáticamente para admin
+            const details = document.getElementById('manualConfigDetails');
+            if(details) details.open = true;
+        } else {
+            const g = CURRENT_ROLE.replace('G','');
+            badge.innerText = `Encargado Grupo ${g}`; badge.style.background = '#d1fae5'; badge.style.color = '#065f46';
+            $('#selGInforme').value = g; $('#selGInforme').disabled = true;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            $('#actividad').classList.add('active'); $('#tabActividad').classList.add('active');
+        }
+        renderAll();
+    }
+
+    try { const saved = localStorage.getItem(DB_KEY); if(saved) state = JSON.parse(saved); } catch(e) {}
+    if(!state.personas) state.personas = [];
+    if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
+
+    function renderAll() {
+        renderGroupOptions();
+        if(CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderEstadoEspiritual(); renderPrecursores(); renderAuxiliares(); renderAsistInputs(); }
+        renderActividad();
+        updateDatalist();
+    }
+
+    window.renderActividad = function() {
+        const g = $('#selGInforme').value;
+        const tb = $('#tblActividad tbody');
+        const k = ymKey(actY, actM);
+        tb.innerHTML = '';
+        const list = state.personas.filter(p => p.grupo == g && !p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+        const cEl = $('#cAct'); if(cEl) cEl.innerText = `(${list.length})`;
+        if(list.length === 0) { tb.innerHTML = `<tr><td colspan="6" style="padding:30px; text-align:center; color:var(--text-muted);">No hay miembros en el Grupo ${g}.</td></tr>`; return; }
+        list.forEach(p => {
+            const r = state.activity[k]?.[p.id] || {part:false, horas:0, est:0, pa:false, nota:''};
+            tb.innerHTML += `<tr><td style="font-weight:600;">${p.nombre}</td><td style="text-align:center;"><input type="checkbox" ${r.part?'checked':''} onchange="updAct('${p.id}','part',this.checked)"></td><td><input type="number" value="${r.horas}" onchange="updAct('${p.id}','horas',this.value)" style="width:60px; text-align:center;"></td><td><input type="number" value="${r.est}" onchange="updAct('${p.id}','est',this.value)" style="width:60px; text-align:center;"></td><td style="text-align:center;"><input type="checkbox" ${r.pa?'checked':''} onchange="updAct('${p.id}','pa',this.checked)"></td><td><input type="text" value="${r.nota||''}" onchange="updAct('${p.id}','nota',this.value)" placeholder="..."></td></tr>`;
+        });
+    }
+
+    window.updAct = (pid, f, v) => { 
+        const k = ymKey(actY, actM); 
+        if(!state.activity[k]) state.activity[k] = {}; 
+        if(!state.activity[k][pid]) state.activity[k][pid] = {part:false, horas:0, est:0, pa:false}; 
+        state.activity[k][pid][f] = (f==='pa'||f==='part'||f==='nota') ? v : parseFloat(v||0); 
+        save(); 
+    }
+
+    window.savePersona = function() { 
+        const id=$('#pId').value, n=$('#pNombre').value.trim(); 
+        if(!n) return alert("Nombre obligatorio"); 
+        const data={ id:id||'p'+Date.now(), nombre:n, grupo:$('#pGrupo').value, sexo:$('#pSexo').value, esp:$('#pEsp').value, nac:$('#pNac').value, bau:$('#pBau').value, fsac:$('#pFSac').value, pr:$('#pPR').checked, anciano:$('#pAnc').checked, sm:$('#pSM').checked, pe:$('#pPE').checked, mis:$('#pMis').checked, sacado:!!$('#pFSac').value }; 
+        if(id) state.personas[state.personas.findIndex(x=>x.id===id)]=data; else state.personas.push(data); 
+        save(); renderMiembros(); resetPForm(); showToast("Guardado");
+    }
+    
+    window.deletePersona = function() { const id=$('#pId').value; if(!id)return; if(confirm("¿ELIMINAR miembro?")) { state.personas=state.personas.filter(p=>p.id!==id); save(); renderMiembros(); resetPForm(); showToast("Eliminado"); } }
+    
+    window.resetPForm = function() { $('#pId').value=''; $('#pNombre').value=''; ['pNac','pBau','pFSac','pSexo','pEsp'].forEach(id=>$('#'+id).value=''); ['pAnc','pSM','pPE','pMis','pPR'].forEach(id=>$('#'+id).checked=false); $('#btnCancelEdit').style.display='none'; $('#btnDeleteP').style.display='none'; $('#btnSaveP').textContent = '💾 Guardar Miembro'; $('#btnSaveP').className = 'btn primary'; }
+    
+    window.renderMiembros = function() { 
+        const tb=$('#tblMiembros tbody'); if(!tb)return; tb.innerHTML=''; 
+        const list = state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+        const cEl = $('#cGen'); if(cEl) cEl.innerText = `(${list.length})`;
+        list.forEach(p=>{ 
+            const tr=document.createElement('tr'); 
+            tr.innerHTML=`<td><div style="font-weight:700;">${p.nombre}</div><div style="font-size:0.75rem; color:var(--text-muted);">${getPrivilegesString(p)}</div></td><td><span style="background:#f3f4f6; padding:2px 8px; border-radius:4px; font-weight:600;">G${p.grupo}</span></td><td><button class="btn ghost" style="padding:4px 8px; font-size:0.8rem;" onclick="editP('${p.id}')">✏️ Editar</button></td>`; 
+            tb.appendChild(tr); 
+        }); 
+    }
+    
+    window.getPrivilegesString = function(p) { return [p.anciano?'Anciano':'', p.sm?'SM':'', p.pr?'PR':'', p.pe?'PE':''].filter(Boolean).join(', '); }
+    window.editP = (id) => { const p=state.personas.find(x=>x.id===id); if(!p)return; $('#pId').value=p.id; $('#pNombre').value=p.nombre; $('#pSexo').value=p.sexo; $('#pEsp').value=p.esp; $('#pNac').value=p.nac||''; $('#pBau').value=p.bau||''; $('#pFSac').value=p.fsac||''; $('#pPR').checked=!!p.pr; $('#pAnc').checked=!!p.anciano; $('#pSM').checked=!!p.sm; $('#pPE').checked=!!p.pe; $('#pMis').checked=!!p.mis; $('#btnCancelEdit').style.display='inline-flex'; $('#btnDeleteP').style.display='inline-flex'; $('#btnSaveP').textContent='💾 Actualizar'; $('#btnSaveP').className='btn success'; window.scrollTo({top:0, behavior:'smooth'}); }
+    
+    window.updateDatalist = function() { const l=$('#pList'); if(l){ l.innerHTML = ''; state.personas.forEach(p => l.innerHTML += `<option value="${p.nombre}">`); } }
+    window.showToast = function(m) { const t=$('#toast'); t.innerHTML = `<span>${m}</span>`; t.style.display='block'; setTimeout(()=>t.style.display='none', 3000); }
+    window.exportBackup = function() { const blob=new Blob([JSON.stringify(state)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CongPro_Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
+    window.updatePassword = function() { if(!state.config) state.config={}; const p=$('#pNew').value; if(p) { state.config.pwd=p; save(); $('#modalPwd').style.display='none'; showToast("Clave actualizada"); } }
+    
+    window.renderSacados=function(){
+        const tb=$('#tblSacados tbody');if(!tb)return;tb.innerHTML='';
+        const list = state.personas.filter(p=>p.sacado);
+        const cEl = $('#cSac'); if(cEl) cEl.innerText = `(${list.length})`;
+        list.forEach(p=>{tb.innerHTML+=`<tr><td>${p.nombre}</td><td>${p.bau||'-'}</td><td style="color:var(--danger)">${p.fsac||'-'}</td></tr>`;});
+    }
+    window.renderPrecursores=function(){
+        const tb=$('#tblPrecursores tbody');if(!tb)return;tb.innerHTML='';
+        const list = state.personas.filter(p=>p.pr&&!p.sacado);
+        const cEl = $('#cPre'); if(cEl) cEl.innerText = `(${list.length})`;
+        list.forEach(p=>{tb.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${p.bau||'-'}</td><td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-weight:bold;">Activo</span></td></tr>`;});
+    }
+    window.renderAuxiliares=function(){const tb=$('#tblAuxiliares tbody'),k=ymKey(curY,curM);if(!tb)return;tb.innerHTML='';state.personas.filter(p=>!p.sacado&&state.activity[k]?.[p.id]?.pa).forEach(p=>{tb.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${state.activity[k][p.id].horas} horas</td></tr>`;});}
+    
+    window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].es[i]||0}" oninput="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].fs[i]||0}" oninput="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
+    window.updAsist=(t,i,v)=>{const k=ymKey(asistY,asistM);state.attendance[k][t][i]=parseInt(v||0);save();}
+
+    window.renderEstadoEspiritual = function() { 
+        const tbIn=$('#tblInactivos tbody'), tbIrr=$('#tblIrregulares tbody'); if(!tbIn)return; tbIn.innerHTML=''; tbIrr.innerHTML=''; 
+        const syStart = (curM>=9)?curY:curY-1; 
+        let countIna = 0;
+        state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{ 
+            let zeros=0, last='-'; 
+            for(let i=0;i<36;i++){ let ty=curY, tm=curM-i; while(tm<=0){tm+=12;ty--;} const act=state.activity[ymKey(ty,tm)]?.[p.id]; if(act&&(act.horas>0||act.part)){ last=`${MESES_NOM[tm-1]} ${ty}`; break; } else if(i<6) zeros++; } 
+            if(zeros>=6){ 
+                countIna++;
+                tbIn.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${last}</td><td><span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold;">+${zeros} meses</span></td></tr>`; 
+            } 
+            else { let fail=[]; for(let i=1;i<=12;i++){ let ty=curY, tm=curM-i; while(tm<=0){tm+=12;ty--;} if(ty<syStart || (ty===syStart && tm<9)) break; const act=state.activity[ymKey(ty,tm)]?.[p.id]; if(!act||(!act.horas && !act.part)) fail.push(MESES_NOM[tm-1].substr(0,3)); } if(fail.length>0){ tbIrr.innerHTML+=`<tr><td>${p.nombre}</td><td>G${p.grupo}</td><td><span style="color:var(--warning); font-weight:600;">${fail.join(', ')}</span></td></tr>`; } } 
+        });
+        const cEl = $('#cIna'); if(cEl) cEl.innerText = `(${countIna})`;
+    }
+
+    // --- NUEVO: FUNCIÓN PARA LIMPIAR ESTILOS ANTES DE IMPRIMIR ---
+    window.toggleS21Inputs = function() { const m=$('#s21Mode').value; $('#s21InputIndiv').style.display=(m==='individual')?'block':'none'; $('#s21InputGroup').style.display=(m==='group')?'block':'none'; $('#preview-viewport').innerHTML=''; }
+    window.getS21HTML = function(p,sy) { let rows='',tH=0; CICLO_S88.forEach(m=>{ const y=(m>=9)?sy:sy+1, r=state.activity[ymKey(y,m)]?.[p.id]||{horas:0,est:0,pa:false,part:false}; tH+=(r.horas||0); rows+=`<tr><td>${MESES_NOM[m-1]}</td><td>${(r.horas||r.part)?'[X]':''}</td><td>${r.est||''}</td><td>${r.pa?'[X]':''}</td><td>${r.horas||''}</td><td></td></tr>`; }); const privs = [p.anciano?'Anciano':'', p.sm?'SM':'', p.pr?'PR':'', p.pe?'PE':''].filter(Boolean).join(', '); return `<div class="print-canvas"><div style="text-align:center; font-weight:800; font-size:12pt; margin-bottom:10px;">REGISTRO DE PUBLICADOR</div><div class="s21-header-box"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Nombre:</b> ${p.nombre}</span><span><b>Grupo:</b> ${p.grupo}</span></div><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>F. Nacimiento:</b> ${p.nac||'-'}</span><span><b>F. Bautismo:</b> ${p.bau||'-'}</span></div><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Sexo:</b> ${p.sexo}</span><span><b>Esperanza:</b> ${p.esp}</span></div><div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;"><b>Privilegios:</b> ${privs||'Publicador'}</div></div><table class="official-table"><thead><tr><th style="width:20%">Año ${sy}-${sy+1}</th><th>Partic.</th><th>Est</th><th>P. Aux</th><th>Horas</th><th>Notas</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="4" style="text-align:right; font-weight:bold;">Total Horas:</td><td>${tH}</td><td></td></tr></tfoot></table></div>`; }
+    window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && !p.sacado);} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&!p.sacado);} else {l=state.personas.filter(p=>!p.sacado);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
+    
+    // --- LÓGICA DE AHORRO DE TINTA APLICADA AQUI ---
+    window.downloadPDFS21 = function() { 
+        const el = document.getElementById('preview-viewport');
+        if(!el.innerHTML) return alert("Ver primero");
+        
+        // 1. Quitar fondo y padding
+        el.style.background = 'white';
+        el.style.padding = '0';
+        
+        html2pdf().set({margin:10, filename:'S21.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:1.5}, jsPDF:{unit:'mm',format:'a4'}})
+        .from(el).save()
+        .then(() => {
+            // 2. Restaurar al terminar
+            el.style.background = '#525252';
+            el.style.padding = '20px';
+        });
+    }
+
+    window.renderS88Preview = function() { const sy=parseInt($('#s88Year').value); const build=(t)=>{let rows='',tA=0,tR=0; CICLO_S88.forEach(m=>{const y=(m>=9)?sy:sy+1, d=state.attendance[ymKey(y,m)]?.[t]||[0,0,0,0,0,0], re=d.filter(v=>v>0).length, as=d.reduce((a,b)=>a+b,0), pr=re>0?Math.round(as/re):''; tA+=as; tR+=re; rows+=`<tr><td>${MESES_NOM[m-1]}</td><td>${re||''}</td><td>${as||''}</td><td><b>${pr}</b></td></tr>`;}); return {h:rows,avg:tR>0?Math.round(tA/tR):''};}; const es=build('es'), fs=build('fs'); $('#s88-preview-viewport').innerHTML=`<div class="print-canvas"><div style="text-align:center; font-weight:800;">REGISTRO ASISTENCIA</div><br><b>REUNIÓN VIDA Y MINISTERIO</b><table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${es.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${es.avg}</td></tr></tfoot></table><br><b>REUNIÓN PÚBLICA</b><table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${fs.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${fs.avg}</td></tr></tfoot></table></div>`; }
+    
+    // --- LÓGICA DE AHORRO DE TINTA APLICADA AQUI TAMBIÉN ---
+    window.generatePDF = function() { 
+        const el = document.getElementById('s88-preview-viewport');
+        if(!el) return;
+        
+        el.style.background = 'white';
+        el.style.padding = '0';
+
+        html2pdf().set({margin:10, filename:'S88.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:1.5}, jsPDF:{unit:'mm',format:'a4'}})
+        .from(el).save()
+        .then(() => {
+            el.style.background = '#525252';
+            el.style.padding = '20px';
+        });
+    }
+    
+    // DASHBOARD RESUMEN
+    window.renderResumenMensual = function(y, m) { 
+        const k=ymKey(y,m), act=state.activity[k]||{}, att=state.attendance[k]||{es:[],fs:[]}; 
+        let tM=0,activos=0,pubC=0,pubE=0,prC=0,prH=0,prE=0,paC=0,paH=0,paE=0; 
+        const last6=[]; for(let i=0;i<6;i++){let tm=m-i,ty=y; if(tm<=0){tm+=12;ty-=1;} last6.push(ymKey(ty,tm));} 
+        state.personas.forEach(p=>{ 
+            if(p.sacado)return; tM++; 
+            let haInf=false; for(const lk of last6){ if(state.activity[lk]?.[p.id]?.horas>0 || state.activity[lk]?.[p.id]?.part){ haInf=true; break; } } if(haInf) activos++; 
+            const r=act[p.id]||{}; if(r.horas>0||r.part){ const h=parseFloat(r.horas||0), e=parseInt(r.est||0); if(p.pr){prC++;prH+=h;prE+=e;} else if(r.pa){paC++;paH+=h;paE+=e;} else{pubC++;pubE+=e;} } 
+        }); 
+        const avgES=att.es.filter(n=>n>0).length?Math.round(att.es.reduce((a,b)=>a+b,0)/att.es.filter(n=>n>0).length):0; 
+        const avgFS=att.fs.filter(n=>n>0).length?Math.round(att.fs.reduce((a,b)=>a+b,0)/att.fs.filter(n=>n>0).length):0; 
+        
+        $('#resumenContent').innerHTML=`
+        <div class="dash-grid">
+            <div class="dash-card">
+                <div class="dash-header">Totales Generales</div>
+                <div class="dash-content">
+                    <div class="dash-stat"><div class="dash-num num-blue">${tM}</div><div class="dash-label">Miembros</div></div>
+                    <div class="dash-stat"><div class="dash-num num-green">${activos}</div><div class="dash-label">Activos</div></div>
+                </div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-header">Publicadores</div>
+                <div class="dash-content">
+                    <div class="dash-stat"><div class="dash-num">${pubC}</div><div class="dash-label">Cant</div></div>
+                    <div class="dash-stat"><div class="dash-num">${pubE}</div><div class="dash-label">Estudios</div></div>
+                </div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-header">Precursores Regulares</div>
+                <div class="dash-content">
+                    <div class="dash-stat"><div class="dash-num">${prC}</div><div class="dash-label">Cant</div></div>
+                    <div class="dash-stat"><div class="dash-num">${prH}</div><div class="dash-label">Horas</div></div>
+                    <div class="dash-stat"><div class="dash-num">${prE}</div><div class="dash-label">Est</div></div>
+                </div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-header">Precursores Auxiliares</div>
+                <div class="dash-content">
+                    <div class="dash-stat"><div class="dash-num">${paC}</div><div class="dash-label">Cant</div></div>
+                    <div class="dash-stat"><div class="dash-num">${paH}</div><div class="dash-label">Horas</div></div>
+                    <div class="dash-stat"><div class="dash-num">${paE}</div><div class="dash-label">Est</div></div>
+                </div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-header">Asistencia Promedio</div>
+                <div class="dash-content">
+                    <div class="dash-stat"><div class="dash-num num-purple">${avgES}</div><div class="dash-label">Vida y Min</div></div>
+                    <div class="dash-stat"><div class="dash-num num-orange">${avgFS}</div><div class="dash-label">Pública</div></div>
+                </div>
+            </div>
+        </div>`; 
+    }
+
+    window.importData = (input) => { 
+        const file = input.files[0]; 
+        if(!file) return; 
+        if(!confirm("⚠️ ¿Restaurar copia de seguridad? Esto reemplazará los datos actuales.")) { input.value = ''; return; }
+        const reader = new FileReader(); 
+        reader.onload = function(e) { 
+            try { 
+                const data = JSON.parse(e.target.result);
+                if(data.personas && Array.isArray(data.personas)) {
+                    state = data; save(); alert("✅ Datos restaurados correctamente. La página se recargará."); location.reload();
+                } else { alert("❌ El archivo no parece ser un backup válido de Congregación Pro."); }
+            } catch(err) { alert("❌ Error leyendo el archivo: " + err.message); } 
+        }; 
+        reader.readAsText(file); 
+    }
+
+    window.addEventListener("DOMContentLoaded", () => { init(); });
+</script>
+</body>
+</html>
