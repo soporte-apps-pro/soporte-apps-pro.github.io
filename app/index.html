@@ -7,6 +7,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -16,7 +17,133 @@
             --warning: #f59e0b; --info: #3b82f6; --radius-md: 16px; --radius-sm: 10px;
             --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
         }
+/* ========================================================= */
+    /* 🌑 MODO OSCURO "MASTER" (CORREGIDO HEADER Y TABLAS) 🌑 */
+    /* ========================================================= */
+    body.dark-mode {
+        --bg-body: #0f172a;        /* Fondo Azul Noche */
+        --surface: #1e293b;        /* Tarjetas Gris Azulado */
+        --text-main: #f1f5f9;      /* Blanco Brillante */
+        --text-muted: #94a3b8;     /* Gris Claro */
+        --border-light: #334155;   /* Bordes Oscuros */
+        --input-bg: #020617;       /* Inputs Negros */
+    }
 
+    /* 1. ARREGLO DEL HEADER (BARRA SUPERIOR) */
+    body.dark-mode header.top {
+        background-color: var(--bg-body) !important;
+        border-bottom: 1px solid var(--border-light) !important;
+    }
+    
+    /* El Título "Congregación Pro" a Blanco */
+    body.dark-mode header.top h1 {
+        color: #ffffff !important;
+    }
+    
+    /* Los selectores de Fecha (Año/Mes) en el Header */
+    body.dark-mode header.top input,
+    body.dark-mode header.top select {
+        background-color: var(--surface) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--border-light) !important;
+    }
+
+    /* 2. ARREGLO DE ETIQUETAS (BADGES) */
+    /* Badge de "Administrador" o "Encargado" */
+    body.dark-mode #roleBadge {
+        background-color: #312e81 !important; /* Fondo Azul Oscuro */
+        color: #c7d2fe !important;            /* Letras Azul Claro Brillante */
+        border: 1px solid #4338ca !important;
+    }
+    /* Badge de "Online/Offline" */
+    body.dark-mode .status-badge {
+        background-color: var(--input-bg) !important;
+        color: #fff !important;
+        border: 1px solid var(--border-light) !important;
+    }
+
+    /* 3. FUERZA BRUTA: TARJETAS Y CONTENEDORES */
+    body.dark-mode, 
+    body.dark-mode .container,
+    body.dark-mode .modal-content {
+        background-color: var(--bg-body) !important;
+        color: var(--text-main) !important;
+    }
+
+    body.dark-mode .card,
+    body.dark-mode .settings-card,
+    body.dark-mode .dash-card {
+        background-color: var(--surface) !important;
+        border-color: var(--border-light) !important;
+        color: var(--text-main) !important;
+    }
+
+    /* 4. TEXTOS GENERALES (Para que nada quede oculto) */
+    body.dark-mode h2, body.dark-mode h3, body.dark-mode h4,
+    body.dark-mode strong, body.dark-mode b, body.dark-mode label,
+    body.dark-mode span:not(.badge):not(.status-badge) {
+        color: #e2e8f0 !important;
+    }
+
+    /* 5. TABLAS (Nombres visibles) */
+    body.dark-mode .table th {
+        background-color: #020617 !important;
+        color: #94a3b8 !important;
+        border-bottom-color: var(--border-light) !important;
+    }
+    body.dark-mode .table td {
+        background-color: var(--surface) !important;
+        color: #e2e8f0 !important; /* <--- ESTO ARREGLA LOS NOMBRES */
+        border-bottom-color: var(--border-light) !important;
+    }
+    body.dark-mode .table tbody tr:hover td {
+        background-color: #334155 !important;
+        color: #fff !important;
+    }
+
+    /* 6. INPUTS (Cajas de texto negras) */
+    body.dark-mode input:not([type="checkbox"]), 
+    body.dark-mode select, 
+    body.dark-mode textarea {
+        background-color: var(--input-bg) !important;
+        color: #fff !important;
+        border: 1px solid #475569 !important;
+    }
+
+  /* 7. LIMPIEZA DE FONDOS BLANCOS REBELDES (Versión Blindada) */
+    body.dark-mode *[style*="background:white"],
+    body.dark-mode *[style*="background: white"],
+    body.dark-mode *[style*="background:#fff"],
+    body.dark-mode *[style*="background: #fff"],
+    body.dark-mode *[style*="background-color: #f9fafb"] {
+        background-color: var(--surface) !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-light) !important;
+    }
+
+    /* 🔥 ATAQUE DIRECTO AL CUADRO DEL HISTORIAL (Por ID) 🔥 */
+    body.dark-mode #boxHistorial {
+        background-color: var(--surface) !important;
+        border-color: var(--border-light) !important;
+    }
+    
+    /* Arreglar el texto pequeño dentro del cuadro */
+    body.dark-mode #boxHistorial small {
+        color: #cbd5e1 !important; 
+    }
+    
+    /* Arreglar el título azul dentro del cuadro */
+    body.dark-mode #boxHistorial label {
+        color: #60a5fa !important;
+    }    
+    /* 8. BOTONES GHOST (Ajustes y Guía) */
+    body.dark-mode .btn.ghost {
+        color: #cbd5e1 !important;
+        border-color: #475569 !important;
+    }
+    body.dark-mode .btn.ghost:hover {
+        background-color: #334155 !important;
+    }
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; font-size: 14px; margin: 0; }
 
@@ -108,19 +235,374 @@
             .tabs-container { top: 115px; } 
             .admin-tools-grid, .asist-grid-layout, .stat-grid, .dash-grid { grid-template-columns: 1fr; } 
         }
+        /* === PARCHE FINAL: TEXTOS VISIBLES === */
+    body.dark-mode label, 
+    body.dark-mode .dash-label,
+    body.dark-mode h3, 
+    body.dark-mode h4,
+    body.dark-mode strong,
+    body.dark-mode b {
+        color: #e2e8f0 !important; /* Blanco brillante */
+    }
+
+    body.dark-mode input, 
+    body.dark-mode select, 
+    body.dark-mode textarea {
+        color: #ffffff !important;
+    }
+    /* === ARREGLO DE FONDO DEL FORMULARIO === */
+    body.dark-mode .admin-tools-grid {
+        background-color: transparent !important;
+        border-color: var(--border-light) !important;
+    }
+    
+    /* Asegurar que los títulos de los campos se vean bien */
+    body.dark-mode .admin-tools-grid label {
+        color: #e2e8f0 !important;
+    }
+/* === ÚLTIMO PARCHE: ETIQUETAS PEQUEÑAS === */
+
+    /* 1. SECCIÓN 2: Los grupos (G1, G2...) */
+    body.dark-mode #tblMiembros span {
+        background-color: #334155 !important;
+        color: #fff !important;
+        border: 1px solid #475569;
+    }
+
+    /* 2. SECCIÓN 5: Las horas LDC */
+    body.dark-mode #tblPrecursores div[style*="background:#eff6ff"],
+    body.dark-mode #tblPrecursores div[style*="background: #eff6ff"] {
+        background-color: #172554 !important;
+        color: #bfdbfe !important;
+        border-color: #1e40af !important;
+    }
+
+    /* 3. SECCIÓN 10: La etiqueta "Inactivo" */
+    body.dark-mode #tblInactivos span {
+        background-color: #450a0a !important;
+        color: #fca5a5 !important;
+        border: 1px solid #7f1d1d !important;
+    }
+    /* 4. ARREGLO BOTÓN GUÍA */
+    body.dark-mode #btnAdminHelp {
+        background-color: #312e81 !important; /* Fondo Azul Oscuro */
+        color: #ffffff !important;            /* Letra Blanca */
+        border: 1px solid #4338ca !important;
+    }
+    /* === ARREGLO DE MODALES (GUÍA Y AJUSTES) === */
+
+    /* 1. Fondo Oscuro para la ventana de Ajustes */
+    body.dark-mode .settings-card {
+        background-color: #1e293b !important; /* Gris Azulado Oscuro */
+        border: 1px solid #334155 !important;
+    }
+
+    /* 2. Fondo Oscuro para la ventana de la Guía */
+    /* Ataca directamente al div blanco dentro del modal */
+    body.dark-mode #modalManual > div {
+        background-color: #1e293b !important;
+        color: #fff !important;
+    }
+
+    /* 3. Arreglo de los desplegables y cajas internas */
+    body.dark-mode summary,
+    body.dark-mode .settings-group,
+    body.dark-mode .settings-content {
+        background-color: #0f172a !important; /* Fondo casi negro */
+        color: #e2e8f0 !important;
+        border-color: #334155 !important;
+    }
+
+    /* 4. Asegurar que los textos dentro se lean */
+    body.dark-mode #modalManual p, 
+    body.dark-mode #modalManual li,
+    body.dark-mode .settings-body p {
+        color: #cbd5e1 !important; /* Gris claro suave */
+    }
+    /* === RETOQUE FINAL: CONTRASTE EN CAJAS INTERNAS === */
+
+    /* 1. Botones cuadrados grandes (Respaldo, Excel...) */
+    body.dark-mode .icon-btn {
+        background-color: #1e293b !important;
+        color: #fff !important;
+        border: 1px solid #475569 !important;
+    }
+    
+    /* 2. Forzar oscuras todas las cajitas de colores (Verde, Naranja, Azul, Gris) */
+    /* Esto es lo que arregla que no se lean los textos claros */
+    body.dark-mode #modalManual div[style*="background"],
+    body.dark-mode #modalManual details,
+    body.dark-mode #modalManual summary,
+    body.dark-mode .settings-card div[style*="background"],
+    body.dark-mode .settings-card details,
+    body.dark-mode .settings-card summary,
+    body.dark-mode .status-card {
+        background-color: #0f172a !important; /* Fondo casi negro */
+        color: #e2e8f0 !important;             /* Letra blanca legible */
+        border-color: #334155 !important;      /* Borde sutil */
+    }
+
+    /* 3. Asegurar que las letras pequeñas y párrafos brillen */
+    body.dark-mode .settings-card small,
+    body.dark-mode .settings-card p,
+    body.dark-mode #modalManual small,
+    body.dark-mode #modalManual li,
+    body.dark-mode #modalManual p {
+        color: #cbd5e1 !important;
+    }
+    /* === ÚLTIMO DETALLE: BOTÓN DE SOPORTE === */
+    /* Atrapamos el botón por su función de abrir el soporte */
+    body.dark-mode button[onclick*="modalSupport"] {
+        background-color: #1e3a8a !important; /* Azul Noche Profundo */
+        color: #ffffff !important;            /* Letra Blanca Brillante */
+        border: 2px solid #1e40af !important; /* Borde Azul Oscuro */
+        box-shadow: none !important;
+    }
+    /* === ARREGLO FINAL: ENCABEZADO DE AJUSTES === */
+    /* Pintamos la barra de título de oscuro */
+    body.dark-mode .settings-header {
+        background-color: #1e293b !important; /* Mismo gris azulado que la ventana */
+        border-bottom: 1px solid #334155 !important;
+    }
+
+    /* Aseguramos que el título "Ajustes" resalte */
+    body.dark-mode .settings-header h3 {
+        color: #ffffff !important;
+    }
+    /* === ARREGLO DE CONTADORES (NUMERITOS) === */
+    body.dark-mode .count-badge {
+        background-color: #334155 !important; /* Gris Oscuro */
+        color: #ffffff !important;            /* Número Blanco */
+        border: 1px solid #475569 !important; /* Borde fino */
+    }
+    /* ========================================================= */
+    /* 📄 CORRECCIÓN PARA VER HOJAS DE PAPEL EN MODO OSCURO 📄 */
+    /* ========================================================= */
+    
+    /* Forzamos que dentro de la hoja (.print-canvas) TODO sea negro */
+    body.dark-mode .print-canvas,
+    body.dark-mode .print-canvas * {
+        color: #000000 !important;       /* Letra Negra */
+        border-color: #000000 !important; /* Bordes Negros */
+    }
+
+    /* Aseguramos que las tablas dentro del papel también sean negras */
+    body.dark-mode .print-canvas .official-table th,
+    body.dark-mode .print-canvas .official-table td {
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+/* ========================================================= */
+    /* 📄 CORRECCIÓN TOTAL PARA PDF EN MODO OSCURO 📄 */
+    /* ========================================================= */
+    
+    /* 1. La hoja completa: Fondo blanco y letra negra base */
+    body.dark-mode .print-canvas {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    /* 2. ATAQUE DIRECTO A LA INFO PERSONAL (Cabecera) */
+    /* Aquí es donde está el Nombre, Grupo, Fechas, etc. */
+    body.dark-mode .print-canvas .s21-header-box,
+    body.dark-mode .print-canvas .s21-header-box div,
+    body.dark-mode .print-canvas .s21-header-box span,
+    body.dark-mode .print-canvas .s21-header-box b,
+    body.dark-mode .print-canvas .s21-header-box strong,
+    body.dark-mode .print-canvas .s21-header-box label {
+        color: #000000 !important; /* ¡NEGRO PURO! */
+        background-color: transparent !important; /* Sin fondo oscuro */
+        border-color: #000000 !important;
+    }
+
+    /* 3. Las Tablas y sus bordes */
+    body.dark-mode .print-canvas table,
+    body.dark-mode .print-canvas th,
+    body.dark-mode .print-canvas td {
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+
+    /* 4. Seguridad extra: Cualquier texto dentro del papel */
+    body.dark-mode .print-canvas * {
+        color: #000000 !important;
+    }
+    /* ========================================================= */
+    /* 🔒 MODO INVITADO (SOLO LECTURA) 🔒 */
+    /* ========================================================= */
+
+    /* 1. Ocultar botones de Guardar, Borrar, Añadir y Editar */
+    body.guest-mode .btn-save,       /* Asegúrate que tus botones de guardar tengan esta clase */
+    body.guest-mode .btn-delete,     /* O esta */
+    body.guest-mode .btn-add,        /* Botones flotantes de agregar (+) */
+    body.guest-mode button[onclick*="save"],   /* Oculta cualquier botón que llame a save */
+    body.guest-mode button[onclick*="delete"], /* Oculta cualquier botón que llame a delete */
+    body.guest-mode button[onclick*="update"] {
+        display: none !important;
+    }
+
+    /* 2. Bloquear todos los Inputs y Selects (No se pueden escribir ni cambiar) */
+    body.guest-mode input,
+    body.guest-mode select,
+    body.guest-mode textarea {
+        pointer-events: none; /* No permite hacer clic */
+        background-color: transparent !important; /* Que parezca solo texto */
+        border: none !important;
+    }
+
+    /* 3. EXCEPCIONES: Cosas que SÍ deben funcionar */
+    
+    /* El botón de búsqueda SÍ debe funcionar */
+    body.guest-mode #searchInput, 
+    body.guest-mode .search-bar input {
+        pointer-events: auto !important;
+        border: 1px solid #ccc !important;
+        background-color: white !important;
+    }
+
+    /* Los botones de navegación y "Ojos" (Ver) SÍ deben verse */
+    body.guest-mode .nav-btn,
+    body.guest-mode .btn-view,   /* El ojito para ver reportes */
+    body.guest-mode .tab-link {
+        display: block !important;
+        pointer-events: auto !important;
+    }
+
+    /* 4. IMPORTANTE: Soporte y Donación SÍ permitidos */
+    body.guest-mode #btn-support,
+    body.guest-mode .donate-section,
+    body.guest-mode a[href*="paypal"],
+    body.guest-mode .btn-about {
+        display: block !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+    }
+
+   /* ========================================================= */
+    /* 🔒 MODO INVITADO (CORREGIDO: SIN PDF) 🔒 */
+    /* ========================================================= */
+
+    /* 1. OCULTAR BOTONES DE EDICIÓN, GUARDADO Y **DESCARGAS** */
+    body.guest-mode .btn-save, 
+    body.guest-mode .btn-delete,
+    body.guest-mode .btn-add,
+    body.guest-mode button[onclick*="save"], 
+    body.guest-mode button[onclick*="update"],
+    body.guest-mode button[onclick*="delete"],
+    /* 👇 AQUÍ ESTÁ EL CAMBIO: OCULTAMOS LOS PDF 👇 */
+    body.guest-mode button[onclick*="downloadPDF"], 
+    body.guest-mode button[onclick*="generatePDF"] {
+        display: none !important;
+    }
+
+    /* 2. BLOQUEO GENERAL (Por defecto, nada se toca) */
+    body.guest-mode input,
+    body.guest-mode select,
+    body.guest-mode textarea {
+        pointer-events: none !important;
+        border: none !important;
+        background: transparent !important;
+        color: inherit;
+    }
+
+    /* 3. ¡EXCEPCIONES! (Lo que SÍ se puede tocar para navegar) */
+    body.guest-mode #headerMonth, body.guest-mode #headerYear,      
+    body.guest-mode #actMonthSelect, body.guest-mode #actYearInput, 
+    body.guest-mode #selGInforme,                                   
+    body.guest-mode #asistMonthSelect, body.guest-mode #asistYearInput, 
+    body.guest-mode #precMes, body.guest-mode #precAno,             
+    body.guest-mode #s21Mode, body.guest-mode #s21Year,             
+    body.guest-mode #s21Search, body.guest-mode #s21GroupSel,       
+    body.guest-mode #s88Year,                                       
+    body.guest-mode #resMonth, body.guest-mode #resYear,            
+    body.guest-mode #qPersona, body.guest-mode #searchInput {       
+        
+        pointer-events: auto !important; 
+        border: 1px solid #ccc !important; 
+        background-color: var(--surface) !important; 
+        border-radius: 6px !important;
+        opacity: 1 !important;
+    }
+
+    /* 4. Permitir botones de "Ver" (Ojitos) y Navegación */
+    body.guest-mode .btn-view,
+    body.guest-mode button[onclick*="render"],
+    body.guest-mode button[onclick*="preview"], /* <--- ESTE ES EL BOTÓN "VER" (OJITO) */
+    body.guest-mode button[onclick*="Search"] {
+        pointer-events: auto !important;
+        display: inline-block !important;
+        cursor: pointer !important;
+    }
+
+    /* ========================================================= */
+    /* 🛠️ AJUSTES VISUALES PARA INVITADO (CONFIGURACIÓN) 🛠️ */
+    /* ========================================================= */
+    
+    /* 1. Ocultar lo que NO debe ver */
+    body.guest-mode #secShareKey,  /* Compartir Llave */
+    body.guest-mode #secRespaldo,  /* Respaldo Local */
+    body.guest-mode #secExcel,     /* Excel */
+    body.guest-mode #secAccesos {  /* Gestión de Claves */
+        display: none !important;
+    }
+
+    /* 2. Mostrar "Conexión Rápida" (que normalmente se oculta a los admins) */
+    body.guest-mode #smartConnectBox {
+        display: block !important;
+    }
+
+    /* =============================================== */
+    /* FIX: FONDO BLANCO PARA PDF (Ahorro de Tinta)    */
+    /* Fuerza que la hoja sea blanca en Modo Oscuro    */
+    /* =============================================== */
+    #modalTarjeta > div, 
+    #modalRegistro > div, 
+    #cardS21, 
+    #cardS88,
+    .hoja-pdf {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    /* Corrección para textos dentro de la tabla en modo oscuro */
+    #modalTarjeta table, #modalTarjeta td, #modalTarjeta th,
+    #modalRegistro table, #modalRegistro td, #modalRegistro th {
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
 
-<div id="modalAuth" style="display: flex;">
+    <div id="modalAuth" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; justify-content: center; align-items: center; background: #374151;">
     <div class="card" style="width:360px; max-width:90%; text-align:center; margin-bottom:0; padding: 40px 20px;">
         <div style="background:var(--primary); width:60px; height:60px; border-radius:16px; margin:0 auto 20px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:1.8rem;">🔐</div>
         <h2 style="font-weight:800; margin-bottom:10px; color:var(--text-main);">Bienvenido</h2>
-        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:30px;">Introduce tu clave de acceso.<br><small style="opacity:0.7;">(Clave inicial sugerida: 12345)</small></p>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:30px; line-height: 1.5;">
+        Introduce tu clave de acceso.<br><br>
+    <small style="opacity:0.9; display:block; font-size: 0.85em;">
+        🔑 <b>Administrador:</b> Clave inicial sugerida 12345.<br>
+        👤 <b>Encargado o Invitado:</b> Pídele la clave al administrador.
+    </small>
+</p>
         <input type="password" id="mPwd" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:12px; margin-bottom:30px; font-weight:700; border-radius: 12px; padding: 15px;">
         <button class="btn primary" id="mEnter" onclick="window.attemptLogin()" style="width:100%; padding:16px; font-size:1rem;">ENTRAR AL SISTEMA</button>
+        <p onclick="handleForgotPwd()" style="margin-top:20px; font-size:0.85rem; color:var(--primary); cursor:pointer; text-decoration:underline; font-weight:600;">
+    ¿Olvidaste tu clave?
+</p>
+    </div>
+</div>
+<div id="modalForcePass" style="display: none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 10005; align-items:center; justify-content:center; padding:20px;">
+    <div class="card" style="width:100%; max-width:360px; text-align:center; padding: 30px; background:white; border-radius:15px;">
+        <div style="font-size:2.5rem; margin-bottom:15px;">🔒</div>
+        <h2 style="font-weight:800; color:var(--primary); margin:0;">Seguridad Requerida</h2>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin: 15px 0 20px 0;">
+            Estás usando la clave inicial. Por seguridad, <b>crea una nueva clave de administrador</b>.
+        </p>
+        <input type="password" id="pForceNew" placeholder="Nueva clave segura" style="text-align:center; font-size:1.2rem; margin-bottom:15px; width:100%; padding:12px; border: 2px solid var(--primary); border-radius:8px;">
+        <button class="btn primary" onclick="window.forceUpdatePassword()" style="width:100%; padding:15px; font-weight:bold;">ESTABLECER Y COMENZAR</button>
     </div>
 </div>
 
@@ -130,6 +612,7 @@
             <h3 style="margin:0; font-size: 1.2rem;">⚙️ Ajustes</h3>
             <button class="btn ghost" onclick="closeSettings()" style="padding:6px 12px; border-radius:50%; border:none; font-size:1.2rem;">✕</button>
         </div>
+        
         <div class="settings-body">
             
             <div class="settings-group">
@@ -152,40 +635,29 @@
                         </p>
                     </div>
 
+                    <div id="secShareKey" class="admin-only" style="margin-top:15px; background:#f0f9ff; padding:15px; border-radius:10px; border:1px solid #bae6fd;">
+                        <label style="color:#0369a1; display:flex; align-items:center; gap:5px;">📤 Compartir Llave de Acceso</label>
+                        <p style="font-size:0.75rem; color:#0c4a6e; margin-bottom:10px;">
+                            Envía estos datos a los encargados para que se conecten a tu nube.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button class="btn info" onclick="copyInstructions()" style="width:100%;">1️⃣ Copiar Instrucciones</button>
+                            <button class="btn warning" onclick="copyRawToken()" style="width:100%; font-weight:800;">2️⃣ Copiar SOLO LA LLAVE</button>
+                        </div>
+                    </div>
+
                     <details id="manualConfigDetails" style="margin-top:15px;">
-                        <summary style="font-size:0.8rem; color:var(--primary);">⚙️ Configuración Manual (Admin)</summary>
+                        <summary style="font-size:0.8rem; color:var(--text-muted); cursor:pointer;">⚙️ Configuración Técnica (API Keys)</summary>
                         <div class="settings-content" style="border:none; padding-top:10px;">
                             <input type="text" id="fbApiKey" placeholder="API Key" style="margin-bottom:10px;">
                             <input type="text" id="fbProjectId" placeholder="Project ID" style="margin-bottom:10px;">
                             <button class="btn ghost" onclick="saveCloudCredentials()" style="width:100%;">Guardar Manualmente</button>
-                            
-                            <div class="admin-only" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--border-light);">
-                                <label>Compartir con Encargados</label>
-                                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;">
-                                    ⚠️ Para facilitar el copiado en WhatsApp, envía primero las instrucciones y luego <b>solo la llave</b> en un segundo mensaje.
-                                </p>
-                                <div style="display: flex; flex-direction: column; gap: 8px;">
-                                    <button class="btn info" onclick="copyInstructions()" style="width:100%;">1️⃣ Copiar Instrucciones</button>
-                                    <button class="btn warning" onclick="copyRawToken()" style="width:100%; font-weight:800;">2️⃣ Copiar SOLO LA LLAVE</button>
-                                </div>
-                            </div>
                         </div>
                     </details>
-
                 </div>
             </div>
 
-            <div class="settings-group">
-                <div style="padding:15px;">
-                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">🌐 Versión Web (iPhone/PC)</div>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                         <p style="font-size:0.8rem; color:var(--text-muted); margin:0; flex:1;">Para usar en navegador sin instalar.</p>
-                         <button class="btn info" onclick="shareWebLink()" style="padding:8px 12px;">🔗 Compartir</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-group">
+            <div id="secRespaldo" class="settings-group">
                 <div style="padding:15px;">
                     <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">💾 Respaldo Local</div>
                     <div class="action-row">
@@ -195,12 +667,36 @@
                 </div>
             </div>
 
-            <details class="settings-group admin-only">
+            <div id="secExcel" class="settings-group admin-only" style="margin-top: 15px; border: 1px solid #16a34a;">
+                <div style="padding:15px; background: #f0fdf4;">
+                    <div style="font-size:0.8rem; font-weight:700; color:#15803d; text-transform:uppercase; margin-bottom:10px;">
+                        📗 Migración Masiva (Excel)
+                    </div>
+                    <p style="font-size:0.8rem; color:#14532d; margin-bottom:15px;">
+                        ¿Traes datos de otra parte? Descarga nuestra plantilla, llénala y súbela.
+                    </p>
+                    
+                    <div class="action-row">
+                        <button class="icon-btn" onclick="downloadExcelTemplate()" style="border:1px solid #86efac; background:white;">
+                            <span style="font-size:1.5rem;">📥</span>
+                            <small style="color:#166534; font-weight:bold;">1. Bajar Plantilla</small>
+                        </button>
+
+                        <div class="icon-btn" style="position:relative; background:#16a34a; border:none; color:white;">
+                            <span style="font-size:1.5rem;">📂</span>
+                            <small style="font-weight:bold;">2. Cargar Excel</small>
+                            <input type="file" accept=".xlsx, .xls" onchange="importFromExcel(this)" 
+                                style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <details id="secAccesos" class="settings-group admin-only">
                 <summary>🔐 Gestión de Accesos</summary>
                 <div class="settings-content">
                     <label>Cambiar Clave Administrador</label>
-                    <button class="btn warning" style="width:100%; margin-bottom:20px;" onclick="document.getElementById('modalPwd').style.display='flex'">🔑 Cambiar Clave Principal</button>
-                    
+                     <button class="btn warning" style="width:100%; margin-bottom:20px;" onclick="openPwdModal()">🔑 Cambiar Clave Principal</button>                    
                     <div style="border-top:1px solid var(--border-light); padding-top:15px; margin-top:10px;">
                         <label>Cantidad de Grupos</label>
                         <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -219,47 +715,93 @@
                 </div>
             </details>
 
-            <div class="admin-only" style="padding:15px; text-align:center; font-size:0.75rem; color:var(--text-muted); background:#f9fafb; border-radius: 12px; display:flex; flex-direction:column; gap:10px; align-items:center;">
-                <span>v1.0.66 • Web/App</span>
-                <button class="btn ghost" style="font-size:0.75rem; padding: 4px 10px; border-color: var(--border-light);" onclick="document.getElementById('modalSupport').style.display='flex'">
-                    ☕ Acerca de & Soporte
+            <div class="settings-group" style="margin-top: 15px;">
+                <div style="padding:15px;">
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">
+                        🌐 Versión Web (iPhone/PC)
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0; flex:1;">Para usar en navegador sin instalar.</p>
+                        <button class="btn info" onclick="shareWebLink()" style="padding:8px 12px;">🔗 Compartir</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding:15px; text-align:center; margin-top: 10px;">
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.2.0 • Web/App</span>
+                
+                <button onclick="document.getElementById('modalSupport').style.display='flex'" 
+                    style="
+                        width: 100%;
+                        background-color: #e0e7ff; 
+                        color: #4338ca;            
+                        border: 2px solid #c7d2fe; 
+                        padding: 15px 20px;        
+                        font-size: 1.1rem;         
+                        font-weight: 800;          
+                        border-radius: 16px;       
+                        cursor: pointer;
+                        box-shadow: 0 4px 6px -1px rgba(67, 56, 202, 0.15);
+                        display: flex; align-items: center; justify-content: center; gap: 10px;
+                        transition: transform 0.1s;
+                    "
+                    onmousedown="this.style.transform='scale(0.97)'" 
+                    onmouseup="this.style.transform='scale(1)'">
+                    <span style="font-size: 1.4rem;">☕</span>
+                    Acerca de & Soporte
                 </button>
+            </div>        
+        </div> </div> </div> ```
+
+<div id="modalSupport" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10001; align-items:center; justify-content:center; padding: 20px;">
+    <div style="background:white; width:100%; max-width:380px; border-radius:15px; padding:25px; position:relative; text-align:center; font-family: 'Inter', sans-serif;">
+        <button class="btn ghost" onclick="document.getElementById('modalSupport').style.display='none'" style="position:absolute; right:15px; top:15px; border:none; background:none; font-size:22px; cursor:pointer;">&times;</button>
+        
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; border:none;">ℹ️ Acerca de la App</h3>
+        <p style="font-size: 0.95rem; margin-bottom: 20px; color: #444;">Tu apoyo voluntario ayuda a mantener este proyecto gratuito y sin anuncios.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button onclick="window.open('https://link.mercadopago.com.co/app2026pro', '_blank')" 
+                style="background-color: #009EE3; color: white; border: none; padding: 14px; border-radius: 25px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                💙 Apoyo por Mercado Pago
+            </button>
+
+            <button onclick="window.open('https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=desarrollo.independiente.app@gmail.com&item_name=Apoyo+App+Pro&currency_code=USD', '_blank')" 
+                style="background-color: #003087; color: white; border: none; padding: 14px; border-radius: 25px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                🅿️ Apoyo por PayPal
+            </button>
+        </div>
+
+        <p style="margin-top: 20px; font-size: 0.8rem; color: var(--text-muted);">
+            📧 soporte: desarrollo.independiente.app@gmail.com
+        </p>
+    </div>
+</div>
+
+
+<div id="modalPwd" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10002; align-items:center; justify-content:center;">
+    <div class="card" style="width:320px; text-align: center; padding: 25px;">
+        <h3 style="margin-top:0;">🔐 Gestión de Claves</h3>
+        
+        <label style="text-align:left; width:100%; font-size:0.8rem; font-weight:bold;">Administrador (Secretario)</label>
+        <input type="password" id="pNew" placeholder="Nueva clave (Opcional)" style="margin-bottom:20px; text-align: center;">
+        
+        <div style="text-align:left; border-top:1px dashed #ddd; padding-top:15px; margin-top:5px;">
+            <label style="color:#059669; font-size:0.8rem; font-weight:bold;">Invitado (Solo Lectura)</label>
+            
+            <div style="background:#f0fdf4; padding:8px; border-radius:6px; margin: 5px 0 10px 0; font-size:0.85rem; color:#166534; border:1px solid #bbf7d0;">
+                Clave Actual: <b id="lblShowGuest">...</b>
             </div>
+
+            <input type="text" id="pGuestNew" placeholder="Escribe la NUEVA clave aquí" style="margin-bottom:20px; text-align: center; border:1px solid #059669; font-weight:bold; color:#059669;">
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn ghost" onclick="document.getElementById('modalPwd').style.display='none'" style="flex:1;">Cancelar</button>
+            <button class="btn primary" onclick="updatePassword()" style="flex:1;">Guardar Cambios</button>
         </div>
     </div>
 </div>
-
-<div id="modalSupport">
-    <div class="card" style="width: 380px; max-width: 90%; margin: 0;">
-        <h3 style="display:flex; justify-content:space-between; align-items:center; border:none; padding-bottom:0; margin-bottom:15px;">
-            <span>ℹ️ Acerca de la App</span>
-            <button class="btn ghost" onclick="document.getElementById('modalSupport').style.display='none'" style="border:none; font-size:1.2rem; padding:4px; color:var(--text-muted);">✕</button>
-        </h3>
-        <div style="font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 25px;">
-            <p style="margin-bottom: 15px;">Herramienta para llevar un registro organizado de manera eficiente, segura y fácil.</p>
-            <p style="margin-bottom: 15px; font-weight:600;">Desarrollo independiente y gratuito.</p>
-            <div style="background:#eef2ff; color:#4338ca; padding:10px; border-radius:8px; font-size:0.8rem; margin-bottom:15px;">
-                <b>Contacto:</b><br>
-                📧 desarrollo.independiente.app@gmail.com
-            </div>
-            <p style="font-size:0.8rem;"><a href="https://soporte-apps-pro.github.io/privacidad.html" target="_blank" style="color:var(--primary);">Ver Política de Privacidad</a></p>
-        </div>
-        <button onclick="window.open('TU_LINK_MERCADOPAGO', '_blank')" style="background:#f59e0b; color:white; border:none; padding:12px 20px; border-radius:50px; font-weight:700; cursor:pointer; box-shadow:0 4px 6px rgba(245, 158, 11, 0.3); display:flex; align-items:center; gap:10px; width:100%; justify-content:center; transition:0.2s;">
-            <span style="font-size:1.2rem;">☕</span> Invítame un Café
-        </button>
-    </div>
-</div>
-
-
-<div id="modalPwd" style="display:none;">
-    <div class="card" style="width:300px; margin-bottom:0; text-align: center;">
-        <h3>Cambiar Clave Admin</h3>
-        <input type="password" id="pNew" placeholder="Nueva clave" style="margin-bottom:15px; text-align: center;">
-        <button class="btn primary" onclick="updatePassword()" style="width:100%; margin-bottom:10px;">Guardar</button>
-        <button class="btn ghost" onclick="document.getElementById('modalPwd').style.display='none'" style="width:100%;">Cancelar</button>
-    </div>
-</div>
-
 <div id="app-content">
     <header class="top">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -268,14 +810,21 @@
                 <h1 style="font-size: 1.1rem; font-weight: 800; margin:0;">Congregación Pro</h1>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <span id="roleBadge">...</span>
-                    <span id="headerStatus" class="status-badge offline">⚪ Offline</span>
+                    <span id="headerStatus" class="status-badge offline" onclick="toggleConnection()" style="cursor:pointer">⚪ Offline</span>
                 </div>
             </div>
         </div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <div style="display:flex; gap:5px;">
+            <button class="btn ghost" onclick="toggleTheme()" id="btnTheme" style="padding:6px 10px; font-size:1.2rem;" title="Cambiar Tema">🌙</button>
+            
+            <button class="btn ghost" onclick="document.getElementById('modalManual').style.display='flex'">📘 Guía</button>
+            
             <button class="btn ghost" onclick="openSettings()">⚙️ Ajustes</button>
-            <div style="display:flex; gap:5px; align-items:center; background:#fff; padding:4px; border-radius:8px; border:1px solid var(--border-light);">
-                <input type="number" id="headerYear" style="width:70px; border:none; box-shadow:none; padding:5px; font-weight:bold; text-align:center;">
+        </div>
+
+            <div style="display:flex; gap:5px; align-items:center; background:#fff; padding:4px; border-radius:8px; border:1px solid var(--border); pointer-events: none; opacity: 0.6;">
+            <input type="number" id="headerYear" style="width:70px; border:none; box-shadow:none; padding:5px; font-weight:bold; text-align:center;">
                 <select id="headerMonth" style="width:110px; border:none; box-shadow:none; padding:5px; font-weight:bold;"></select>
             </div>
             <button class="btn danger" onclick="location.reload()" style="padding:8px 12px;">🔒</button>
@@ -311,7 +860,24 @@
                 <div class="admin-tools-grid">
                     <div><label>Fecha Nacimiento</label><input type="date" id="pNac"></div>
                     <div><label>Fecha Bautismo</label><input type="date" id="pBau"></div>
-                    <div><label>Fecha Expulsión</label><input type="date" id="pFSac"></div>
+                    
+                    <div>
+                        <label>Inicio/Reactivación</label>
+                        <input type="month" id="pInicio" title="Mes en que llegó o se reactivó. Antes de esta fecha no contará fallas.">
+                    </div>
+                    <div><label>Fecha Sacado</label><input type="date" id="pFSac"></div>
+                    <div id="boxHistorial" style="margin-top: 15px; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px;"></div>
+                    <label style="font-weight: bold; color: #0d6efd; display: block; margin-bottom: 5px;">
+        <i class="bi bi-clock-history"></i> Historial Rápido (Evitar "Irregular")
+    </label>
+    <small style="color: #666; display: block; margin-bottom: 10px;">
+        Marque los meses que predicó antes de hoy:
+    </small>
+    
+    <div id="contenedor-historial-rapido" style="display: flex; flex-wrap: wrap; gap: 10px;">
+        </div>
+</div>
+
                     <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
                         <button class="btn primary" id="btnSaveP">💾 Guardar Miembro</button>
                         <div style="display:flex; gap:8px; width:100%;">
@@ -373,8 +939,51 @@
         </section>
 
         <section id="precursores" class="tab admin-only">
-            <div class="card"><h3><span>🏅 Precursores Regulares</span> <span id="cPre" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblPrecursores"><tbody></tbody></table></div></div>
-            <div class="card" style="margin-top:20px;"><h3>🏃 Precursores Auxiliares (Mes Actual)</h3><div class="table-container"><table class="table" id="tblAuxiliares"><tbody></tbody></table></div></div>
+<div class="card">
+        <h3>
+            <span>🏆 Precursores Regulares</span> 
+            <span id="cPre" class="count-badge">0</span>
+        </h3>
+
+        <div class="admin-tools-grid" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+            <div>
+                <label>Mes</label>
+                <select id="precMes" class="form-control">
+                    <option value="0">Enero</option>
+                    <option value="1">Febrero</option>
+                    <option value="2">Marzo</option>
+                    <option value="3">Abril</option>
+                    <option value="4">Mayo</option>
+                    <option value="5">Junio</option>
+                    <option value="6">Julio</option>
+                    <option value="7">Agosto</option>
+                    <option value="8">Septiembre</option>
+                    <option value="9">Octubre</option>
+                    <option value="10">Noviembre</option>
+                    <option value="11">Diciembre</option>
+                </select>
+            </div>
+            <div>
+                <label>Año</label>
+                <select id="precAno" class="form-control" style="font-weight:bold;"></select>
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+                <button class="btn primary" onclick="renderAllPrecursores()">📅 Ver Datos</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table" id="tblPrecursores">
+           <thead>
+    <tr>
+        <th style="width: 30%;">Publicador</th>
+        <th style="text-align:center; width: 20%; color:#059669;">A la Fecha</th> <th style="text-align:center; width: 20%;">Total Año</th>
+        <th style="text-align:center; width: 30%;">Meta</th>
+    </tr>
+      </thead>
+           
+    <tbody></tbody>
+</table></div></div>
         </section>
 
         <section id="tarjeta" class="tab admin-only">
@@ -384,7 +993,7 @@
                     <div><label>Modo</label><select id="s21Mode" onchange="toggleS21Inputs()"><option value="individual">Individual</option><option value="group">Por Grupo</option><option value="pr">Solo Precursores</option><option value="all">Todos</option></select></div>
                     <div id="s21InputIndiv"><label>Buscar Persona</label><input id="s21Search" list="pList" placeholder="Escribe nombre..."></div>
                     <div id="s21InputGroup" style="display:none;"><label>Grupo</label><select id="s21GroupSel" class="dynamic-group-select"></select></div>
-                    <div><label>Año Servicio</label><input type="number" id="s21Year"></div>
+                    <div><label>Año Servicio</label><select id="s21Year" style="font-weight:bold;"></select></div>
                     <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="previewS21()">👁️ Ver</button><button class="btn success" onclick="downloadPDFS21()">📥 PDF</button></div>
                 </div>
                 <div id="preview-viewport"></div>
@@ -395,7 +1004,7 @@
             <div class="card">
                 <h3>📈 Registro de Asistencia</h3>
                 <div class="admin-tools-grid">
-                    <div><label>Año Servicio</label><input type="number" id="s88Year"></div>
+                 <div><label>Año Servicio</label><select id="s88Year" style="font-weight:bold;"></select></div>
                     <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="renderS88Preview()">👁️ Ver</button><button class="btn success" onclick="generatePDF('s88')">📥 PDF</button></div>
                 </div>
                 <div id="s88-preview-viewport"></div>
@@ -435,11 +1044,53 @@
     const ymKey = (y,m) => `${y}-${String(m).padStart(2,'0')}`;
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
-    
+    // ... debajo de const CICLO_S88 ...
+
+    // NUEVO: Función para obtener el Año de Servicio actual
+    // Ejemplo: Si es Sept 2025, devuelve 2026. Si es Ene 2026, devuelve 2026.
+    const getServiceYear = () => {
+        const d = new Date();
+        // Si el mes es Septiembre (8) o mayor, ya es el siguiente año de servicio
+        return d.getMonth() >= 8 ? d.getFullYear() + 1 : d.getFullYear();
+    };
+
+    // NUEVO: Convierte mes calendario a año correcto según el Año de Servicio elegido
+    // targetYear: El año de servicio (ej: 2024). mes: 0-11
+    const getYearForMonth = (targetYear, mesIndex) => {
+        // Si el mes es Sept(8) a Dic(11), pertenece al año anterior calendario
+        if (mesIndex >= 8) return targetYear - 1;
+        // Si es Ene(0) a Ago(7), es el mismo año calendario
+        return targetYear;
+    };
+
+    let currentSession = { role: 'admin', group: null }; // 👈 NUEVA VARIABLE DE SEGURIDAD
     let state = { personas: [], activity: {}, attendance: {}, config: { pwd: '12345', totalGroups: 5, groups: {} } };
     let CURRENT_ROLE = 'ADMIN'; 
     let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
     let actY = curY, actM = curM, asistY = curY, asistM = curM;
+
+// --- FUNCIÓN PARA LLENAR AÑOS (2025 - 2026) ---
+    function populateSelects() {
+        const startYear = 2023; 
+        const currentYear = new Date().getFullYear(); 
+        const endYear = currentYear + 2; 
+        const selects = ['precAno', 's21Year', 's88Year'];
+
+        selects.forEach(id => {
+            const sel = document.getElementById(id);
+            if (sel) {
+                sel.innerHTML = '';
+                for (let y = startYear; y <= endYear; y++) {
+                    const opt = document.createElement('option');
+                    opt.value = y; // Valor interno: 2026
+                    opt.innerText = (y - 1) + " - " + y; // Visual: 2025 - 2026
+                    sel.appendChild(opt);
+                }
+                const m = new Date().getMonth(); 
+                sel.value = (m >= 8) ? currentYear + 1 : currentYear;
+            }
+        });
+    }
 
     // --- NUEVO: FUNCIÓN PARA COMPARTIR ENLACE WEB ---
     window.shareWebLink = function() {
@@ -552,18 +1203,292 @@
         showToast(`Clave del Grupo ${gID} guardada`);
     }
 
+    // --- FUNCIONES NUEVAS PARA EXCEL ---
+// ==========================================
+// 1. GENERAR PLANTILLA "INTUITIVA" (DOBLE COLUMNA)
+// ==========================================
+window.downloadExcelTemplate = function() {
+    // Encabezados de Datos Personales
+    const headersDatos = [
+        "NOMBRE COMPLETO", "GRUPO (1-5)", "SEXO (H/M)", "F. NACIMIENTO", "F. BAUTISMO", 
+        "PRIVILEGIOS (Anciano, SM, PR)", "ESPERANZA (Otras/Ungido)", "NOTAS (Opcional)"
+    ];
+
+    // Encabezados de Meses (SEPARADOS PARA QUE SEA OBVIO)
+    const headersMeses = [
+        "SEP (Horas)", "SEP (Estudios)", 
+        "OCT (Horas)", "OCT (Estudios)",
+        "NOV (Horas)", "NOV (Estudios)",
+        "DIC (Horas)", "DIC (Estudios)",
+        "ENE (Horas)", "ENE (Estudios)",
+        "FEB (Horas)", "FEB (Estudios)",
+        "MAR (Horas)", "MAR (Estudios)",
+        "ABR (Horas)", "ABR (Estudios)",
+        "MAY (Horas)", "MAY (Estudios)",
+        "JUN (Horas)", "JUN (Estudios)",
+        "JUL (Horas)", "JUL (Estudios)",
+        "AGO (Horas)", "AGO (Estudios)"
+    ];
+
+    const allHeaders = [...headersDatos, ...headersMeses];
+
+    // EJEMPLOS CLARÍSIMOS
+    const example1 = [
+        "Ej: Juan Pérez", 1, "H", "1980-05-20", "2000-11-15", "Anciano", "Otras", "Viene de otra congre",
+        10, 0,  // Sep: 10 horas
+        8,  1,  // Oct: 8 horas, 1 estudio
+        12, 0,  // Nov
+        "P", 0, // Dic: "P" significa que predicó
+        // ... resto vacíos
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([allHeaders, example1]);
+
+    // Ancho de columnas
+    const wDatos = {wch:15}; 
+    const wMes = {wch:12}; 
+    let colWidths = [{wch:25}, {wch:8}, {wch:8}, {wch:12}, {wch:12}, {wch:20}, {wch:15}, {wch:20}];
+    for(let k=0; k<24; k++) colWidths.push(wMes);
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, "Plantilla_Facil");
+    XLSX.writeFile(wb, "Plantilla_CongregacionPro.xlsx");
+};
+
+// ==========================================
+// 1. GENERAR PLANTILLA "INTUITIVA" (DOBLE COLUMNA)
+// ==========================================
+window.downloadExcelTemplate = function() {
+    // Encabezados de Datos Personales
+    const headersDatos = [
+        "NOMBRE COMPLETO", "GRUPO (1-5)", "SEXO (H/M)", "F. NACIMIENTO", "F. BAUTISMO", 
+        "PRIVILEGIOS (Anciano, SM, PR)", "ESPERANZA (Otras/Ungido)", "NOTAS (Opcional)"
+    ];
+
+    // Encabezados de Meses (SEPARADOS PARA QUE SEA OBVIO)
+    const headersMeses = [
+        "SEP (Horas)", "SEP (Estudios)", 
+        "OCT (Horas)", "OCT (Estudios)",
+        "NOV (Horas)", "NOV (Estudios)",
+        "DIC (Horas)", "DIC (Estudios)",
+        "ENE (Horas)", "ENE (Estudios)",
+        "FEB (Horas)", "FEB (Estudios)",
+        "MAR (Horas)", "MAR (Estudios)",
+        "ABR (Horas)", "ABR (Estudios)",
+        "MAY (Horas)", "MAY (Estudios)",
+        "JUN (Horas)", "JUN (Estudios)",
+        "JUL (Horas)", "JUL (Estudios)",
+        "AGO (Horas)", "AGO (Estudios)"
+    ];
+
+    const allHeaders = [...headersDatos, ...headersMeses];
+
+    // EJEMPLOS CLARÍSIMOS
+    const example1 = [
+        "Ej: Juan Pérez", 1, "H", "1980-05-20", "2000-11-15", "Anciano", "Otras", "Viene de otra congre",
+        10, 0,  // Sep: 10 horas
+        8,  1,  // Oct: 8 horas, 1 estudio
+        12, 0,  // Nov
+        "P", 0, // Dic: "P" significa que predicó
+        // ... resto vacíos
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([allHeaders, example1]);
+
+    // Ancho de columnas
+    const wDatos = {wch:15}; 
+    const wMes = {wch:12}; 
+    let colWidths = [{wch:25}, {wch:8}, {wch:8}, {wch:12}, {wch:12}, {wch:20}, {wch:15}, {wch:20}];
+    for(let k=0; k<24; k++) colWidths.push(wMes);
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, "Plantilla_Facil");
+    XLSX.writeFile(wb, "Plantilla_CongregacionPro.xlsx");
+};
+
+// ==========================================
+// 2. IMPORTADOR MAESTRO (SIN SALIRSE DE LA APP)
+// ==========================================
+window.importFromExcel = function(input) {
+    const file = input.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+
+            let countNuevos = 0;
+            let countEditados = 0;
+
+            const hoy = new Date();
+            let yearInicio = hoy.getFullYear();
+            if (hoy.getMonth() < 8) yearInicio = yearInicio - 1;
+
+            const mapMeses = [
+                {colH:8,  colE:9,  m:9,  y:yearInicio},   // Sep
+                {colH:10, colE:11, m:10, y:yearInicio},   // Oct
+                {colH:12, colE:13, m:11, y:yearInicio},   // Nov
+                {colH:14, colE:15, m:12, y:yearInicio},   // Dic
+                {colH:16, colE:17, m:1,  y:yearInicio+1}, // Ene
+                {colH:18, colE:19, m:2,  y:yearInicio+1}, // Feb
+                {colH:20, colE:21, m:3,  y:yearInicio+1}, // Mar
+                {colH:22, colE:23, m:4,  y:yearInicio+1}, // Abr
+                {colH:24, colE:25, m:5,  y:yearInicio+1}, // May
+                {colH:26, colE:27, m:6,  y:yearInicio+1}, // Jun
+                {colH:28, colE:29, m:7,  y:yearInicio+1}, // Jul
+                {colH:30, colE:31, m:8,  y:yearInicio+1}  // Ago
+            ];
+
+            for(let i=1; i<rows.length; i++) {
+                const row = rows[i];
+                if (!row) continue;
+
+                const nombre = row[0] ? String(row[0]).trim() : "";
+                if(!nombre || nombre === "NOMBRE COMPLETO" || nombre.startsWith("Ej:")) continue;
+
+                let persona = state.personas.find(p => p.nombre.toLowerCase() === nombre.toLowerCase());
+                let esNuevo = false;
+
+                if (!persona) {
+                    persona = { 
+                        id: 'p' + Date.now() + Math.floor(Math.random()*100000),
+                        nombre: nombre,
+                        grupo: 1, sexo: 'Hombre', esp: 'Otras ovejas', inicio: '', fsac: ''
+                    };
+                    esNuevo = true;
+                    countNuevos++;
+                } else {
+                    countEditados++;
+                }
+
+                const privs = row[5] ? String(row[5]).toUpperCase() : "";
+                if(row[1]) persona.grupo = row[1];
+                if(row[2]) persona.sexo = String(row[2]).toUpperCase().includes('M') ? 'Mujer' : 'Hombre';
+                if(row[3]) persona.nac = parseDate(row[3]);
+                if(row[4]) persona.bau = parseDate(row[4]);
+                
+                persona.anciano = privs.includes("ANC");
+                persona.sm = privs.includes("SM") || privs.includes("SIERVO");
+                persona.pr = privs.includes("PR") || privs.includes("REGULAR");
+                persona.pe = privs.includes("ESP") || privs.includes("ESPECIAL");
+                persona.mis = privs.includes("MIS");
+                
+                if(row[6]) persona.esp = String(row[6]).toUpperCase().includes('UNG') ? 'Ungido' : 'Otras ovejas';
+                if(row[7]) persona.notas = String(row[7]).trim();
+
+                if (esNuevo) state.personas.push(persona);
+
+                mapMeses.forEach(dato => {
+                    const valHoras = row[dato.colH]; 
+                    const valEst   = row[dato.colE]; 
+
+                    if( (valHoras !== undefined && valHoras !== "") || (valEst !== undefined && valEst !== "") ) {
+                        const key = `${dato.y}-${String(dato.m).padStart(2, '0')}`;
+                        if (!state.activity[key]) state.activity[key] = {};
+
+                        let h = 0, e = 0, pub = false;
+                        const sHoras = String(valHoras).toUpperCase().trim();
+
+                        if (sHoras === 'P' || sHoras === 'X' || sHoras === 'SI') { pub = true; } 
+                        else if (!isNaN(parseFloat(sHoras))) { h = parseFloat(sHoras); pub = true; }
+                        if (valEst && !isNaN(parseFloat(valEst))) e = parseFloat(valEst);
+
+                        if (pub || e > 0) {
+                            state.activity[key][persona.id] = { part: true, horas: h, est: e, pa: false, nota: '' };
+                        }
+                    }
+                });
+            }
+            
+            save();
+            
+            // AQUI ESTA EL TRUCO: renderAll() en vez de reload()
+            alert(`✅ IMPORTACIÓN EXITOSA\n\n🆕 Nuevos: ${countNuevos}\n✏️ Actualizados: ${countEditados}\n\nLa pantalla se actualizará sin salir.`);
+            renderAll(); 
+
+        } catch(error) {
+            alert("❌ Error al procesar el Excel.");
+            console.error(error);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+    input.value = ''; 
+};
+function parseDate(val) {
+    if(!val) return "";
+    if(typeof val === 'number') {
+        const d = new Date(Math.round((val - 25569)*86400*1000));
+        return d.toISOString().split('T')[0];
+    }
+    return String(val).trim();
+}
+    
+// ==========================================
+    // 🌗 LÓGICA DE MODO OSCURO
+    // ==========================================
+    window.toggleTheme = function() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        
+        // 1. Guardar la preferencia en el celular
+        localStorage.setItem('cong_pro_theme', isDark ? 'dark' : 'light');
+        
+        // 2. Cambiar el icono (Sol / Luna)
+        const btn = document.getElementById('btnTheme');
+        if(btn) btn.innerText = isDark ? '☀️' : '🌙';
+    }
+
+    // CARGAR TEMA AL ABRIR LA APP
+    const savedTheme = localStorage.getItem('cong_pro_theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        // Esperamos un instante para asegurarnos que el botón existe
+        setTimeout(() => {
+            const btn = document.getElementById('btnTheme');
+            if(btn) btn.innerText = '☀️';
+        }, 500);
+    }
+
+
     window.init = function() {
+        populateSelects(); // <--- ¡IMPORTANTE! Esto llena los huecos vacíos
         $('#mEnter').onclick = attemptLogin;
         $('#mPwd').onkeydown = (e) => { if(e.key==='Enter') attemptLogin(); };
         const mSels = [$('#headerMonth'), $('#actMonthSelect'), $('#resMonth'), $('#asistMonthSelect')];
-        mSels.forEach(sel => { if(sel){ sel.innerHTML=''; MESES_NOM.forEach((m,i)=>{const o=document.createElement('option'); o.value=i+1; o.text=m; if(i+1===curM)o.selected=true; sel.appendChild(o);}); } });
-        if($('#headerYear')) $('#headerYear').value = curY;
-        if($('#actYearInput')) $('#actYearInput').value = curY;
+         mSels.forEach(sel => { 
+            if(sel){ 
+                sel.innerHTML=''; 
+                MESES_NOM.forEach((m,i)=>{
+                    const o=document.createElement('option'); 
+                    o.value=i+1; 
+                    o.text=m; 
+                    if(i+1===curM) o.selected=true; 
+                    sel.appendChild(o);
+                }); 
+            } 
+        });
+        // 1. Calculamos el Año de Servicio usando tu nueva función
+        const currentServiceYear = getServiceYear();
+
+        // El encabezado (headerYear) se queda con el año calendario para navegar hoy
+        if($('#headerYear')) $('#headerYear').value = curY; 
+        
+        // El informe mensual (actYearInput) también suele ser calendario
+        if($('#actYearInput')) $('#actYearInput').value = curY; 
         if($('#asistYearInput')) $('#asistYearInput').value = curY;
         if($('#resYear')) $('#resYear').value = curY;
-        if($('#s21Year')) $('#s21Year').value = (curM>=9)?curY:curY-1;
-        if($('#s88Year')) $('#s88Year').value = (curM>=9)?curY:curY-1;
-        
+
+        // AQUÍ EL CAMBIO IMPORTANTE:
+        // La Tarjeta (S-21) y el Registro (S-88) deben iniciar mostrando el AÑO DE SERVICIO
+        if($('#s21Year')) $('#s21Year').value = currentServiceYear;
+        if($('#s88Year')) $('#s88Year').value = currentServiceYear;
+        // ------------------        
         if($('#headerMonth')) $('#headerMonth').onchange = (e) => { curM=parseInt(e.target.value); renderAll(); };
         if($('#headerYear')) $('#headerYear').onchange = (e) => { curY=parseInt(e.target.value); renderAll(); };
         if($('#selGInforme')) $('#selGInforme').onchange = renderActividad;
@@ -575,7 +1500,24 @@
         
         if($('#btnSaveP')) $('#btnSaveP').onclick = savePersona;
         if($('#btnDeleteP')) $('#btnDeleteP').onclick = deletePersona;
-        if($('#btnQEdit')) $('#btnQEdit').onclick = () => { const n=$('#qPersona').value; const p=state.personas.find(x=>x.nombre===n); if(p) { editP(p.id); document.querySelector('[data-tab="personas"]').click(); } };
+// Lógica mejorada para el botón EDITAR
+        if($('#btnQEdit')) $('#btnQEdit').onclick = () => { 
+            const n = $('#qPersona').value.trim();
+            if(!n) return alert("⚠️ Escribe un nombre primero.");
+
+            // Buscamos la persona (ignorando mayúsculas/minúsculas para facilitar)
+            const p = state.personas.find(x => x.nombre.toLowerCase() === n.toLowerCase()); 
+            
+            if(p) { 
+                editP(p.id); 
+                // Aseguramos que se vea el formulario arriba
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                // Limpiamos el buscador
+                $('#qPersona').value = '';
+            } else {
+                alert("❌ No se encontró a esa persona.\n\nAsegúrate de seleccionarla de la lista que aparece al escribir.");
+            }
+        };
         if($('#btnSaveReports')) $('#btnSaveReports').onclick = () => { save(); showToast("Guardado ☁️"); };
         if($('#btnSaveAsist')) $('#btnSaveAsist').onclick = () => { save(); showToast("Asistencia Guardada"); renderS88Preview(); };
         
@@ -610,81 +1552,242 @@
         connectFirebase(apiKey, projectId);
     }
 
-    function connectFirebase(apiKey, projectId) {
+function connectFirebase(apiKey, projectId) {
+        // 1. NUEVO: Revisamos si el usuario bloqueó la conexión (Offline)
+        const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
+        
+        if (isForcedOffline) {
+            updateCloudUI(false); // Ponemos el icono en gris
+            console.log("🚫 Conexión bloqueada por el usuario (Modo Offline).");
+            return; // ¡Y NOS DETENEMOS AQUÍ! No conectamos.
+        }
+
         const statusSpan = $('#statusIndicator');
         if(statusSpan) statusSpan.innerHTML = '🟡...';
         try {
             const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
-            app = initializeApp(firebaseConfig);
+            
+            // Solo inicializamos si no existe ya
+            if (!app) app = initializeApp(firebaseConfig);
             db = getFirestore(app);
-            startRealtimeSync();
+            
+            startRealtimeSync(); // Iniciamos la escucha de datos
+            
             updateCloudUI(true, projectId);
-            if($('#modalSettings').style.display === 'flex') showToast("Conectado");
+            if($('#modalSettings').style.display === 'flex') showToast("Conectado 🟢");
         } catch(e) {
             console.error(e);
-            alert("Error conectando.");
             updateCloudUI(false);
         }
     }
 
     function startRealtimeSync() {
         if(!db) return;
-        onSnapshot(doc(db, "congregacion", "datos_generales"), (doc) => {
+        
+        // 2. NUEVO: Guardamos el "cable" en la variable global para poder cortarlo luego
+        window.unsubscribeSync = onSnapshot(doc(db, "congregacion", "datos_generales"), (doc) => {
             if(doc.exists()) {
                 const cloudData = doc.data(); 
+                
+                // Actualizamos el estado local con lo que viene de la nube
                 state = cloudData;
+                window.state = state;
+                
+                // Aseguramos que la estructura sea válida
                 if(!state.personas) state.personas = [];
                 if(!state.activity) state.activity = {};
                 if(!state.attendance) state.attendance = {};
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
+                
                 localStorage.setItem(DB_KEY, JSON.stringify(state));
-                renderAll();
-            } else { save(); }
-        }, (error) => { console.error("Sync error:", error); updateCloudUI(false); });
+                renderAll(); // Repintamos la pantalla
+            } else { 
+                save(); // Si no existe en la nube, subimos lo nuestro
+            }
+        }, (error) => { 
+            console.error("Sync error:", error); 
+            updateCloudUI(false); 
+        });
     }
 
+
     window.save = async function() {
+        // ⛔ SEGURIDAD TOTAL: Si es invitado, matamos la función aquí mismo.
+    if (document.body.classList.contains('guest-mode')) {
+        return; 
+    }
+        // 1. Siempre guardamos en la memoria del celular (Local)
         localStorage.setItem(DB_KEY, JSON.stringify(state));
-        updateDatalist();
+        updateDatalist(); // Actualizamos lista del buscador
+
+        // 2. EL GUARDA: Verificamos si estamos en Offline
+        const isOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
+        
+        if (isOffline) {
+            console.log("🔕 Guardado LOCAL (Nube desactivada)");
+            // Si estamos Offline, NOS DETENEMOS AQUÍ. No enviamos nada a Firebase.
+            return; 
+        }
+
+        // 3. Si estamos Online, enviamos a la Nube
         if(db) { 
             try { 
                 await setDoc(doc(db, "congregacion", "datos_generales"), state); 
+                // Opcional: Console log para depurar
+                // console.log("☁️ Subido a la nube");
             } catch(e) { 
-                alert("❌ ERROR AL SUBIR A LA NUBE:\n\n" + e.message); 
+                // Si falla la subida (ej: se fue el internet real), avisamos pero no bloqueamos
+                console.error("❌ Error subiendo a nube (pero guardado local): " + e.message); 
             } 
         }
     }
 
-    window.attemptLogin = function() {
-        const pwd = $('#mPwd').value;
-        const adminPwd = (state.config && state.config.pwd) ? state.config.pwd : '12345';
-        if (pwd === adminPwd) { CURRENT_ROLE = 'ADMIN'; enterApp(); return; } 
-        let foundGroup = null;
-        const groups = state.config.groups || {};
-        for (const [grpNum, grpPwd] of Object.entries(groups)) { if (grpPwd === pwd) { foundGroup = grpNum; break; } }
-        if (foundGroup) { CURRENT_ROLE = 'G' + foundGroup; enterApp(); } else { alert("❌ Clave incorrecta"); }
+// --- FUNCIÓN DE OLVIDO DE CLAVE (UNIVERSAL) ---
+    window.handleForgotPwd = function() {
+        alert("🔒 RECUPERACIÓN DE ACCESO\n\n" +
+              "El sistema usa una clave única de administración.\n\n" +
+              "❓ ¿CÓMO RECUPERARLA?\n" +
+              "La clave está visible dentro de la base de datos (Google Firebase).\n\n" +
+              "👉 Si tú creaste la conexión a la Nube:\n" +
+              "Entra a console.firebase.google.com > Firestore Database > datos_generales > config. Ahí verás el campo 'pwd'.\n\n" +
+              "👉 Si tú NO configuraste la Nube:\n" +
+              "Por favor, contacta al hermano que instaló o configuró la aplicación en este dispositivo.");
+    };
+
+// --- FUNCIÓN DE LOGIN MEJORADA (DETECTA ROL Y GRUPO) ---
+window.attemptLogin = function() {
+    console.log("🔵 Intentando acceder...");
+
+    const input = document.getElementById('mPwd');
+    const pwd = input ? input.value.trim() : '';
+
+    if (!pwd) return alert("⚠️ Escribe la clave.");
+
+    if (!window.state) window.state = {};
+    if (!window.state.config) window.state.config = { pwd: '12345', groups: {}, totalGroups: 5 };
+    
+    const config = window.state.config;
+    
+    // 1. SI ES ADMIN (Clave Maestra)
+    // -----------------------------
+    // Nota: Usamos config.pwd o el default '12345'
+    if (pwd === (config.pwd || '12345')) {
+        window.CURRENT_ROLE = 'ADMIN';
+        currentSession = { role: 'admin', group: null }; // 🔓 Acceso Total
+        enterApp(); 
+        return; 
+    }
+// ---------------------------------------------------------
+    // 1.5. ACCESO DE INVITADO (DINÁMICO)
+    // ---------------------------------------------------------
+    // Leemos la clave guardada. Si no existe, por defecto será 'visita'
+    const guestKey = (window.state.config && window.state.config.guestPwd) ? window.state.config.guestPwd : 'visita';
+
+    if (pwd === guestKey) { 
+        console.log("🟢 Acceso concedido como Invitado");
+        
+        window.CURRENT_ROLE = 'GUEST'; 
+        document.body.classList.add('guest-mode'); 
+        
+        currentSession = { role: 'guest', group: null }; 
+        
+        enterApp(); 
+        alert("👁️ Modo Invitado: Solo Lectura");
+        return; 
     }
 
-    function enterApp() {
-        $('#modalAuth').style.display = 'none';
-        $('#app-content').style.display = 'block';
-        document.body.className = (CURRENT_ROLE === 'ADMIN') ? 'role-admin' : 'role-restricted';
-        const badge = $('#roleBadge');
-        if(CURRENT_ROLE === 'ADMIN') {
-            badge.innerText = 'Administrador'; badge.style.background = '#e0e7ff'; badge.style.color = '#4338ca';
-            const details = document.getElementById('manualConfigDetails');
-            if(details) details.open = true;
-        } else {
-            const g = CURRENT_ROLE.replace('G','');
-            badge.innerText = `Encargado Grupo ${g}`; badge.style.background = '#d1fae5'; badge.style.color = '#065f46';
-            $('#selGInforme').value = g; $('#selGInforme').disabled = true;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            $('#actividad').classList.add('active'); $('#tabActividad').classList.add('active');
+
+    // 2. SI ES ENCARGADO (Buscamos su grupo)
+    // -------------------------------------
+    let foundGroup = null;
+    const totalGroups = config.totalGroups || 5; 
+
+    for (let i = 1; i <= totalGroups; i++) {
+        const storedPwd = config.groups[i]; 
+        const defaultPwd = 'grupo' + i; 
+
+        // Probamos si la clave coincide con algún grupo
+        if ((storedPwd && String(storedPwd) === pwd) || (!storedPwd && pwd === defaultPwd)) {
+            foundGroup = i;
+            break;
         }
-        renderAll();
     }
+
+    if (foundGroup) {
+        window.CURRENT_ROLE = 'G' + foundGroup;
+        // 🔒 AQUÍ ESTÁ EL TRUCO: Guardamos quién es para bloquearlo después
+        currentSession = { role: 'group', group: foundGroup }; 
+        enterApp(); 
+    } else {
+        alert("❌ Clave incorrecta.");
+    }
+};
+// --- 3. FUNCIÓN DE CAMBIO DE CLAVE (INDEPENDIENTE) ---
+window.forceUpdatePassword = function() {
+    const input = document.getElementById('pForceNew');
+    const newP = input ? input.value.trim() : "";
+    if (newP.length < 4) return alert("❌ Mínimo 4 caracteres.");
+    if (newP === '12345') return alert("❌ No uses la clave inicial.");
+    
+    if(!window.state) window.state = {};
+    if(!window.state.config) window.state.config = {};
+    window.state.config.pwd = newP;
+    
+    if (typeof window.save === 'function') { window.save(); }
+    
+    document.getElementById('modalForcePass').style.display = 'none';
+    document.getElementById('modalAuth').style.display = 'none'; 
+    window.CURRENT_ROLE = 'ADMIN';
+    enterApp();
+    alert("✅ Clave configurada con éxito.");
+};
+
+// --- 4. FUNCIÓN DE ENTRADA AL SISTEMA (VERSIÓN FINAL BLINDADA) ---
+function enterApp() {
+    $('#modalAuth').style.display = 'none';
+    $('#app-content').style.display = 'block';
+
+    // 1. VISIBILIDAD DE PESTAÑAS
+    // Si es Admin o Invitado, le ponemos el traje de "role-admin" para que vea todo el menú
+    if (window.CURRENT_ROLE === 'ADMIN' || window.CURRENT_ROLE === 'GUEST') {
+        document.body.className = 'role-admin'; 
+    } else {
+        document.body.className = 'role-restricted'; 
+    }
+
+    // 2. ¡CORRECCIÓN CRÍTICA! 🔒
+    // Al hacer lo de arriba, se borró el modo invitado. Aquí lo forzamos de nuevo.
+    if (window.CURRENT_ROLE === 'GUEST') {
+        document.body.classList.add('guest-mode'); // <--- ESTO BLOQUEA LOS BOTONES OTRA VEZ
+    }
+    
+    // 3. ETIQUETA SUPERIOR (BADGE)
+    const badge = $('#roleBadge');
+    
+    if (window.CURRENT_ROLE === 'ADMIN') {
+        badge.innerText = 'Administrador';
+        badge.style.background = '#e0e7ff';
+        badge.style.color = '#4338ca';
+        addHelpButton(badge); 
+
+    } else if (window.CURRENT_ROLE === 'GUEST') {
+        badge.innerText = 'Invitado (Solo Lectura)';
+        badge.style.background = '#f3f4f6'; 
+        badge.style.color = '#4b5563';      
+        badge.style.border = '1px solid #d1d5db';
+        
+    } else {
+        const g = window.CURRENT_ROLE.replace('G', '');
+        badge.innerText = `Encargado Grupo ${g}`;
+        badge.style.background = '#d1fae5';
+        badge.style.color = '#065f46';
+    }
+    
+    renderAll();
+}
 
     try { const saved = localStorage.getItem(DB_KEY); if(saved) state = JSON.parse(saved); } catch(e) {}
+    window.state = state;
     if(!state.personas) state.personas = [];
     if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
 
@@ -695,19 +1798,134 @@
         updateDatalist();
     }
 
-    window.renderActividad = function() {
-        const g = $('#selGInforme').value;
-        const tb = $('#tblActividad tbody');
-        const k = ymKey(actY, actM);
-        tb.innerHTML = '';
-        const list = state.personas.filter(p => p.grupo == g && !p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
-        const cEl = $('#cAct'); if(cEl) cEl.innerText = `(${list.length})`;
-        if(list.length === 0) { tb.innerHTML = `<tr><td colspan="6" style="padding:30px; text-align:center; color:var(--text-muted);">No hay miembros en el Grupo ${g}.</td></tr>`; return; }
-        list.forEach(p => {
-            const r = state.activity[k]?.[p.id] || {part:false, horas:0, est:0, pa:false, nota:''};
-            tb.innerHTML += `<tr><td style="font-weight:600;">${p.nombre}</td><td style="text-align:center;"><input type="checkbox" ${r.part?'checked':''} onchange="updAct('${p.id}','part',this.checked)"></td><td><input type="number" value="${r.horas}" onchange="updAct('${p.id}','horas',this.value)" style="width:60px; text-align:center;"></td><td><input type="number" value="${r.est}" onchange="updAct('${p.id}','est',this.value)" style="width:60px; text-align:center;"></td><td style="text-align:center;"><input type="checkbox" ${r.pa?'checked':''} onchange="updAct('${p.id}','pa',this.checked)"></td><td><input type="text" value="${r.nota||''}" onchange="updAct('${p.id}','nota',this.value)" placeholder="..."></td></tr>`;
-        });
+   // Variable global para controlar el desbloqueo temporal
+window.forceUnlock = false;
+
+window.renderActividad = function() {
+    // 1. OBTENER GRUPO Y PERMISOS
+    const selector = document.querySelector('#selGInforme');
+    let g = selector ? selector.value : '1';
+
+    if (currentSession.role === 'group') {
+        g = currentSession.group; 
+        if (selector) { selector.value = g; selector.disabled = true; selector.style.opacity = "0.7"; }
+    } else {
+        if (selector) { selector.disabled = false; selector.style.opacity = "1"; }
     }
+
+    const tb = document.querySelector('#tblActividad tbody');
+    if(!tb) return;
+    tb.innerHTML = '';
+    
+   // 2. LÓGICA DE CONTROL (AÑO FUTURO + MES DE GRACIA)
+        const hoy = new Date();
+        const anioActualReal = hoy.getFullYear();
+        const diaDelMes = hoy.getDate(); 
+        const difMeses = (hoy.getFullYear() - actY) * 12 + (hoy.getMonth() - (actM - 1));
+        
+        let esPasado = false;
+        let mensajeError = ""; // Aquí guardaremos el motivo real
+
+        if (actY > anioActualReal) {
+            esPasado = true;
+            mensajeError = "🚫 INFORME FUTURO: Este año aún no ha comenzado.";
+        } else if (difMeses > 1) {
+            esPasado = true;
+            mensajeError = "🔒 MES CERRADO: Este es un informe antiguo.";
+        } else if (difMeses === 1 && diaDelMes > 20) {
+            esPasado = true;
+            mensajeError = "⏰ PLAZO VENCIDO: Los 20 días de gracia han terminado.";
+        }
+    
+    // ESTADO DEL CANDADO: Bloqueado si es pasado Y no hemos pulsado el botón de desbloquear
+// BLOQUEO: Solo si es pasado Y no estamos en el periodo de gracia, ni se ha desbloqueado manualmente
+        const isLocked = esPasado && !window.forceUnlock;
+    // 3. ACTUALIZAR INTERFAZ (Botón de Desbloqueo)
+    // Buscamos si ya existe el aviso, si no lo creamos
+    let lockBanner = document.getElementById('lockBanner');
+    if (!lockBanner) {
+        lockBanner = document.createElement('div');
+        lockBanner.id = 'lockBanner';
+        lockBanner.style.marginBottom = '15px';
+        selector.parentElement.parentElement.after(lockBanner); // Insertar debajo de los filtros
+    }
+
+    if (esPasado) {
+        if (window.forceUnlock) {
+            lockBanner.innerHTML = `
+                <div style="background:#fef3c7; color:#92400e; padding:10px; border-radius:8px; border:1px solid #fcd34d; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🔓 <b>EDICIÓN HABILITADA:</b> Ten cuidado, estás modificando el historial.</span>
+                    <button class="btn ghost" onclick="window.forceUnlock=false; renderActividad();" style="font-size:0.8rem; background:white;">Bloquear</button>
+                </div>`;
+        } else {
+            lockBanner.innerHTML = `
+                    <div style="background: var(--bg-card); color: var(--text-main); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); margin-bottom: 10px;">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            ${mensajeError}
+                        </span>
+                        <button class="btn warning" onclick="window.forceUnlock=true; renderActividad();" style="font-size: 0.8rem; padding: 6px 12px;">
+                            🔓 Desbloquear
+                        </button>
+                    </div>`;
+        }
+        lockBanner.style.display = 'block';
+    } else {
+        lockBanner.style.display = 'none';
+        window.forceUnlock = false; // Resetear si volvemos al mes actual
+    }
+
+    // 4. GENERAR TABLA
+    const k = ymKey(actY, actM);
+    const list = state.personas.filter(p => p.grupo == g && !p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+    
+    const cEl = document.getElementById('cAct'); if(cEl) cEl.innerText = `(${list.length})`;
+    
+    if(list.length === 0) { 
+        tb.innerHTML = `<tr><td colspan="6" style="padding:25px; text-align:center; color:#6b7280;">No hay miembros en el Grupo ${g}.</td></tr>`; 
+        return; 
+    }
+
+    // Estilo para inputs bloqueados
+    const disableAttr = isLocked ? 'disabled' : '';
+    const styleAttr = isLocked ? 'background-color:#f3f4f6; color:#9ca3af; cursor:not-allowed;' : '';
+
+    list.forEach(p => {
+        const r = state.activity[k]?.[p.id] || {part:false, horas:0, est:0, pa:false, nota:''};
+        
+        tb.innerHTML += `
+            <tr>
+                <td style="font-weight:600; color:#374151;">${p.nombre}</td>
+                
+                <td style="text-align:center;">
+                    <input type="checkbox" ${r.part?'checked':''} ${disableAttr} 
+                    onchange="updAct('${p.id}','part',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
+                </td>
+                
+                <td style="text-align:center;">
+                    <input type="number" value="${r.horas}" ${disableAttr} 
+                    onchange="updAct('${p.id}','horas',this.value)" 
+                    style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
+                </td>
+                
+                <td style="text-align:center;">
+                    <input type="number" value="${r.est}" ${disableAttr} 
+                    onchange="updAct('${p.id}','est',this.value)" 
+                    style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
+                </td>
+                
+                <td style="text-align:center;">
+                    <input type="checkbox" ${r.pa?'checked':''} ${disableAttr} 
+                    onchange="updAct('${p.id}','pa',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
+                </td>
+                
+                <td>
+                    <input type="text" value="${r.nota||''}" ${disableAttr} 
+                    onchange="updAct('${p.id}','nota',this.value)" placeholder="..." 
+                    style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:4px; ${styleAttr}">
+                </td>
+            </tr>`;
+    });
+};
 
     window.updAct = (pid, f, v) => { 
         const k = ymKey(actY, actM); 
@@ -717,18 +1935,97 @@
         save(); 
     }
 
-    window.savePersona = function() { 
-        const id=$('#pId').value, n=$('#pNombre').value.trim(); 
-        if(!n) return alert("Nombre obligatorio"); 
-        const data={ id:id||'p'+Date.now(), nombre:n, grupo:$('#pGrupo').value, sexo:$('#pSexo').value, esp:$('#pEsp').value, nac:$('#pNac').value, bau:$('#pBau').value, fsac:$('#pFSac').value, pr:$('#pPR').checked, anciano:$('#pAnc').checked, sm:$('#pSM').checked, pe:$('#pPE').checked, mis:$('#pMis').checked, sacado:!!$('#pFSac').value }; 
-        if(id) state.personas[state.personas.findIndex(x=>x.id===id)]=data; else state.personas.push(data); 
-        save(); renderMiembros(); resetPForm(); showToast("Guardado");
+   window.savePersona = function() {
+    const id = $('#pId').value, n = $('#pNombre').value.trim();
+    if(!n) return alert("Nombre obligatorio");
+
+    // 1. Recopilamos los datos (Igual que antes)
+    const data = {
+        id: id || 'p' + Date.now(),
+        nombre: n,
+        grupo: $('#pGrupo').value,
+        sexo: $('#pSexo').value,
+        esp: $('#pEsp').value,
+        nac: $('#pNac').value,
+        bau: $('#pBau').value,
+        inicio: $('#pInicio').value, 
+        fsac: $('#pFSac').value,
+        pr: $('#pPR').checked,
+        anciano: $('#pAnc').checked,
+        sm: $('#pSM').checked,
+        pe: $('#pPE').checked,
+        // Agrego protección por si estos campos no existen en todos lados
+        mis: $('#pMis') ? $('#pMis').checked : false, 
+        sacado: $('#pFSac').value 
+    };
+
+    // 2. Guardamos (Lógica ajustada a TU código original)
+    if(id) {
+        // Es una EDICIÓN: Buscamos y actualizamos
+        const index = state.personas.findIndex(x => x.id == id);
+        if(index >= 0) state.personas[index] = data;
+    } else {
+        // Es NUEVO: Lo agregamos a la lista
+        state.personas.push(data);
+        
+ // --- CORRECCIÓN INTELIGENTE: GUARDAR HISTORIAL ---
+        const checks = document.querySelectorAll('.check-historial:checked');
+
+        if (checks.length > 0) {
+            checks.forEach(check => {
+                const mes = parseInt(check.value);
+                
+                // --- LÓGICA INTELIGENTE DE AÑO ---
+                // Si el mes seleccionado es MAYOR al mes actual real, 
+                // asumimos que fue el año pasado.
+                let anioDestino = actY; 
+                const fechaHoy = new Date();
+                
+                if (actY === fechaHoy.getFullYear() && mes > fechaHoy.getMonth()) {
+                    anioDestino = actY - 1;
+                }
+                // ----------------------------------
+
+                const k = ymKey(anioDestino, mes); 
+
+                // Si no existe el mes, lo creamos
+                if (!state.activity[k]) state.activity[k] = {};
+
+                // Guardamos
+                state.activity[k][data.id] = { 
+                    part: true, 
+                    horas: 0, 
+                    est: 0, 
+                    pa: false, 
+                    nota: 'Historial' 
+                };
+            });
+            console.log("✅ Historial guardado inteligentemente.");
+        }
+        // --------------------------------------------------------
     }
+
+    // 3. Finalizar
+    save(); 
+    renderMiembros(); 
+    resetPForm(); 
+    // Usamos tu función de notificaciones si existe, o alert
+    if(window.showToast) showToast("Guardado correctamente"); else alert("Guardado");
+};
     
     window.deletePersona = function() { const id=$('#pId').value; if(!id)return; if(confirm("¿ELIMINAR miembro?")) { state.personas=state.personas.filter(p=>p.id!==id); save(); renderMiembros(); resetPForm(); showToast("Eliminado"); } }
     
-    window.resetPForm = function() { $('#pId').value=''; $('#pNombre').value=''; ['pNac','pBau','pFSac','pSexo','pEsp'].forEach(id=>$('#'+id).value=''); ['pAnc','pSM','pPE','pMis','pPR'].forEach(id=>$('#'+id).checked=false); $('#btnCancelEdit').style.display='none'; $('#btnDeleteP').style.display='none'; $('#btnSaveP').textContent = '💾 Guardar Miembro'; $('#btnSaveP').className = 'btn primary'; }
-    
+window.resetPForm = function() { 
+        $('#pId').value=''; 
+        $('#pNombre').value=''; 
+        // 👇 AQUI AGREGAMOS 'pInicio' A LA LISTA DE LIMPIEZA
+        ['pNac','pBau','pFSac','pInicio','pSexo','pEsp'].forEach(id=>$('#'+id).value=''); 
+        ['pAnc','pSM','pPE','pMis','pPR'].forEach(id=>$('#'+id).checked=false); 
+        $('#btnCancelEdit').style.display='none'; 
+        $('#btnDeleteP').style.display='none'; 
+        $('#btnSaveP').textContent = '💾 Guardar Miembro'; 
+        $('#btnSaveP').className = 'btn primary'; 
+    }    
     window.renderMiembros = function() { 
         const tb=$('#tblMiembros tbody'); if(!tb)return; tb.innerHTML=''; 
         const list = state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
@@ -741,74 +2038,610 @@
     }
     
     window.getPrivilegesString = function(p) { return [p.anciano?'Anciano':'', p.sm?'SM':'', p.pr?'PR':'', p.pe?'PE':''].filter(Boolean).join(', '); }
-    window.editP = (id) => { const p=state.personas.find(x=>x.id===id); if(!p)return; $('#pId').value=p.id; $('#pNombre').value=p.nombre; $('#pSexo').value=p.sexo; $('#pEsp').value=p.esp; $('#pNac').value=p.nac||''; $('#pBau').value=p.bau||''; $('#pFSac').value=p.fsac||''; $('#pPR').checked=!!p.pr; $('#pAnc').checked=!!p.anciano; $('#pSM').checked=!!p.sm; $('#pPE').checked=!!p.pe; $('#pMis').checked=!!p.mis; $('#btnCancelEdit').style.display='inline-flex'; $('#btnDeleteP').style.display='inline-flex'; $('#btnSaveP').textContent='💾 Actualizar'; $('#btnSaveP').className='btn success'; window.scrollTo({top:0, behavior:'smooth'}); }
+// ==========================================
+// FUNCIÓN EDITAR (CON CAMBIO DE PESTAÑA AUTOMÁTICO)
+// ==========================================
+window.editP = (id) => {
+    const p = state.personas.find(x => x.id === id); 
+    if (!p) return;
+
+    // 1. LLENAR LOS CAMPOS DEL FORMULARIO
+    $('#pId').value = p.id;
+    $('#pNombre').value = p.nombre;
+    $('#pSexo').value = p.sexo;
+    $('#pEsp').value = p.esp;
+    $('#pNac').value = p.nac || '';
+    $('#pBau').value = p.bau || '';
+    $('#pInicio').value = p.inicio || ''; 
+    $('#pFSac').value = p.fsac || '';
+
+    // Privilegios
+    $('#pPR').checked = !!p.pr;
+    $('#pAnc').checked = !!p.anciano;
+    $('#pSM').checked = !!p.sm;
+    $('#pPE').checked = !!p.pe;
+    if($('#pMis')) $('#pMis').checked = !!p.mis; 
+
+    // 2. CAMBIAR A LA PESTAÑA DE GESTIÓN (ID "personas")
+    // Desactivamos todas las pestañas primero
+    document.querySelectorAll('.tabs button, .tab').forEach(el => el.classList.remove('active'));
     
+    // Activamos el botón de la pestaña 1
+    const btnTab = document.querySelector('button[data-tab="personas"]');
+    if(btnTab) btnTab.classList.add('active');
+    
+    // Activamos el contenido de la pestaña 1
+    const secTab = document.getElementById('personas');
+    if(secTab) secTab.classList.add('active');
+
+    // 3. CAMBIAR ESTADO DE BOTONES
+    $('#btnCancelEdit').style.display = 'inline-flex';
+    $('#btnDeleteP').style.display = 'inline-flex';
+    $('#btnSaveP').textContent = '💾 Actualizar';
+    $('#btnSaveP').className = 'btn success';
+
+    // 4. IR AL INICIO DE LA PÁGINA
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
     window.updateDatalist = function() { const l=$('#pList'); if(l){ l.innerHTML = ''; state.personas.forEach(p => l.innerHTML += `<option value="${p.nombre}">`); } }
     window.showToast = function(m) { const t=$('#toast'); t.innerHTML = `<span>${m}</span>`; t.style.display='block'; setTimeout(()=>t.style.display='none', 3000); }
-    window.exportBackup = function() { const blob=new Blob([JSON.stringify(state)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CongPro_Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
-    window.updatePassword = function() { if(!state.config) state.config={}; const p=$('#pNew').value; if(p) { state.config.pwd=p; save(); $('#modalPwd').style.display='none'; showToast("Clave actualizada"); } }
+    window.exportBackup = async function() {
+        const isApp = window.hasOwnProperty('Capacitor');
+        const data = JSON.stringify(state);
+        const fileName = `CongPro_Backup_${new Date().toISOString().slice(0,10)}.json`;
+
+        if (isApp && Capacitor.Plugins.Filesystem) {
+            try {
+                const { Filesystem } = Capacitor.Plugins;
+                await Filesystem.writeFile({
+                    path: fileName,
+                    data: data,
+                    directory: 'DOCUMENTS',
+                    encoding: 'utf8'
+                });
+                alert("✅ ¡Respaldo guardado en Documentos del celular!");
+            } catch (e) {
+                alert("❌ Error al guardar en celular: " + e.message);
+            }
+        } else {
+            // LÓGICA CORREGIDA PARA PC
+            try {
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a); // Paso extra para asegurar compatibilidad
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("📥 Descarga iniciada en PC");
+            } catch (err) {
+                alert("❌ Error en descarga PC: " + err.message);
+            }
+        }
+    };
+   
+    // --- FUNCIÓN PARA ABRIR EL MODAL Y MOSTRAR CLAVE ACTUAL ---
+window.openPwdModal = function() {
+    // 1. Buscamos la clave guardada (o 'visita' si es nueva instalación)
+    const currentGuest = (window.state.config && window.state.config.guestPwd) ? window.state.config.guestPwd : 'visita';
     
+    // 2. La escribimos en la etiqueta <b> del modal
+    const label = document.getElementById('lblShowGuest');
+    if(label) label.innerText = currentGuest;
+    
+    // 3. Limpiamos los inputs para que estén vacíos y listos para escribir
+    document.getElementById('pNew').value = '';
+    document.getElementById('pGuestNew').value = '';
+
+    // 4. Mostramos la ventana
+    document.getElementById('modalPwd').style.display = 'flex';
+}
+// ... (código anterior: window.exportBackup) ...
+// };  <-- Cierra la función anterior
+// --- 3. FUNCIÓN DE CAMBIO DE CLAVE (MEJORADA PARA INVITADO) ---
+window.updatePassword = async function() {
+    console.log("🔵 Guardando claves...");
+    
+    const inputAdmin = document.getElementById('pNew');
+    const inputGuest = document.getElementById('pGuestNew');
+    
+    // Protección por si no existen los inputs en el HTML todavía
+    if (!inputAdmin || !inputGuest) return; 
+    
+    const newAdminPwd = inputAdmin.value.trim();
+    const newGuestPwd = inputGuest.value.trim();
+
+    if(!window.state.config) window.state.config = {};
+
+    let huboCambios = false;
+
+    // 1. Guardar Clave Admin (Solo si escribieron algo válido)
+    if (newAdminPwd.length >= 4) {
+        window.state.config.pwd = newAdminPwd;
+        huboCambios = true;
+    } else if (newAdminPwd.length > 0 && newAdminPwd.length < 4) {
+        return alert("⚠️ La clave de Admin es muy corta (mínimo 4).");
+    }
+
+    // 2. Guardar Clave Invitado (Solo si escribieron algo)
+    if (newGuestPwd.length > 0) {
+        window.state.config.guestPwd = newGuestPwd;
+        huboCambios = true;
+    }
+
+    // 3. Si no escribieron nada
+    if (!huboCambios) {
+        return alert("⚠️ Escribe al menos una clave nueva para guardar.");
+    }
+
+    // 4. Guardar en Nube y Local
+    await window.save();
+    
+    alert("✅ Claves actualizadas correctamente.");
+    
+    // Limpiar y cerrar
+    inputAdmin.value = '';
+    inputGuest.value = '';
+    document.getElementById('modalPwd').style.display = 'none';
+};
+
+// window.renderSacados = function(){ ... (Esto NO lo borres, es lo que sigue)
     window.renderSacados=function(){
         const tb=$('#tblSacados tbody');if(!tb)return;tb.innerHTML='';
         const list = state.personas.filter(p=>p.sacado);
         const cEl = $('#cSac'); if(cEl) cEl.innerText = `(${list.length})`;
         list.forEach(p=>{tb.innerHTML+=`<tr><td>${p.nombre}</td><td>${p.bau||'-'}</td><td style="color:var(--danger)">${p.fsac||'-'}</td></tr>`;});
     }
-    window.renderPrecursores=function(){
-        const tb=$('#tblPrecursores tbody');if(!tb)return;tb.innerHTML='';
-        const list = state.personas.filter(p=>p.pr&&!p.sacado);
-        const cEl = $('#cPre'); if(cEl) cEl.innerText = `(${list.length})`;
-        list.forEach(p=>{tb.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${p.bau||'-'}</td><td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-weight:bold;">Activo</span></td></tr>`;});
-    }
-    window.renderAuxiliares=function(){const tb=$('#tblAuxiliares tbody'),k=ymKey(curY,curM);if(!tb)return;tb.innerHTML='';state.personas.filter(p=>!p.sacado&&state.activity[k]?.[p.id]?.pa).forEach(p=>{tb.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${state.activity[k][p.id].horas} horas</td></tr>`;});}
     
-    window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].es[i]||0}" oninput="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].fs[i]||0}" oninput="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
+// ==========================================
+// FUNCIÓN MAESTRA: Lee el botón "Ver Datos"
+// ==========================================
+window.renderAllPrecursores = function() {
+    // 1. LEER lo que el usuario seleccionó en las cajitas
+    const elAno = document.getElementById('precAno');
+    const elMes = document.getElementById('precMes');
+    
+    // Convertir a números
+    let y = parseInt(elAno.value);
+    let m = parseInt(elMes.value);
+
+    // 2. VALIDAR (Si están vacíos o son inválidos, usar fecha de hoy)
+    if (!y || isNaN(y)) { 
+        const d = new Date();
+        y = d.getFullYear(); 
+        elAno.value = y; // Autocompletar visualmente
+    }
+    if (isNaN(m)) {
+        const d = new Date();
+        m = d.getMonth();
+        elMes.value = m; // Autocompletar visualmente
+    }
+
+    // 3. EJECUTAR la búsqueda con los datos correctos
+    console.log("Buscando datos para:", y, m); 
+    window.renderPrecursores(y, m);
+    
+
+};
+window.renderPrecursores = function(yearIn, monthIn) {
+    // 1. LOCALIZAR LA TABLA
+    let tb = document.querySelector('#tblPrecursores tbody');
+    if (!tb) {
+        const section = document.getElementById('precursores');
+        if (section) tb = section.querySelector('table tbody');
+    }
+    if (!tb) return;
+    
+    // Títulos de Tabla (Se generan solos para asegurar que estén bien)
+    const table = tb.closest('table');
+    const thead = table.querySelector('thead');
+    if (thead) {
+        thead.innerHTML = `
+            <tr>
+                <th style="width: 30%; color:#334155;">Publicador</th>
+                <th style="text-align:center; width: 15%; color:#334155;">Realizado</th>
+                <th style="text-align:center; width: 25%; color:#334155;">Progreso</th>
+                <th style="text-align:center; width: 30%; color:#334155;">Meta Anual (600)</th>
+            </tr>
+        `;
+    }
+    tb.innerHTML = ''; 
+
+    // 2. CONFIGURAR FECHAS
+    let curY = parseInt(yearIn);
+    let curM = parseInt(monthIn);
+    if (!curY || isNaN(curY)) { const d = new Date(); curY = d.getFullYear(); curM = d.getMonth(); }
+
+    const selectedServiceIndex = (curM >= 8) ? (curM - 8) : (curM + 4);
+    
+    // Lógica de tiempo
+    const hoyReal = new Date();
+    const valorMesHoy = (hoyReal.getFullYear() * 12) + hoyReal.getMonth();
+    const anioDelMesSeleccionado = (curM >= 8) ? curY - 1 : curY;
+    const valorMesSeleccionado = (anioDelMesSeleccionado * 12) + curM;
+    const esMesPasado = valorMesSeleccionado < valorMesHoy;
+    const mesesACobrar = esMesPasado ? (selectedServiceIndex + 1) : selectedServiceIndex;
+
+    // 3. OBTENER DATOS
+    if (!state || !state.personas) return;
+    const list = state.personas.filter(p => (p.pr || p.pa) && !p.sacado).sort((a,b) => a.nombre.localeCompare(b.nombre));
+    const cEl = document.getElementById('cPre'); if (cEl) cEl.innerText = list.length;
+
+    if (list.length === 0) {
+        tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#9ca3af;">No hay datos.</td></tr>';
+        return;
+    }
+
+    // 4. GENERAR FILAS
+    let html = '';
+    const cicloMeses = [8,9,10,11,0,1,2,3,4,5,6,7]; 
+
+    list.forEach(p => {
+        let totalSincronizado = 0;
+        let detalleCampo = 0;
+        let detalleLDC = 0;
+
+        cicloMeses.forEach((m, index) => {
+            if (index <= selectedServiceIndex) {
+                const calculatedYear = (m >= 8) ? (curY - 1) : curY;
+                const key = `${calculatedYear}-${String(m + 1).padStart(2,'0')}`;
+
+                if (state.activity[key] && state.activity[key][p.id]) {
+                    const reg = state.activity[key][p.id];
+                    let h = parseFloat(reg.horas) || 0;
+                    
+                    // 🔥 CORRECCIÓN AQUÍ: Leemos 'nota' (singular) O 'notas' (plural)
+                    // Y convertimos a minúsculas
+                    const txt = (reg.nota || reg.notas || "").toLowerCase();
+                    let ldc = 0;
+
+                    // Regex Mágico (Busca "16ldc", "ldc 16", "escuela 30", etc)
+                    const match = txt.match(/(?:ldc|escuela)\s*(\d+)|(\d+)\s*(?:ldc|escuela)/);
+                    
+                    if (match) {
+                        ldc = parseInt(match[1] || match[2]);
+                    }
+
+                    // Regla 55h Mensual
+                    let espacio = 55 - h;
+                    if (espacio < 0) espacio = 0;
+                    let ldcAplicable = (ldc > espacio) ? espacio : ldc;
+
+                    totalSincronizado += (h + ldcAplicable);
+                    detalleCampo += h;
+                    detalleLDC += ldcAplicable;
+                }
+            }
+        });
+
+        // --- CÁLCULOS ---
+        const metaBase = (p.pr) ? 50 : 30; 
+        const metaIdeal = mesesACobrar * metaBase;
+        const diff = totalSincronizado - metaIdeal;
+
+        // Semáforo
+        let statusColor = '#dc2626'; let statusBg = '#fef2f2'; let statusIcon = '⚠️'; let statusText = `Atraso ${diff}`;
+
+        if (p.pr && totalSincronizado >= 600) {
+            statusColor = '#16a34a'; statusBg = '#dcfce7'; statusIcon = '🏆'; statusText = 'LOGRADO';
+        } else if (diff >= 0) {
+            statusColor = '#2563eb'; statusBg = '#eff6ff'; statusIcon = '👍'; statusText = `Bien (+${diff})`;
+        }
+
+        // Meta Anual
+        let htmlMetaAnual = '';
+        if (p.pr) { 
+            const faltan = 600 - totalSincronizado;
+            if (faltan <= 0) {
+                htmlMetaAnual = `<span style="color:#16a34a; font-weight:800; font-size:0.8rem;">¡COMPLETADA!</span>`;
+            } else {
+                htmlMetaAnual = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.65rem; color:#64748b; text-transform:uppercase;">Faltan</span>
+                        <span style="font-weight:800; color:#ea580c; font-size:1rem;">${faltan}</span>
+                        <span style="font-size:0.65rem; color:#94a3b8;">de 600</span>
+                    </div>
+                `;
+            }
+        } else {
+            htmlMetaAnual = `<span style="font-size:0.7rem; color:#cbd5e1;">-</span>`;
+        }
+
+        const tipoBadge = p.pr ? 
+            `<span style="background:#dbeafe; color:#1e40af; font-size:0.65rem; padding:2px 6px; border-radius:4px;">REG</span>` : 
+            `<span style="background:#fef3c7; color:#92400e; font-size:0.65rem; padding:2px 6px; border-radius:4px;">AUX</span>`;
+
+        html += `
+        <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:10px;">
+                <div style="font-weight:700; color:#334155; font-size:0.95rem;">${p.nombre}</div>
+                <div style="margin-top:2px;">${tipoBadge} <span style="font-size:0.75rem; color:#94a3b8;">G-${p.grupo}</span></div>
+            </td>
+            
+            <td style="text-align:center;">
+             <div style="font-weight:800; font-size:1.1rem; color: var(--text-main);">${Math.round(totalSincronizado)}</div>
+             <div style="font-size:0.65rem; color: var(--text-muted);">(C:${Math.round(detalleCampo)} + L:${Math.round(detalleLDC)})</div>
+            </td>
+
+           <td style="text-align:right; padding:8px;">
+           <div style="background: var(--bg-body); color:${statusColor}; border:1px solid ${statusColor}60; padding:6px; border-radius:10px;">
+           <div style="font-size:0.65rem; font-weight:700; opacity:0.8; color: var(--text-muted);">Debería llevar: ${metaIdeal}</div>
+           <div style="font-weight:700; font-size:0.85rem;">${statusIcon} ${statusText}</div>
+        </div>
+     </td>
+       <td style="text-align:center; padding:8px; border-left:1px dashed var(--border-color); vertical-align:middle;">
+    <div style="font-size:0.65rem; color: var(--text-muted); font-weight:700; text-transform:uppercase;">Faltan</div>
+    <div style="font-weight:800; font-size:1.1rem; color: var(--text-main);">${600 - Math.round(totalSincronizado)}</div>
+    <div style="font-size:0.65rem; color: var(--text-muted);">de 600</div>
+</td>
+        </tr>`;
+    });
+
+    tb.innerHTML = html;
+};
+
+
+window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].es[i]||0}" onchange="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].fs[i]||0}" onchange="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
     window.updAsist=(t,i,v)=>{const k=ymKey(asistY,asistM);state.attendance[k][t][i]=parseInt(v||0);save();}
 
-    window.renderEstadoEspiritual = function() { 
-        const tbIn=$('#tblInactivos tbody'), tbIrr=$('#tblIrregulares tbody'); if(!tbIn)return; tbIn.innerHTML=''; tbIrr.innerHTML=''; 
-        const syStart = (curM>=9)?curY:curY-1; 
+window.renderEstadoEspiritual = function() { 
+        const tbIn=$('#tblInactivos tbody'), tbIrr=$('#tblIrregulares tbody'); 
+        if(!tbIn)return; 
+        tbIn.innerHTML=''; tbIrr.innerHTML=''; 
+        
+        // 1. AQUI LA MAGIA: Usamos el Año de Servicio (Septiembre)
+        const serviceYear = getServiceYear(); 
+        
         let countIna = 0;
+        
         state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{ 
+            
+            // --- A. CÁLCULO DE INACTIVOS (Regla: 6 meses sin reportar, sin importar el año) ---
             let zeros=0, last='-'; 
-            for(let i=0;i<36;i++){ let ty=curY, tm=curM-i; while(tm<=0){tm+=12;ty--;} const act=state.activity[ymKey(ty,tm)]?.[p.id]; if(act&&(act.horas>0||act.part)){ last=`${MESES_NOM[tm-1]} ${ty}`; break; } else if(i<6) zeros++; } 
+            // Miramos 36 meses atrás para encontrar el último reporte
+            for(let i=0;i<36;i++){ 
+                let ty=curY, tm=curM-i; 
+                while(tm<=0){tm+=12;ty--;} 
+
+                // Freno: Si es antes de que la persona llegara
+                const checkKey = `${ty}-${String(tm).padStart(2,'0')}`;
+                if (p.inicio && checkKey < p.inicio) break;
+
+                const act=state.activity[ymKey(ty,tm)]?.[p.id]; 
+                if(act&&(act.horas>0||act.part)){ last=`${MESES_NOM[tm-1]} ${ty}`; break; } 
+                else if(i<6) zeros++; 
+            } 
+            
             if(zeros>=6){ 
                 countIna++;
-                tbIn.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${last}</td><td><span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold;">+${zeros} meses</span></td></tr>`; 
+                tbIn.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${last}</td><td><span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold;">Inactivo</span></td></tr>`; 
             } 
-            else { let fail=[]; for(let i=1;i<=12;i++){ let ty=curY, tm=curM-i; while(tm<=0){tm+=12;ty--;} if(ty<syStart || (ty===syStart && tm<9)) break; const act=state.activity[ymKey(ty,tm)]?.[p.id]; if(!act||(!act.horas && !act.part)) fail.push(MESES_NOM[tm-1].substr(0,3)); } if(fail.length>0){ tbIrr.innerHTML+=`<tr><td>${p.nombre}</td><td>G${p.grupo}</td><td><span style="color:var(--warning); font-weight:600;">${fail.join(', ')}</span></td></tr>`; } } 
+            else { 
+                // --- B. CÁLCULO DE IRREGULARES (Regla: Fallas desde el 1 de Septiembre) ---
+                let fail=[]; 
+                
+                // Calculamos cuándo empezó el ciclo actual (1 Sept del año anterior)
+                const startOfCycle = new Date(serviceYear - 1, 8, 1); 
+                const today = new Date();
+                
+                let pointer = new Date(startOfCycle);
+                
+                // Recorremos mes a mes hasta HOY
+                while (pointer < today) {
+                    // No contamos el mes actual como falla todavía
+                    if(pointer.getMonth() === today.getMonth() && pointer.getFullYear() === today.getFullYear()) break;
+
+                    let py = pointer.getFullYear();
+                    let pm = pointer.getMonth() + 1; // 1-12
+                    const key = ymKey(py, pm);
+                    
+                    const currentCheckKey = `${py}-${String(pm).padStart(2,'0')}`;
+                    
+                    // Si la persona ya estaba en la congregación en esa fecha...
+                    if (!p.inicio || currentCheckKey >= p.inicio) {
+                         const act = state.activity[key]?.[p.id];
+                         // Si NO tiene horas Y tampoco marcó participación -> ES FALLA
+                         if(!act || (!act.horas && !act.part)) {
+                             fail.push(MESES_NOM[pm-1].substr(0,3)); 
+                         }
+                    }
+                    // Avanzar al siguiente mes
+                    pointer.setMonth(pointer.getMonth() + 1);
+                }
+                
+                if(fail.length > 0){ 
+                    tbIrr.innerHTML+=`<tr><td>${p.nombre}</td><td>G${p.grupo}</td><td><span style="color:var(--warning); font-weight:600;">${fail.join(', ')}</span></td></tr>`; 
+                } 
+            } 
         });
         const cEl = $('#cIna'); if(cEl) cEl.innerText = `(${countIna})`;
     }
-
     window.toggleS21Inputs = function() { const m=$('#s21Mode').value; $('#s21InputIndiv').style.display=(m==='individual')?'block':'none'; $('#s21InputGroup').style.display=(m==='group')?'block':'none'; $('#preview-viewport').innerHTML=''; }
-    window.getS21HTML = function(p,sy) { let rows='',tH=0; CICLO_S88.forEach(m=>{ const y=(m>=9)?sy:sy+1, r=state.activity[ymKey(y,m)]?.[p.id]||{horas:0,est:0,pa:false,part:false}; tH+=(r.horas||0); rows+=`<tr><td>${MESES_NOM[m-1]}</td><td>${(r.horas||r.part)?'[X]':''}</td><td>${r.est||''}</td><td>${r.pa?'[X]':''}</td><td>${r.horas||''}</td><td></td></tr>`; }); const privs = [p.anciano?'Anciano':'', p.sm?'SM':'', p.pr?'PR':'', p.pe?'PE':''].filter(Boolean).join(', '); return `<div class="print-canvas"><div style="text-align:center; font-weight:800; font-size:12pt; margin-bottom:10px;">REGISTRO DE PUBLICADOR</div><div class="s21-header-box"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Nombre:</b> ${p.nombre}</span><span><b>Grupo:</b> ${p.grupo}</span></div><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>F. Nacimiento:</b> ${p.nac||'-'}</span><span><b>F. Bautismo:</b> ${p.bau||'-'}</span></div><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Sexo:</b> ${p.sexo}</span><span><b>Esperanza:</b> ${p.esp}</span></div><div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;"><b>Privilegios:</b> ${privs||'Publicador'}</div></div><table class="official-table"><thead><tr><th style="width:20%">Año ${sy}-${sy+1}</th><th>Partic.</th><th>Est</th><th>P. Aux</th><th>Horas</th><th>Notas</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="4" style="text-align:right; font-weight:bold;">Total Horas:</td><td>${tH}</td><td></td></tr></tfoot></table></div>`; }
+
+    window.getS21HTML = function(p, sy) { 
+    let rows = '', tH = 0; 
+    CICLO_S88.forEach(m => { 
+        const y = (m >= 9) ? sy - 1 : sy; 
+        // Recuperamos nota o notas, y ponemos un string vacío por defecto
+        const r = state.activity[ymKey(y, m)]?.[p.id] || {horas: 0, est: 0, pa: false, part: false, nota: ''}; 
+        tH += (r.horas || 0); 
+        
+        rows += `<tr>
+            <td>${MESES_NOM[m - 1]}</td>
+            <td>${(r.horas || r.part) ? '[X]' : ''}</td>
+            <td>${r.est || ''}</td>
+            <td>${r.pa ? '[X]' : ''}</td>
+            <td>${r.horas || ''}</td>
+            <td style="font-size:0.75rem; color:#374151;">${r.nota || r.notas || ''}</td> </tr>`; 
+    }); 
+
+    const privs = [p.anciano ? 'Anciano' : '', p.sm ? 'SM' : '', p.pr ? 'PR' : '', p.pe ? 'PE' : ''].filter(Boolean).join(', '); 
+    
+    return `<div class="print-canvas">
+        <div style="text-align:center; font-weight:800; font-size:12pt; margin-bottom:10px;">REGISTRO DE PUBLICADOR</div>
+        <div class="s21-header-box">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Nombre:</b> ${p.nombre}</span><span><b>Grupo:</b> ${p.grupo}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>F. Nacimiento:</b> ${p.nac || '-'}</span><span><b>F. Bautismo:</b> ${p.bau || '-'}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Sexo:</b> ${p.sexo}</span><span><b>Esperanza:</b> ${p.esp}</span></div>
+            <div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;"><b>Privilegios:</b> ${privs || 'Publicador'}</div>
+        </div>
+        <table class="official-table">
+            <thead>
+                <tr><th style="width:20%">Año ${sy - 1}-${sy}</th><th>Partic.</th><th>Est</th><th>P. Aux</th><th>Horas</th><th>Notas</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr><td colspan="4" style="text-align:right; font-weight:bold;">Total Horas:</td><td>${tH}</td><td></td></tr></tfoot>
+        </table>
+    </div>`; 
+};
+
     window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && !p.sacado);} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&!p.sacado);} else {l=state.personas.filter(p=>!p.sacado);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
     
     window.downloadPDFS21 = function() { 
-        const el = document.getElementById('preview-viewport');
-        if(!el.innerHTML) return alert("Ver primero");
-        el.style.background = 'white'; el.style.padding = '0';
-        html2pdf().set({margin:10, filename:'S21.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:1.5}, jsPDF:{unit:'mm',format:'a4'}})
-        .from(el).save().then(() => { el.style.background = '#525252'; el.style.padding = '20px'; });
-    }
+    const el = document.getElementById('preview-viewport');
+    if(!el.innerHTML) return alert("Ver primero");
 
-    window.renderS88Preview = function() { const sy=parseInt($('#s88Year').value); const build=(t)=>{let rows='',tA=0,tR=0; CICLO_S88.forEach(m=>{const y=(m>=9)?sy:sy+1, d=state.attendance[ymKey(y,m)]?.[t]||[0,0,0,0,0,0], re=d.filter(v=>v>0).length, as=d.reduce((a,b)=>a+b,0), pr=re>0?Math.round(as/re):''; tA+=as; tR+=re; rows+=`<tr><td>${MESES_NOM[m-1]}</td><td>${re||''}</td><td>${as||''}</td><td><b>${pr}</b></td></tr>`;}); return {h:rows,avg:tR>0?Math.round(tA/tR):''};}; const es=build('es'), fs=build('fs'); $('#s88-preview-viewport').innerHTML=`<div class="print-canvas"><div style="text-align:center; font-weight:800;">REGISTRO ASISTENCIA</div><br><b>REUNIÓN VIDA Y MINISTERIO</b><table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${es.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${es.avg}</td></tr></tfoot></table><br><b>REUNIÓN PÚBLICA</b><table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${fs.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${fs.avg}</td></tr></tfoot></table></div>`; }
-    
-    window.generatePDF = function() { 
-        const el = document.getElementById('s88-preview-viewport');
-        if(!el) return;
-        el.style.background = 'white'; el.style.padding = '0';
-        html2pdf().set({margin:10, filename:'S88.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:1.5}, jsPDF:{unit:'mm',format:'a4'}})
-        .from(el).save().then(() => { el.style.background = '#525252'; el.style.padding = '20px'; });
+    // 1. Preparamos el estilo visual (Fondo blanco para imprimir)
+    const oldBg = el.style.background;
+    const oldPad = el.style.padding;
+    el.style.background = 'white'; 
+    el.style.padding = '0';
+
+    const fileName = 'Tarjeta_S21.pdf';
+    const opt = {
+        margin: 10, 
+        filename: fileName, 
+        image: {type:'jpeg', quality:0.98}, 
+        html2canvas: {scale:1.5}, 
+        jsPDF: {unit:'mm', format:'a4'}
+    };
+
+    // 2. Detectamos si es App o Web
+    if (window.hasOwnProperty('Capacitor')) {
+        // MODO APP (Android)
+        html2pdf().set(opt).from(el).outputPdf('datauristring').then(async (pdfBase64) => {
+            try {
+                const base64Content = pdfBase64.split(',')[1];
+                const { Filesystem } = Capacitor.Plugins;
+                
+                await Filesystem.writeFile({
+                    path: fileName,
+                    data: base64Content,
+                    directory: 'DOCUMENTS'
+                });
+                
+                // Restauramos el estilo original
+                el.style.background = '#525252'; 
+                el.style.padding = '20px';
+                alert("✅ PDF guardado en Documentos");
+            } catch (err) {
+                alert("Error App: " + err.message);
+                // Restaurar estilo aunque falle
+                el.style.background = '#525252'; el.style.padding = '20px';
+            }
+        });
+    } else {
+        // MODO WEB (PC)
+        html2pdf().set(opt).from(el).save().then(() => { 
+            el.style.background = '#525252'; 
+            el.style.padding = '20px'; 
+        });
     }
+}
+
+window.renderS88Preview = function() { 
+        const sy = parseInt($('#s88Year').value); 
+        const build = (t) => {
+            let rows = '', tA = 0, tR = 0; 
+            CICLO_S88.forEach(m => {
+                const y = (m >= 9) ? sy - 1 : sy; // Corrección de Año
+                const d = state.attendance[ymKey(y, m)]?.[t] || [0, 0, 0, 0, 0, 0]; 
+                const re = d.filter(v => v > 0).length; 
+                const as = d.reduce((a, b) => a + b, 0); 
+                const pr = re > 0 ? Math.round(as / re) : ''; 
+                tA += as; tR += re; 
+                rows += `<tr><td>${MESES_NOM[m - 1]}</td><td>${re || ''}</td><td>${as || ''}</td><td><b>${pr}</b></td></tr>`;
+            }); 
+            return {h: rows, avg: tR > 0 ? Math.round(tA / tR) : ''};
+        }; 
+        const es = build('es'), fs = build('fs'); 
+        $('#s88-preview-viewport').innerHTML = `<div class="print-canvas">
+            <div style="text-align:center; font-weight:800;">REGISTRO ASISTENCIA ${sy-1}-${sy}</div><br>
+            <b>REUNIÓN VIDA Y MINISTERIO</b>
+            <table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${es.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${es.avg}</td></tr></tfoot></table>
+            <br><b>REUNIÓN PÚBLICA</b>
+            <table class="official-table"><thead><tr><th>Mes</th><th>Reun</th><th>Total</th><th>Prom</th></tr></thead><tbody>${fs.h}</tbody><tfoot><tr><td colspan="3" style="text-align:right">PROM. ANUAL</td><td>${fs.avg}</td></tr></tfoot></table>
+        </div>`; 
+    };    
+    window.generatePDF = function() { 
+    const el = document.getElementById('s88-preview-viewport');
+    if(!el) return;
+
+    // Guardamos estilo original
+    const oldBg = el.style.background;
+    const oldPad = el.style.padding;
     
-    window.renderResumenMensual = function(y, m) { 
-        const k=ymKey(y,m), act=state.activity[k]||{}, att=state.attendance[k]||{es:[],fs:[]}; 
-        let tM=0,activos=0,pubC=0,pubE=0,prC=0,prH=0,prE=0,paC=0,paH=0,paE=0; 
-        const last6=[]; for(let i=0;i<6;i++){let tm=m-i,ty=y; if(tm<=0){tm+=12;ty-=1;} last6.push(ymKey(ty,tm));} 
-        state.personas.forEach(p=>{ 
-            if(p.sacado)return; tM++; 
+    // Ponemos fondo blanco para la foto
+    el.style.background = 'white'; 
+    el.style.padding = '0';
+
+    const fileName = 'Registro_S88.pdf';
+    const opt = { 
+        margin: 10, 
+        filename: fileName, 
+        image:{type:'jpeg', quality:0.98}, 
+        html2canvas:{scale:1.5}, 
+        jsPDF:{unit:'mm', format:'a4'} 
+    };
+
+    if (window.hasOwnProperty('Capacitor')) {
+        // --- MODO APP (ANDROID) ---
+        html2pdf().set(opt).from(el).outputPdf('datauristring').then(async (pdfBase64) => {
+            try {
+                const base64 = pdfBase64.split(',')[1];
+                const { Filesystem } = Capacitor.Plugins;
+                
+                await Filesystem.writeFile({
+                    path: fileName,
+                    data: base64,
+                    directory: 'DOCUMENTS'
+                });
+                
+                showToast("✅ S-88 guardado en Documentos");
+            } catch (e) {
+                alert("Error App: " + e.message);
+            } finally {
+                // Restauramos estilo
+                el.style.background = oldBg || '#525252'; 
+                el.style.padding = oldPad || '20px';
+            }
+        });
+    } else {
+        // --- MODO WEB (PC) ---
+        html2pdf().set(opt).from(el).save().then(() => { 
+            el.style.background = oldBg || '#525252'; 
+            el.style.padding = oldPad || '20px'; 
+        });
+    }
+}
+    
+    window.renderResumenMensual = function(y, m) {
+        const k=ymKey(y,m), act=state.activity[k]||{}, att=state.attendance[k]||{es:[],fs:[]};
+        let tM=0,activos=0,pubC=0,pubE=0,prC=0,prH=0,prE=0,paC=0,paH=0,paE=0;
+        const last6=[]; for(let i=0;i<6;i++){let tm=m-i,ty=y; if(tm<=0){tm+=12;ty-=1;} last6.push(ymKey(ty,tm));}
+        
+        // 1. CREAMOS LA FECHA DEL RESUMEN QUE ESTAMOS MIRANDO 📅
+        const viewDate = `${y}-${String(m).padStart(2,'0')}`;
+
+        state.personas.forEach(p=>{
+            if(p.sacado) return;
+
+            // 2. SI LA FECHA DEL RESUMEN ES ANTERIOR A SU LLEGADA, NO CUENTA 🛑
+            if(p.inicio && viewDate < p.inicio) return;
+
+            tM++; // Sumamos al total de publicadores 
             let haInf=false; for(const lk of last6){ if(state.activity[lk]?.[p.id]?.horas>0 || state.activity[lk]?.[p.id]?.part){ haInf=true; break; } } if(haInf) activos++; 
             const r=act[p.id]||{}; if(r.horas>0||r.part){ const h=parseFloat(r.horas||0), e=parseInt(r.est||0); if(p.pr){prC++;prH+=h;prE+=e;} else if(r.pa){paC++;paH+=h;paE+=e;} else{pubC++;pubE+=e;} } 
         }); 
@@ -857,23 +2690,386 @@
         </div>`; 
     }
 
-    window.importData = (input) => { 
-        const file = input.files[0]; 
-        if(!file) return; 
-        if(!confirm("⚠️ ¿Restaurar copia de seguridad? Esto reemplazará los datos actuales.")) { input.value = ''; return; }
-        const reader = new FileReader(); 
-        reader.onload = function(e) { 
-            try { 
-                const data = JSON.parse(e.target.result);
-                if(data.personas && Array.isArray(data.personas)) {
-                    state = data; save(); alert("✅ Datos restaurados correctamente. La página se recargará."); location.reload();
-                } else { alert("❌ El archivo no parece ser un backup válido."); }
-            } catch(err) { alert("❌ Error leyendo el archivo: " + err.message); } 
-        }; 
-        reader.readAsText(file); 
-    }
+  // ==========================================
+// IMPORTADOR DE RESPALDOS (JSON) - SIN SALIRSE
+// ==========================================
+window.importData = (input) => { 
+    const file = input.files[0]; 
+    if(!file) return; 
 
-    window.addEventListener("DOMContentLoaded", () => { init(); });
+    const reader = new FileReader(); 
+    
+    reader.onload = async function(e) { 
+        try { 
+            const dataImportada = JSON.parse(e.target.result);
+
+            if(dataImportada.personas && Array.isArray(dataImportada.personas)) {
+                
+                let modoFusion = confirm(
+                    "📂 RESPALDO DETECTADO\n\n" +
+                    "¿Qué deseas hacer?\n\n" +
+                    "[ACEPTAR] = 🧬 FUSIONAR (Suma datos sin borrar).\n" +
+                    "[CANCELAR] = ⚠️ RESTAURAR (Borra todo y pone este archivo)."
+                );
+
+                if (modoFusion) {
+                    // MODO FUSIÓN
+                    let nuevos = 0;
+                    let actualizados = 0;
+                    dataImportada.personas.forEach(pImp => {
+                        let existe = state.personas.find(p => p.id === pImp.id);
+                        if (!existe) { state.personas.push(pImp); nuevos++; }
+                    });
+                    if(dataImportada.activity) {
+                        for (const [key, grupo] of Object.entries(dataImportada.activity)) {
+                            if(!state.activity[key]) state.activity[key] = {};
+                            for (const [pid, inf] of Object.entries(grupo)) {
+                                if(inf.part || inf.horas > 0 || inf.est > 0) {
+                                    state.activity[key][pid] = inf;
+                                    actualizados++;
+                                }
+                            }
+                        }
+                    }
+                    save(); 
+                    alert(`✅ FUSIÓN COMPLETADA\n\nSe agregaron ${nuevos} personas y ${actualizados} informes.`);
+                    renderAll(); // <--- TRUCO: Repinta sin salir
+
+                } else {
+                    // MODO RESTAURACIÓN
+                    if(confirm("⚠️ ¿Seguro que quieres BORRAR tu base actual y reemplazarla?")) {
+                        state = dataImportada; 
+                        save(); 
+                        alert("✅ Datos restaurados correctamente."); 
+                        renderAll(); // <--- TRUCO: Repinta sin salir
+                    } else {
+                        input.value = '';
+                    }
+                }
+            } else { 
+                alert("❌ Archivo inválido."); 
+            }
+        } catch(err) { 
+            alert("❌ Error: " + err.message); 
+            input.value = '';
+        } 
+    }; 
+    
+    reader.readAsText(file); 
+    input.value = ''; 
+};
+    
+// ==========================================
+// 🕹️ INTERRUPTOR ONLINE / OFFLINE
+// ==========================================
+window.unsubscribeSync = null; 
+
+window.toggleConnection = function() {
+    const stored = localStorage.getItem('cong_pro_firebase_creds');
+    if (!stored) return alert("⚠️ Primero debes configurar la conexión en Ajustes.");
+
+    const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
+
+    if (isForcedOffline) {
+        // --- CONECTAR (De Offline a Online) ---
+        
+        // 1. Quitamos el candado
+        localStorage.removeItem('cong_pro_force_offline'); 
+        
+        const c = JSON.parse(stored);
+        
+        // 2. Conectamos el cable
+        if(window.connectFirebase) connectFirebase(c.apiKey, c.projectId);
+        
+        // 3. 🔥 ¡ESTA ES LA CLAVE! 🔥
+        // Forzamos una subida inmediata de lo que hiciste mientras estabas Offline
+        // para que la nube no te sobrescriba con datos viejos.
+        if(window.save) window.save(); 
+
+        // 4. Feedback visual verde inmediato
+        updateCloudUI(true, c.projectId); 
+        showToast("🟢 Conectando y subiendo cambios...");
+
+    } else {
+        // --- DESCONECTAR (De Online a Offline) ---
+        if (confirm("¿Desconectar de la Nube y trabajar Offline?")) {
+            localStorage.setItem('cong_pro_force_offline', 'true'); 
+            
+            if (window.unsubscribeSync) {
+                window.unsubscribeSync(); 
+                window.unsubscribeSync = null;
+            }
+            
+            updateCloudUI(false); 
+            showToast("⚪ Modo Offline");
+        }
+    }
+};
+
+window.addEventListener("DOMContentLoaded", () => { init(); });
+
+   // --- PEGAR ESTO ANTES DEL  DE LA LÍNEA 1264 ---
+
+window.renderizarHistorialRapido = function() {
+    const contenedor = document.getElementById('contenedor-historial-rapido');
+    if(!contenedor) return; 
+    contenedor.innerHTML = ''; 
+
+    const hoy = new Date();
+    const mesIndexActual = hoy.getMonth(); // 0 = Enero, 11 = Diciembre
+    
+    // Nombres para mostrar en pantalla
+    const nombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+    // LÓGICA DE RELOJ: Empezamos siempre en Septiembre (Índice 8)
+    let puntero = 8; 
+
+    // Recorremos máximo 12 meses o hasta encontrar el mes actual
+    for(let i=0; i<12; i++) {
+        // Normalizamos el puntero (si es 12 vuelve a 0, si es 13 vuelve a 1...)
+        let m = puntero % 12;
+
+        // ¡STOP! Si llegamos al mes actual (Enero), paramos el bucle.
+        if (m === mesIndexActual) break;
+
+        // CORRECCIÓN: Guardamos (m + 1) para que Enero sea "1" y Septiembre sea "9"
+        const valorReal = m + 1;
+
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-size: 0.9em; background:white; padding:4px 8px; border-radius:6px; border:1px solid #e5e7eb;">
+                <input class="check-historial" type="checkbox" value="${valorReal}" checked style="accent-color: #0d6efd; transform:scale(1.2);">
+                <span style="font-weight:600; color:#374151;">${nombres[m]}</span>
+            </label>
+        `;
+        contenedor.appendChild(div);
+
+        // Avanzamos al siguiente mes
+        puntero++;
+    }
+};
+
+// Aseguramos que se ejecute al resetear el formulario
+const originalReset = window.resetPForm;
+window.resetPForm = function() {
+    if(originalReset) originalReset();
+    setTimeout(window.renderizarHistorialRapido, 50); 
+};
+
+// Ejecutar al inicio también para asegurar que aparezcan
+setTimeout(window.renderizarHistorialRapido, 500);
+
+
 </script>
+<div id="modalManual" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(5px); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:var(--surface); width:95%; max-width:750px; height:90vh; border-radius:24px; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); overflow:hidden; border:1px solid var(--border-light); font-family:'Inter', sans-serif;">
+        
+        <div style="padding:25px; background:var(--bg-body); border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h2 style="margin:0; font-size:1.6rem; color:var(--text-main); font-weight:800; display:flex; align-items:center; gap:10px;">
+                    🤔 Centro de Ayuda
+                </h2>
+                <span style="font-size:0.9rem; color:var(--text-muted); margin-top:5px; display:block;">Todo lo que necesitas saber para usar la App.</span>
+            </div>
+            <button onclick="document.getElementById('modalManual').style.display='none'" style="background:none; border:none; font-size:32px; color:var(--text-muted); cursor:pointer;">&times;</button>
+        </div>
+
+        <div style="padding:0; overflow-y:auto; flex:1; background:var(--surface);">
+            <div style="padding:25px; display:flex; flex-direction:column; gap:30px;">
+
+                <div>
+                    <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                        🎨 Apariencia y Seguridad
+                    </label>
+
+                    <details style="margin-bottom:10px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface); overflow:hidden;">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main); display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:1.2rem;">🌙</span> ¿Cómo cambio entre Modo Claro y Oscuro?
+                        </summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted); line-height:1.6;">
+                            Es muy sencillo. En la barra superior de la pantalla principal, verás un botón con una <b>Luna</b> (🌙) o un <b>Sol</b> (☀️). Solo tócalo y la App cambiará instantáneamente de color para descansar tu vista.
+                        </div>
+                    </details>
+
+                    <details style="margin-bottom:10px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface); overflow:hidden;">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main); display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:1.2rem;">🔐</span> ¿Cómo cambio mi clave o la del invitado?
+                        </summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted); line-height:1.6;">
+                            Ve al botón <b>⚙️ Ajustes</b> (arriba a la derecha).
+                            <br>Baja hasta la sección <b>"🔐 Gestión de Accesos"</b> y pulsa el botón naranja <b>"Cambiar Clave Principal"</b>.
+                            <br><br>
+                            Allí verás dos opciones:
+                            <ul style="margin-top:5px; padding-left:20px;">
+                                <li style="margin-bottom:5px;"><b>Administrador:</b> Es tu clave personal (Secretario).</li>
+                                <li><b>Invitado (Solo Lectura):</b> Aquí defines la clave que usarán los ancianos para entrar a ver la información sin poder borrar nada.</li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                        👥 Trabajo en Equipo
+                    </label>
+
+                    <details style="margin-bottom:12px; border:1px solid #10b981; border-radius:12px; overflow:hidden;">
+                        <summary style="background:#ecfdf5; padding:15px; cursor:pointer; font-weight:600; color:#065f46; display:flex; align-items:center; gap:12px;">
+                            <span style="background:#10b981; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">?</span>
+                            ¿Cómo invito a otros ancianos a ver los datos?
+                        </summary>
+                        <div style="padding:20px; background:white; border-top:1px solid #10b981; color:#334155; line-height:1.6;">
+                            <p style="margin-top:0;">Puedes dar acceso al Cuerpo de Ancianos para que consulten tarjetas e informes <strong>sin riesgo</strong> (Modo Solo Lectura).</p>
+                            
+                            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:15px;">
+                                <strong>Pasos para conectarlos:</strong>
+                                <ol style="margin:10px 0 0 20px; padding:0;">
+                                    <li style="margin-bottom:8px;">Diles que descarguen esta misma App.</li>
+                                    <li style="margin-bottom:8px;">
+                                        <b>Método Rápido:</b> En tu celular ve a Ajustes > "Compartir Llave" y envíales el código por WhatsApp. Ellos deben pegarlo en Ajustes > "Conexión Rápida".
+                                    </li>
+                                    <li>
+                                        Finalmente, dales la <b>Clave de Invitado</b> que configuraste. Al entrar con ella, solo podrán ver, no tocar.
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details style="margin-bottom:12px; border:1px solid #3b82f6; border-radius:12px; overflow:hidden;">
+                        <summary style="background:#eff6ff; padding:15px; cursor:pointer; font-weight:600; color:#1e40af; display:flex; align-items:center; gap:12px;">
+                            <span style="background:#3b82f6; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">?</span>
+                            ¿Cómo me ayudan los Encargados de Grupo?
+                        </summary>
+                        <div style="padding:20px; background:white; border-top:1px solid #3b82f6; color:#334155; line-height:1.6;">
+                            <p style="margin-top:0;">Los encargados pueden recoger los informes de su propio grupo y enviártelos automáticamente.</p>
+                            <ul style="padding-left:20px;">
+                                <li style="margin-bottom:10px;">
+                                    <strong>Opción A (Online):</strong> Si tienen internet, dales la "Llave de Acceso" y su clave de grupo (ej: <code>grupo1</code>). Lo que anoten en su celular aparecerá en el tuyo al instante.
+                                </li>
+                                <li>
+                                    <strong>Opción B (Offline):</strong> Si no tienen internet, ellos llenan los datos y la App genera un archivo (Respaldo) que te envían por WhatsApp. Tú solo usas "Restaurar" para cargar esos datos.
+                                </li>
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                        🚀 Tareas Comunes
+                    </label>
+
+                    <details style="margin-bottom:8px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface);">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main);">📝 ¿Cómo registro los informes y cómo funciona el candado?</summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted);">
+                            Ve a la pestaña <b>3. Informes</b>. El sistema tiene <b>Autoguardado</b>: basta con escribir el número y tocar fuera de la casilla.
+                            <br><br>
+                            <b>🔒 Seguridad (Candado):</b>
+                            <br>• El sistema protege tu historial. Los meses de "Diciembre hacia atrás" aparecen siempre bloqueados con un banner azul.
+                            <br>• <b>Periodo de Gracia:</b> El mes anterior (Enero) permanecerá abierto y editable automáticamente durante los primeros <b>15 días</b> del mes actual (Febrero). 
+                            <br>• El día 16, el mes anterior se cerrará solo. 
+                            <br>• <b>¿Cómo editar si está bloqueado?</b> Solo pulsa el botón naranja <b>"🔓 Desbloquear"</b> para habilitar la edición manual.
+                        </div>
+                    </details>
+
+                    <details style="margin-bottom:8px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface);">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main);">🏆 ¿Cómo entiendo la Tabla de Precursores?</summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted);">
+                            En la pestaña <b>5. Precursores</b>, el sistema hace los cálculos por ti: 
+                            <ul style="margin-top:5px; padding-left:20px; line-height:1.6;">
+                                <li><b>Regulares:</b> Muestra el progreso hacia la meta anual de 600 horas. Calcula automáticamente el atraso o adelanto según el mes de servicio.</li>
+                                <li><b>Crédito LDC:</b> Escribe en notas "LDC 10" o "ESCUELA", no importa si lo pones en mayúsculas o minúsculas el sistema sumará esas horas al total del precursor.</li>
+                                <li><b>Estado:</b> Te avisa si va "👍 Bien" o lleva "⚠️ Atraso" en su meta.</li>
+                            </ul>
+                        </div>
+                    </details>
+
+                    <details style="margin-bottom:8px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface);">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main);">👤 ¿Cómo agrego o edito un publicador?</summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted);">
+                            Ve a la pestaña <b>1. Gestión</b>.
+                            <br>Para <b>crear</b>: Llena los datos y pulsa "Guardar".
+                            <br>Para <b>editar</b>: Usa el buscador (abajo) o ve a la Lista General y toca el lápiz ✏️.
+                        </div>
+                    </details>
+                    
+                    <details style="margin-bottom:8px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface);">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main);">🖨️ ¿Cómo descargo las Tarjetas (PDF)?</summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted);">
+                            Ve a la pestaña <b>6 (Tarjeta S-21)</b> o <b>7 (Registro S-88)</b>.
+                            <ol style="margin-top:10px; padding-left:20px;">
+                                <li>Selecciona la persona y el año <b>"2025 - 2026"</b>.</li>
+                                <li>Pulsa el botón azul 👁️ <b>Ver</b>.</li>
+                                <li>Pulsa el botón verde 📥 <b>PDF</b> para descargar.</li>
+                            </ol>
+                        </div>
+                    </details>
+                    <details style="margin-bottom:8px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface);">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main);">🚫 ¿Cómo elimino a alguien (Bajas)?</summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted);">
+                            Busca a la persona en la pestaña <b>1. Gestión</b> Toca el botón de la papelera.
+                        </div>
+                    </details>
+                    <details style="margin-bottom:8px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface);">
+                        <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main);">🔌 Offline y Online</summary>
+                        <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted);">
+                            <b>Modo Offline:</b> Toca el indicador superior (🟢/⚪) para desconectar la App de internet si estás en una zona sin señal. Los datos se guardan en el celular hasta que vuelvas a conectarte.
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                        ⚙️ Configuración Avanzada
+                    </label>
+
+                    <details style="margin-bottom:8px; border:1px solid #cbd5e1; border-radius:12px; background:var(--surface);">
+                        <summary style="background:#f8fafc; color:#1e293b; padding:15px; cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:10px;">
+                            ☁️ Configuración de la Nube (Tutorial Técnico)
+                        </summary>
+                        <div style="padding:20px; border-top:1px solid #cbd5e1; font-size:0.9em; line-height:1.6; color:#334155;">
+                            <p style="margin-top:0;">Para sincronizar, necesitas una base de datos gratuita en <b>Firebase de Google</b>:</p>
+                            <ol style="padding-left:20px; margin-bottom:0;">
+                                <li style="margin-bottom:8px;">Entra a <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary);">console.firebase.google.com</a>.</li>
+                                <li style="margin-bottom:8px;">Crea un proyecto y una base de datos <b>Firestore</b>.</li>
+                                <li style="margin-bottom:8px;">Copia el <code>apiKey</code> y el <code>projectId</code>.</li>
+                                <li>Pégalos en los Ajustes de esta App.</li>
+                                <p style="margin-bottom:0; margin-top:10px; color:#166534; font-weight:bold;">Una vez configurado, usa la "Llave Rápida" para conectar a los demás hermanos fácilmente.</p>
+                            </ol>
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                        💙 Colaboración
+                    </label>
+                    
+                    <details style="margin-bottom:8px; border:1px solid #bfdbfe; border-radius:12px; background:var(--surface);">
+                        <summary style="background:#eff6ff; color:#1e40af; padding:15px; cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:10px;">
+                            ☕ ¿La App es gratis? ¿Cómo puedo apoyar?
+                        </summary>
+                        <div style="padding:20px; border-top:1px solid #bfdbfe; font-size:0.95em; line-height:1.6; color:#1e3a8a;">
+                            <p style="margin-top:0;">Sí, <b>esta App es 100% gratuita</b>.</p>
+                            <p>Si deseas apoyar voluntariamente con el mantenimiento técnico, puedes encontrar las opciones en: <b>Ajustes ⚙️ > Botón "Acerca de & Soporte".</b></p>
+                        </div>
+                    </details>
+                </div>
+
+            </div>
+
+            <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.2.5</span>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    body.dark-mode * { color: #e2e8f0 !important; border-color: #334155 !important; }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #020617 !important; color: #fff !important; }
+    body.dark-mode .btn, body.dark-mode .status-badge { color: inherit !important; }
+</style>
+
 </body>
-</html> 
+</html>
