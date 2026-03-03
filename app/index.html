@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <style>
         :root {
             --primary: #4f46e5; --primary-hover: #4338ca; --bg-body: #f3f4f6;
@@ -584,8 +584,8 @@
         Introduce tu clave de acceso.<br><br>
     <small style="opacity:0.9; display:block; font-size: 0.85em;">
         🔑 <b>Administrador:</b> Clave inicial sugerida 12345.<br>
-        👤 <b>Encargado o Invitado:</b> Pídele la clave al administrador.
-    </small>
+👥 <b>Encargados:</b> Tu clave inicial es <b>grupo1</b>, <b>grupo2</b> (según tu grupo).<br>
+    👀 <b>Invitado:</b> Pídele la clave al administrador.    </small>
 </p>
         <input type="password" id="mPwd" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:12px; margin-bottom:30px; font-weight:700; border-radius: 12px; padding: 15px;">
         <button class="btn primary" id="mEnter" onclick="window.attemptLogin()" style="width:100%; padding:16px; font-size:1rem;">ENTRAR AL SISTEMA</button>
@@ -728,7 +728,7 @@
             </div>
 
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.2.0 • Web/App</span>
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.3.0 • Web/App</span>
                 
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
@@ -1068,6 +1068,11 @@
     let CURRENT_ROLE = 'ADMIN'; 
     let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
     let actY = curY, actM = curM, asistY = curY, asistM = curM;
+    // --- NUEVO SISTEMA DE GUARDADO LOCAL ULTRA-RÁPIDO (DEXIE) ---
+    const localDb = new Dexie("CongregacionProDB");
+    localDb.version(1).stores({
+        settings: 'key' 
+    });
 
 // --- FUNCIÓN PARA LLENAR AÑOS (2025 - 2026) ---
     function populateSelects() {
@@ -1528,7 +1533,7 @@ function parseDate(val) {
                 if($(`#${b.dataset.tab}`)) $(`#${b.dataset.tab}`).classList.add('active');
                 if(b.dataset.tab === 'actividad') renderActividad();
                 if(b.dataset.tab === 'asistencia') renderAsistInputs();
-                if(b.dataset.tab === 'precursores') { renderPrecursores(); renderAuxiliares(); }
+                if(b.dataset.tab === 'precursores') { renderPrecursores(); }
                 if(b.dataset.tab === 'resumen') renderResumenMensual(parseInt($('#resYear').value), parseInt($('#resMonth').value));
                 if(b.dataset.tab === 'sacados') renderSacados();
                 if(b.dataset.tab === 'inactivos') renderEstadoEspiritual();
@@ -1583,26 +1588,23 @@ function connectFirebase(apiKey, projectId) {
 
     function startRealtimeSync() {
         if(!db) return;
-        
-        // 2. NUEVO: Guardamos el "cable" en la variable global para poder cortarlo luego
-        window.unsubscribeSync = onSnapshot(doc(db, "congregacion", "datos_generales"), (doc) => {
-            if(doc.exists()) {
-                const cloudData = doc.data(); 
-                
-                // Actualizamos el estado local con lo que viene de la nube
+        window.unsubscribeSync = onSnapshot(doc(db, "congregacion", "datos_generales"), async (docSnap) => {
+            if(docSnap.exists()) {
+                const cloudData = docSnap.data(); 
                 state = cloudData;
                 window.state = state;
                 
-                // Aseguramos que la estructura sea válida
                 if(!state.personas) state.personas = [];
                 if(!state.activity) state.activity = {};
                 if(!state.attendance) state.attendance = {};
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
                 
-                localStorage.setItem(DB_KEY, JSON.stringify(state));
-                renderAll(); // Repintamos la pantalla
+                // GUARDAR EN DISCO DURO LOCAL (DEXIE) LO QUE LLEGA DE LA NUBE
+                try { await localDb.settings.put({ key: "appState", val: state }); } catch(e){}
+                
+                renderAll(); 
             } else { 
-                save(); // Si no existe en la nube, subimos lo nuestro
+                save(); 
             }
         }, (error) => { 
             console.error("Sync error:", error); 
@@ -1610,38 +1612,28 @@ function connectFirebase(apiKey, projectId) {
         });
     }
 
-
     window.save = async function() {
-        // ⛔ SEGURIDAD TOTAL: Si es invitado, matamos la función aquí mismo.
-    if (document.body.classList.contains('guest-mode')) {
-        return; 
-    }
-        // 1. Siempre guardamos en la memoria del celular (Local)
-        localStorage.setItem(DB_KEY, JSON.stringify(state));
-        updateDatalist(); // Actualizamos lista del buscador
+        if (document.body.classList.contains('guest-mode')) return; 
+
+        // 1. GUARDADO ULTRA-RÁPIDO LOCAL (DEXIE)
+        try { await localDb.settings.put({ key: "appState", val: state }); } catch(e) {}
+        updateDatalist(); 
 
         // 2. EL GUARDA: Verificamos si estamos en Offline
         const isOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
-        
-        if (isOffline) {
-            console.log("🔕 Guardado LOCAL (Nube desactivada)");
-            // Si estamos Offline, NOS DETENEMOS AQUÍ. No enviamos nada a Firebase.
-            return; 
-        }
+        if (isOffline) return; 
 
-        // 3. Si estamos Online, enviamos a la Nube
+        // 3. SINCRONIZAR CON LA NUBE (FIREBASE)
         if(db) { 
             try { 
                 await setDoc(doc(db, "congregacion", "datos_generales"), state); 
-                // Opcional: Console log para depurar
-                // console.log("☁️ Subido a la nube");
             } catch(e) { 
-                // Si falla la subida (ej: se fue el internet real), avisamos pero no bloqueamos
-                console.error("❌ Error subiendo a nube (pero guardado local): " + e.message); 
+                console.error("❌ Error subiendo a nube (guardado local exitoso): " + e.message); 
             } 
         }
     }
 
+    
 // --- FUNCIÓN DE OLVIDO DE CLAVE (UNIVERSAL) ---
     window.handleForgotPwd = function() {
         alert("🔒 RECUPERACIÓN DE ACCESO\n\n" +
@@ -1786,17 +1778,14 @@ function enterApp() {
     renderAll();
 }
 
-    try { const saved = localStorage.getItem(DB_KEY); if(saved) state = JSON.parse(saved); } catch(e) {}
-    window.state = state;
-    if(!state.personas) state.personas = [];
-    if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
 
-    function renderAll() {
-        renderGroupOptions();
-        if(CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderEstadoEspiritual(); renderPrecursores(); renderAuxiliares(); renderAsistInputs(); }
-        renderActividad();
-        updateDatalist();
-    }
+
+   function renderAll() {
+    renderGroupOptions();
+    if(CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderEstadoEspiritual(); renderPrecursores(); renderAsistInputs(); }
+    renderActividad();
+    updateDatalist();
+}
 
    // Variable global para controlar el desbloqueo temporal
 window.forceUnlock = false;
@@ -2085,42 +2074,82 @@ window.editP = (id) => {
 }
     window.updateDatalist = function() { const l=$('#pList'); if(l){ l.innerHTML = ''; state.personas.forEach(p => l.innerHTML += `<option value="${p.nombre}">`); } }
     window.showToast = function(m) { const t=$('#toast'); t.innerHTML = `<span>${m}</span>`; t.style.display='block'; setTimeout(()=>t.style.display='none', 3000); }
-    window.exportBackup = async function() {
-        const isApp = window.hasOwnProperty('Capacitor');
-        const data = JSON.stringify(state);
-        const fileName = `CongPro_Backup_${new Date().toISOString().slice(0,10)}.json`;
+    // ==========================================
+// EXPORTADOR DE RESPALDOS (JSON) - SEGURO
+// ==========================================
+window.exportBackup = async function() {
+    const isApp = window.hasOwnProperty('Capacitor');
+    
+    // 1. Crear una copia profunda de los datos para no afectar la app en vivo
+    let exportData = JSON.parse(JSON.stringify(state));
+    
+    // 2. 🛡️ SEGURIDAD CRÍTICA: NUNCA exportar las contraseñas ni API keys
+    delete exportData.config;
+    
+    let fileName = "";
 
-        if (isApp && Capacitor.Plugins.Filesystem) {
-            try {
-                const { Filesystem } = Capacitor.Plugins;
-                await Filesystem.writeFile({
-                    path: fileName,
-                    data: data,
-                    directory: 'DOCUMENTS',
-                    encoding: 'utf8'
-                });
-                alert("✅ ¡Respaldo guardado en Documentos del celular!");
-            } catch (e) {
-                alert("❌ Error al guardar en celular: " + e.message);
-            }
-        } else {
-            // LÓGICA CORREGIDA PARA PC
-            try {
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a); // Paso extra para asegurar compatibilidad
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast("📥 Descarga iniciada en PC");
-            } catch (err) {
-                alert("❌ Error en descarga PC: " + err.message);
+    // 3. 🎯 LÓGICA DE ROLES: Filtrar si es un Encargado
+    if (currentSession && currentSession.role === 'group') {
+        const miGrupo = currentSession.group;
+        fileName = `Respaldo_Grupo${miGrupo}_${new Date().toISOString().slice(0,10)}.json`;
+        
+        // A. Dejar solo a las personas de su grupo
+        const miembrosDeMiGrupo = exportData.personas.filter(p => String(p.grupo) === String(miGrupo));
+        const idsPermitidos = miembrosDeMiGrupo.map(p => p.id);
+        exportData.personas = miembrosDeMiGrupo;
+        
+        // B. Borrar la asistencia (no le compete al encargado)
+        delete exportData.attendance; 
+        
+        // C. Limpiar los informes de personas que NO son de su grupo
+        if(exportData.activity) {
+            for (let mes in exportData.activity) {
+                for (let pid in exportData.activity[mes]) {
+                    if (!idsPermitidos.includes(pid)) {
+                        delete exportData.activity[mes][pid]; // Eliminamos el rastro
+                    }
+                }
             }
         }
-    };
+    } else {
+        // Si es el Administrador, exporta toda la base (sin el config)
+        fileName = `CongPro_Respaldo_TOTAL_${new Date().toISOString().slice(0,10)}.json`;
+    }
+
+    const data = JSON.stringify(exportData);
+
+    // 4. LÓGICA DE GUARDADO (Mantenemos tu código que ya funciona perfecto)
+    if (isApp && Capacitor.Plugins.Filesystem) {
+        try {
+            const { Filesystem } = Capacitor.Plugins;
+            await Filesystem.writeFile({
+                path: fileName,
+                data: data,
+                directory: 'DOCUMENTS',
+                encoding: 'utf8'
+            });
+            alert("✅ ¡Respaldo guardado en Documentos del celular!");
+        } catch (e) {
+            alert("❌ Error al guardar en celular: " + e.message);
+        }
+    } else {
+        // LÓGICA PARA PC / NAVEGADOR
+        try {
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a); 
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("📥 Descarga completada");
+        } catch (err) {
+            alert("❌ Error en descarga PC: " + err.message);
+        }
+    }
+};
    
     // --- FUNCIÓN PARA ABRIR EL MODAL Y MOSTRAR CLAVE ACTUAL ---
 window.openPwdModal = function() {
@@ -2690,8 +2719,8 @@ window.renderS88Preview = function() {
         </div>`; 
     }
 
-  // ==========================================
-// IMPORTADOR DE RESPALDOS (JSON) - SIN SALIRSE
+ // ==========================================
+// IMPORTADOR DE RESPALDOS (JSON) - 100% INTELIGENTE
 // ==========================================
 window.importData = (input) => { 
     const file = input.files[0]; 
@@ -2705,52 +2734,106 @@ window.importData = (input) => {
 
             if(dataImportada.personas && Array.isArray(dataImportada.personas)) {
                 
-                let modoFusion = confirm(
-                    "📂 RESPALDO DETECTADO\n\n" +
-                    "¿Qué deseas hacer?\n\n" +
-                    "[ACEPTAR] = 🧬 FUSIONAR (Suma datos sin borrar).\n" +
-                    "[CANCELAR] = ⚠️ RESTAURAR (Borra todo y pone este archivo)."
-                );
+                // 1. DETECTAR QUIÉN ESTÁ USANDO LA APP
+                let esAdmin = (currentSession && currentSession.role === 'admin');
+                let miGrupo = (currentSession && currentSession.role === 'group') ? currentSession.group : null;
+
+                let modoFusion = true;
+                let grupoFiltro = "";
+
+                // 2. COMPORTAMIENTO SEGÚN EL ROL
+                if (esAdmin) {
+                    // El Admin decide qué hacer
+                    modoFusion = confirm(
+                        "📂 RESPALDO DETECTADO\n\n" +
+                        "¿Qué deseas hacer?\n\n" +
+                        "[ACEPTAR] = 🧬 FUSIONAR (Añadir informes del Encargado sin borrar lo tuyo).\n" +
+                        "[CANCELAR] = ⚠️ RESTAURAR TOTAL (CUIDADO: Borra tu base y pone este archivo)."
+                    );
+
+                    if (modoFusion) {
+                        grupoFiltro = prompt(
+                            "🛡️ MODO SEGURO ACTIVO\n\n" +
+                            "Si este archivo te lo envió un Encargado, escribe su número de grupo (ej: 1, 2, 3).\n\n" +
+                            "Si es tu propio respaldo general, déjalo en blanco y presiona Aceptar:"
+                        );
+                        if (grupoFiltro === null) {
+                            alert("❌ Operación cancelada.");
+                            input.value = '';
+                            return;
+                        }
+                        grupoFiltro = grupoFiltro.trim();
+                    }
+                } else if (miGrupo) {
+                    // Si es Encargado: Fusión OBLIGATORIA y filtrada solo a su grupo
+                    modoFusion = true;
+                    grupoFiltro = String(miGrupo);
+                    if(!confirm(`📂 ARCHIVO DETECTADO\n\nSe van a cargar los informes de tu Grupo ${miGrupo}. ¿Continuar?`)) {
+                        input.value = '';
+                        return;
+                    }
+                } else {
+                    // Si es invitado o no hay rol claro, bloqueamos
+                    alert("🚫 No tienes permisos para restaurar datos.");
+                    input.value = '';
+                    return;
+                }
 
                 if (modoFusion) {
-                    // MODO FUSIÓN
+                    // --- MODO FUSIÓN SEGURO ---
                     let nuevos = 0;
                     let actualizados = 0;
+
+                    // A. Fusionar personas
                     dataImportada.personas.forEach(pImp => {
                         let existe = state.personas.find(p => p.id === pImp.id);
+                        
+                        // Blindaje: Si hay filtro de grupo, el encargado SOLO puede importar personas de SU grupo
+                        if (grupoFiltro !== "" && String(pImp.grupo) !== String(grupoFiltro)) return;
+
                         if (!existe) { state.personas.push(pImp); nuevos++; }
                     });
+
+                    // B. Fusionar actividad
                     if(dataImportada.activity) {
-                        for (const [key, grupo] of Object.entries(dataImportada.activity)) {
-                            if(!state.activity[key]) state.activity[key] = {};
-                            for (const [pid, inf] of Object.entries(grupo)) {
-                                if(inf.part || inf.horas > 0 || inf.est > 0) {
-                                    state.activity[key][pid] = inf;
-                                    actualizados++;
+                        for (const [keyMes, grupoActividad] of Object.entries(dataImportada.activity)) {
+                            if(!state.activity[keyMes]) state.activity[keyMes] = {};
+                            
+                            for (const [pid, infImportada] of Object.entries(grupoActividad)) {
+                                
+                                // Buscamos en la base local, o en la importada si es nuevo
+                                const personaLocal = state.personas.find(p => p.id === pid) || dataImportada.personas.find(p => p.id === pid);
+                                
+                                // Blindaje: Ignoramos la actividad de personas que no sean del grupo autorizado
+                                if (grupoFiltro !== "" && personaLocal && String(personaLocal.grupo) !== String(grupoFiltro)) {
+                                    continue; 
                                 }
+
+                                state.activity[keyMes][pid] = infImportada;
+                                actualizados++;
                             }
                         }
                     }
                     save(); 
-                    alert(`✅ FUSIÓN COMPLETADA\n\nSe agregaron ${nuevos} personas y ${actualizados} informes.`);
-                    renderAll(); // <--- TRUCO: Repinta sin salir
+                    alert(`✅ FUSIÓN COMPLETADA\n\nSe agregaron ${nuevos} personas y se actualizaron ${actualizados} registros.`);
+                    renderAll(); 
 
                 } else {
-                    // MODO RESTAURACIÓN
-                    if(confirm("⚠️ ¿Seguro que quieres BORRAR tu base actual y reemplazarla?")) {
+                    // --- MODO RESTAURACIÓN TOTAL (SOLO ADMIN) ---
+                    if(confirm("🚨 ADVERTENCIA FINAL\n\n¿Estás 100% seguro de que quieres BORRAR tu base de datos actual y reemplazarla por este archivo?")) {
                         state = dataImportada; 
                         save(); 
                         alert("✅ Datos restaurados correctamente."); 
-                        renderAll(); // <--- TRUCO: Repinta sin salir
+                        renderAll(); 
                     } else {
-                        input.value = '';
+                        input.value = ''; 
                     }
                 }
             } else { 
-                alert("❌ Archivo inválido."); 
+                alert("❌ Archivo inválido o corrupto."); 
             }
         } catch(err) { 
-            alert("❌ Error: " + err.message); 
+            alert("❌ Error procesando el archivo: " + err.message); 
             input.value = '';
         } 
     }; 
@@ -2806,8 +2889,31 @@ window.toggleConnection = function() {
     }
 };
 
-window.addEventListener("DOMContentLoaded", () => { init(); });
+// --- MOTOR DE ARRANQUE ASÍNCRONO ---
+    window.addEventListener("DOMContentLoaded", async () => { 
+        try {
+            // 1. Intentar cargar desde la nueva Base de Datos Rápida
+            const record = await localDb.settings.get("appState");
+            if (record && record.val) {
+                state = record.val;
+            } else {
+                // 2. MIGRACIÓN: Si es la primera vez, rescatar datos del localStorage antiguo
+                const savedOld = localStorage.getItem(DB_KEY);
+                if (savedOld) {
+                    state = JSON.parse(savedOld);
+                    await localDb.settings.put({ key: "appState", val: state }); // Mudar a Dexie
+                    console.log("🚀 Datos migrados a IndexedDB exitosamente.");
+                }
+            }
+        } catch(e) { console.error("Error al cargar datos locales", e); }
 
+        window.state = state;
+        if(!state.personas) state.personas = [];
+        if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
+
+        // 3. Iniciar la interfaz gráfica
+        init(); 
+    });
    // --- PEGAR ESTO ANTES DEL  DE LA LÍNEA 1264 ---
 
 window.renderizarHistorialRapido = function() {
@@ -2939,18 +3045,27 @@ setTimeout(window.renderizarHistorialRapido, 500);
                     <details style="margin-bottom:12px; border:1px solid #3b82f6; border-radius:12px; overflow:hidden;">
                         <summary style="background:#eff6ff; padding:15px; cursor:pointer; font-weight:600; color:#1e40af; display:flex; align-items:center; gap:12px;">
                             <span style="background:#3b82f6; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">?</span>
-                            ¿Cómo me ayudan los Encargados de Grupo?
+                            ¿Cómo enviar y recibir informes sin internet?
                         </summary>
                         <div style="padding:20px; background:white; border-top:1px solid #3b82f6; color:#334155; line-height:1.6;">
-                            <p style="margin-top:0;">Los encargados pueden recoger los informes de su propio grupo y enviártelos automáticamente.</p>
-                            <ul style="padding-left:20px;">
-                                <li style="margin-bottom:10px;">
-                                    <strong>Opción A (Online):</strong> Si tienen internet, dales la "Llave de Acceso" y su clave de grupo (ej: <code>grupo1</code>). Lo que anoten en su celular aparecerá en el tuyo al instante.
-                                </li>
-                                <li>
-                                    <strong>Opción B (Offline):</strong> Si no tienen internet, ellos llenan los datos y la App genera un archivo (Respaldo) que te envían por WhatsApp. Tú solo usas "Restaurar" para cargar esos datos.
-                                </li>
-                            </ul>
+                            <p style="margin-top:0;">El sistema permite que los encargados recolecten informes y los envíen al secretario de dos formas:</p>
+                            
+                            <div style="margin-bottom:15px;">
+                                <strong style="color:#1e40af;">🌐 Opción A (Con Internet - Automático):</strong><br>
+                                Si tienen la "Llave de Acceso" configurada, todo lo que anoten en su celular aparecerá en el del secretario al instante gracias a la Nube.
+                            </div>
+
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:15px;">
+                                <strong style="color:#0f172a; display:block; margin-bottom:8px;">📱 Opción B (Sin Internet - Archivo por WhatsApp):</strong>
+                                <p style="font-size:0.9em; margin-top:0; margin-bottom:10px;">Si trabajan fuera de línea (Offline), la información se puede pasar manualmente mediante un archivo seguro:</p>
+                                
+                                <ol style="font-size:0.9em; padding-left:20px; margin-top:5px; margin-bottom:0; color:#475569;">
+                                    <li style="margin-bottom:8px;"><b>Generar el archivo:</b> El encargado anota los informes en su celular. Luego va a <b>⚙️ Ajustes > 💾 Respaldo Local</b> y toca <b>"📥 Descargar"</b>.</li>
+                                    <li style="margin-bottom:8px;"><b>Enviar los datos:</b> El encargado comparte ese archivo recién descargado con el secretario (por ejemplo, vía WhatsApp).</li>
+                                    <li style="margin-bottom:8px;"><b>Cargar al sistema:</b> El secretario guarda el archivo en su dispositivo, abre la App y va a <b>⚙️ Ajustes > 💾 Respaldo Local</b>. Allí toca <b>"📤 Restaurar"</b> y selecciona el archivo recibido.</li>
+                                    <li><b>Fusión Inteligente:</b> La App detectará que vienen datos nuevos y preguntará si se desea <b>FUSIONAR</b>. Al aceptar, los informes del grupo se sumarán a la base general sin borrar la información anterior.</li>
+                                </ol>
+                            </div>
                         </div>
                     </details>
                 </div>
@@ -3023,20 +3138,50 @@ setTimeout(window.renderizarHistorialRapido, 500);
                     <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                         ⚙️ Configuración Avanzada
                     </label>
-
-                    <details style="margin-bottom:8px; border:1px solid #cbd5e1; border-radius:12px; background:var(--surface);">
+<details style="margin-bottom:8px; border:1px solid #cbd5e1; border-radius:12px; background:var(--surface);">
                         <summary style="background:#f8fafc; color:#1e293b; padding:15px; cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:10px;">
                             ☁️ Configuración de la Nube (Tutorial Técnico)
                         </summary>
                         <div style="padding:20px; border-top:1px solid #cbd5e1; font-size:0.9em; line-height:1.6; color:#334155;">
-                            <p style="margin-top:0;">Para sincronizar, necesitas una base de datos gratuita en <b>Firebase de Google</b>:</p>
-                            <ol style="padding-left:20px; margin-bottom:0;">
-                                <li style="margin-bottom:8px;">Entra a <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary);">console.firebase.google.com</a>.</li>
-                                <li style="margin-bottom:8px;">Crea un proyecto y una base de datos <b>Firestore</b>.</li>
-                                <li style="margin-bottom:8px;">Copia el <code>apiKey</code> y el <code>projectId</code>.</li>
-                                <li>Pégalos en los Ajustes de esta App.</li>
-                                <p style="margin-bottom:0; margin-top:10px; color:#166534; font-weight:bold;">Una vez configurado, usa la "Llave Rápida" para conectar a los demás hermanos fácilmente.</p>
+                            
+                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 1: Crear el espacio (Proyecto)</p>
+                            <ol style="padding-left:20px; margin-bottom:15px;">
+                                <li>Entra a <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary);">console.firebase.google.com</a>.</li>
+                                <li>Haz clic en <b>"Añadir proyecto"</b>.</li>
+                                <li>Ponle un nombre y haz clic en Continuar.</li>
+                                <li>Apaga el interruptor de <i>Google Analytics</i> y haz clic en <b>"Crear Proyecto"</b>.</li>
                             </ol>
+
+                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 2: Activar la Base de Datos</p>
+                            <ol style="padding-left:20px; margin-bottom:15px;">
+                                <li>En el menú izquierdo, ve a <b>"Compilación"</b> (o Build) y haz clic en <b>"Firestore Database"</b>.</li>
+                                <li>Haz clic en el botón <b>"Crear base de datos"</b>.</li>
+                                <li>Deja la ubicación sugerida y dale a Siguiente.</li>
+                                <li>Selecciona <b>"Comenzar en modo de prueba"</b> y haz clic en Crear.</li>
+                            </ol>
+
+                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 3: Obtener tus Claves Secretas</p>
+                            <ol style="padding-left:20px; margin-bottom:15px;">
+                                <li>Arriba a la izquierda, haz clic en la <b>rueda de engranaje ⚙️</b> y elige <b>"Configuración del proyecto"</b>.</li>
+                                <li>Baja hasta "Tus aplicaciones" y haz clic en el icono <b><code>&lt;/&gt;</code></b> (Aplicación Web).</li>
+                                <li>Ponle un apodo y haz clic en "Registrar app".</li>
+                                <li>Del código que aparece, <b>solo copia dos valores</b> (lo que está dentro de las comillas):<br>
+                                    • Tu <code>apiKey</code> <i>(ej: AIzaSyA...)</i><br>
+                                    • Tu <code>projectId</code> <i>(ej: congregacion-app-123)</i>
+                                </li>
+                            </ol>
+
+                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 4: Conectar la Aplicación</p>
+                            <ol style="padding-left:20px; margin-bottom:15px;">
+                                <li>Vuelve a los ⚙️ Ajustes de esta App y abre la "Configuración Técnica".</li>
+                                <li>Pega tu <code>apiKey</code> y tu <code>projectId</code> y presiona <b>"Guardar Manualmente"</b>.</li>
+                                <li>El indicador debería ponerse Verde (🟢 Online).</li>
+                            </ol>
+
+                            <p style="margin-bottom:0; margin-top:20px; color:#166534; font-weight:bold; text-align:center;">
+                                ✅ ¡Listo! Usa el botón "Compartir Llave de Acceso" arriba para darle conexión a los demás hermanos rápidamente.
+                            </p>
+
                         </div>
                     </details>
                 </div>
@@ -3060,7 +3205,7 @@ setTimeout(window.renderizarHistorialRapido, 500);
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.2.5</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.3.0</span>
             </div>
         </div>
     </div>
