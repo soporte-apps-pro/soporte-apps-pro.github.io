@@ -605,6 +605,52 @@
         <button class="btn primary" onclick="window.forceUpdatePassword()" style="width:100%; padding:15px; font-weight:bold;">ESTABLECER Y COMENZAR</button>
     </div>
 </div>
+<div id="modalForceRescue" style="display: none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 10006; align-items:center; justify-content:center; padding:20px;">
+    <div class="card" style="width:100%; max-width:380px; text-align:center; padding: 30px; background:white; border-radius:15px;">
+        <div style="font-size:2.5rem; margin-bottom:15px;">🛡️</div>
+        <h2 style="font-weight:800; color:#b91c1c; margin:0;">Mejora de Seguridad</h2>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin: 15px 0 20px 0;">
+            Para evitar que pierdas tus datos si olvidas tu clave trabajando sin internet, <b>es obligatorio crear una 'Palabra de Rescate' secreta</b>.
+        </p>
+        <input type="text" id="pRescueWord" placeholder="Ej: Nombre de tu mascota o ciudad" style="text-align:center; font-size:1.1rem; margin-bottom:15px; width:100%; padding:12px; border: 2px solid #b91c1c; border-radius:8px;">
+        <button class="btn primary" onclick="window.saveRescueWord()" style="width:100%; padding:15px; font-weight:bold; background:#b91c1c;">GUARDAR Y CONTINUAR</button>
+    </div>
+</div>
+
+<div id="modalResetPwd" style="display: none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 10007; align-items:center; justify-content:center; padding:20px;">
+    <div class="card" style="width:100%; max-width:360px; text-align:center; padding: 30px; background:white; border-radius:15px; position:relative;">
+        <button class="btn ghost" onclick="document.getElementById('modalResetPwd').style.display='none'" style="position:absolute; right:15px; top:15px; border:none; font-size:1.5rem; padding:0 10px;">&times;</button>
+        <div style="font-size:2.5rem; margin-bottom:15px; margin-top:10px;">🛟</div>
+        <h2 style="font-weight:800; color:var(--primary); margin:0;">Recuperar Acceso</h2>
+        
+        <div id="stepRescue1">
+            <p style="font-size:0.9rem; color:var(--text-muted); margin: 15px 0;">Escribe tu <b>Palabra de Rescate</b> secreta.</p>
+            <input type="text" id="pTryRescue" placeholder="Palabra secreta..." style="text-align:center; font-size:1.1rem; margin-bottom:15px; width:100%; padding:12px; border: 1px solid #ccc; border-radius:8px;">
+            <button class="btn primary" onclick="window.verifyRescueWord()" style="width:100%; padding:15px; font-weight:bold;">VERIFICAR</button>
+        </div>
+
+        <div id="stepRescue2" style="display:none;">
+            <p style="font-size:0.9rem; color:#059669; margin: 15px 0; font-weight:bold;">¡Correcto! Crea tu nueva clave de Administrador.</p>
+            <input type="password" id="pNewAdminPwd" placeholder="Nueva clave numérica..." style="text-align:center; font-size:1.2rem; margin-bottom:15px; width:100%; padding:12px; border: 2px solid #059669; border-radius:8px;">
+            <button class="btn success" onclick="window.confirmNewAdminPwd()" style="width:100%; padding:15px; font-weight:bold;">GUARDAR NUEVA CLAVE</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalAppUpdate" style="display: none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10010; align-items:center; justify-content:center; padding:20px;">
+    <div class="card" style="width:100%; max-width:360px; text-align:center; padding: 30px; background:white; border-radius:15px;">
+        <div style="font-size:3rem; margin-bottom:10px;">🚀</div>
+        <h2 style="font-weight:800; color:#2563eb; margin:0;">¡Nueva Versión Disponible!</h2>
+        <p style="font-size:0.95rem; color:var(--text-muted); margin: 15px 0;">
+            Hemos lanzado una versión mejorada de la App. Para asegurar que todo funcione perfecto, por favor actualiza desde la Play Store.
+        </p>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn ghost" onclick="document.getElementById('modalAppUpdate').style.display='none'" style="flex:1;">Más tarde</button>
+            <button class="btn primary" onclick="window.open('market://details?id=com.soporteappspro.congregacion', '_blank')" style="flex:1;">Actualizar</button>
+        </div>
+    </div>
+</div>
+
 
 <div id="modalSettings">
     <div class="settings-card">
@@ -1034,9 +1080,8 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+  import { initializeApp } from "./firebase/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "./firebase/firebase-firestore.js";
     let app, db;
     const DB_KEY = 'cong_pro_v108_master';
     const CRED_KEY = 'cong_pro_firebase_creds';
@@ -1044,6 +1089,7 @@
     const ymKey = (y,m) => `${y}-${String(m).padStart(2,'0')}`;
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
+    const APP_VERSION = "1.3.1"; // <-- NUEVO: LA VERSIÓN ACTUAL DE LA APP
     // ... debajo de const CICLO_S88 ...
 
     // NUEVO: Función para obtener el Año de Servicio actual
@@ -1068,6 +1114,29 @@
     let CURRENT_ROLE = 'ADMIN'; 
     let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
     let actY = curY, actM = curM, asistY = curY, asistM = curM;
+
+    // --- 🛡️ GUARDIA DE SEGURIDAD CENTRALIZADO ---
+    window.canWrite = function(mostrarAviso = true) {
+        // Verificamos por la variable de rol, por la sesión y por la clase visual
+        if (window.CURRENT_ROLE === 'GUEST' || 
+           (window.currentSession && window.currentSession.role === 'guest') || 
+           document.body.classList.contains('guest-mode')) {
+            
+            if (mostrarAviso) alert("❌ Seguridad: Modo Invitado. No tienes permiso para modificar datos.");
+            return false; // ⛔ NO puede escribir
+        }
+        return true; // ✅ SÍ puede escribir
+    };
+    // --- 🔐 MOTOR DE ENCRIPTACIÓN DE CLAVES (SHA-256) ---
+    window.hashPassword = async function(password) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
+
     // --- NUEVO SISTEMA DE GUARDADO LOCAL ULTRA-RÁPIDO (DEXIE) ---
     const localDb = new Dexie("CongregacionProDB");
     localDb.version(1).stores({
@@ -1148,16 +1217,29 @@
 
     window.openSettings = function() {
         $('#modalSettings').style.display = 'flex';
+        
         const stored = localStorage.getItem(CRED_KEY);
+        // 🛡️ CORRECCIÓN: Revisamos si el usuario la puso en modo offline
+        const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
+        
         if(stored) {
             const c = JSON.parse(stored);
-            $('#fbApiKey').value = c.apiKey; $('#fbProjectId').value = c.projectId;
-            updateCloudUI(true, c.projectId);
-        } else { updateCloudUI(false); }
+            $('#fbApiKey').value = c.apiKey; 
+            $('#fbProjectId').value = c.projectId;
+            
+            // Solo pintamos de verde si NO está offline Y la base de datos arrancó
+            if(!isForcedOffline && db) {
+                updateCloudUI(true, c.projectId);
+            } else { 
+                updateCloudUI(false); 
+            }
+        } else { 
+            updateCloudUI(false); 
+        }
+        
         loadGroupPassword();
         if($('#totalGroupsInput')) $('#totalGroupsInput').value = state.config.totalGroups || 5;
     };
-
     function updateCloudUI(connected, pid) {
         const card = $('#cloudStatusCard'); const title = $('#cloudTitle'); const desc = $('#cloudDesc'); const icon = $('#cloudIcon');
         const badge = $('#headerStatus');
@@ -1261,57 +1343,6 @@ window.downloadExcelTemplate = function() {
     XLSX.writeFile(wb, "Plantilla_CongregacionPro.xlsx");
 };
 
-// ==========================================
-// 1. GENERAR PLANTILLA "INTUITIVA" (DOBLE COLUMNA)
-// ==========================================
-window.downloadExcelTemplate = function() {
-    // Encabezados de Datos Personales
-    const headersDatos = [
-        "NOMBRE COMPLETO", "GRUPO (1-5)", "SEXO (H/M)", "F. NACIMIENTO", "F. BAUTISMO", 
-        "PRIVILEGIOS (Anciano, SM, PR)", "ESPERANZA (Otras/Ungido)", "NOTAS (Opcional)"
-    ];
-
-    // Encabezados de Meses (SEPARADOS PARA QUE SEA OBVIO)
-    const headersMeses = [
-        "SEP (Horas)", "SEP (Estudios)", 
-        "OCT (Horas)", "OCT (Estudios)",
-        "NOV (Horas)", "NOV (Estudios)",
-        "DIC (Horas)", "DIC (Estudios)",
-        "ENE (Horas)", "ENE (Estudios)",
-        "FEB (Horas)", "FEB (Estudios)",
-        "MAR (Horas)", "MAR (Estudios)",
-        "ABR (Horas)", "ABR (Estudios)",
-        "MAY (Horas)", "MAY (Estudios)",
-        "JUN (Horas)", "JUN (Estudios)",
-        "JUL (Horas)", "JUL (Estudios)",
-        "AGO (Horas)", "AGO (Estudios)"
-    ];
-
-    const allHeaders = [...headersDatos, ...headersMeses];
-
-    // EJEMPLOS CLARÍSIMOS
-    const example1 = [
-        "Ej: Juan Pérez", 1, "H", "1980-05-20", "2000-11-15", "Anciano", "Otras", "Viene de otra congre",
-        10, 0,  // Sep: 10 horas
-        8,  1,  // Oct: 8 horas, 1 estudio
-        12, 0,  // Nov
-        "P", 0, // Dic: "P" significa que predicó
-        // ... resto vacíos
-    ];
-
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([allHeaders, example1]);
-
-    // Ancho de columnas
-    const wDatos = {wch:15}; 
-    const wMes = {wch:12}; 
-    let colWidths = [{wch:25}, {wch:8}, {wch:8}, {wch:12}, {wch:12}, {wch:20}, {wch:15}, {wch:20}];
-    for(let k=0; k<24; k++) colWidths.push(wMes);
-    ws['!cols'] = colWidths;
-
-    XLSX.utils.book_append_sheet(wb, ws, "Plantilla_Facil");
-    XLSX.writeFile(wb, "Plantilla_CongregacionPro.xlsx");
-};
 
 // ==========================================
 // 2. IMPORTADOR MAESTRO (SIN SALIRSE DE LA APP)
@@ -1599,6 +1630,19 @@ function connectFirebase(apiKey, projectId) {
                 if(!state.attendance) state.attendance = {};
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
                 
+                // --- NUEVO: RADAR DE ACTUALIZACIONES ---
+                if (state.config.latestVersion) {
+                    const currentV = APP_VERSION.split('.').map(Number);
+                    const cloudV = state.config.latestVersion.split('.').map(Number);
+                    
+                    let isOld = false;
+                    for (let i = 0; i < 3; i++) {
+                        if (cloudV[i] > (currentV[i] || 0)) { isOld = true; break; }
+                        if (cloudV[i] < (currentV[i] || 0)) { break; }
+                    }
+                    if (isOld) document.getElementById('modalAppUpdate').style.display = 'flex';
+                }
+                
                 // GUARDAR EN DISCO DURO LOCAL (DEXIE) LO QUE LLEGA DE LA NUBE
                 try { await localDb.settings.put({ key: "appState", val: state }); } catch(e){}
                 
@@ -1611,9 +1655,12 @@ function connectFirebase(apiKey, projectId) {
             updateCloudUI(false); 
         });
     }
-
-    window.save = async function() {
-        if (document.body.classList.contains('guest-mode')) return; 
+   window.save = async function() {
+        // 🛡️ SEGURIDAD REAL: Bloqueamos por rol real, no solo por diseño visual
+        if (!window.canWrite(false)) {
+            console.warn("🔒 Bloqueo de seguridad: Un invitado intentó guardar datos.");
+            return; 
+        }
 
         // 1. GUARDADO ULTRA-RÁPIDO LOCAL (DEXIE)
         try { await localDb.settings.put({ key: "appState", val: state }); } catch(e) {}
@@ -1632,22 +1679,59 @@ function connectFirebase(apiKey, projectId) {
             } 
         }
     }
-
     
-// --- FUNCIÓN DE OLVIDO DE CLAVE (UNIVERSAL) ---
-    window.handleForgotPwd = function() {
-        alert("🔒 RECUPERACIÓN DE ACCESO\n\n" +
-              "El sistema usa una clave única de administración.\n\n" +
-              "❓ ¿CÓMO RECUPERARLA?\n" +
-              "La clave está visible dentro de la base de datos (Google Firebase).\n\n" +
-              "👉 Si tú creaste la conexión a la Nube:\n" +
-              "Entra a console.firebase.google.com > Firestore Database > datos_generales > config. Ahí verás el campo 'pwd'.\n\n" +
-              "👉 Si tú NO configuraste la Nube:\n" +
-              "Por favor, contacta al hermano que instaló o configuró la aplicación en este dispositivo.");
-    };
+// --- SISTEMA DE RESCATE Y OLVIDO DE CLAVES ---
+window.handleForgotPwd = function() {
+    // Si no tienen palabra de rescate, mostramos el mensaje antiguo
+    if (!window.state || !window.state.config || !window.state.config.rescueWord) {
+        alert("🔒 RECUPERACIÓN DE ACCESO\n\nAún no has configurado una palabra de rescate.\n\n👉 Si tienes la Nube conectada: Entra a console.firebase.google.com > Firestore Database > datos_generales > config. Ahí verás el campo 'pwd'.\n\n👉 Si la usas sin internet: Contacta a soporte.");
+        return;
+    }
+    
+    // Si la tienen, abrimos la ventana de rescate moderna
+    document.getElementById('stepRescue1').style.display = 'block';
+    document.getElementById('stepRescue2').style.display = 'none';
+    document.getElementById('pTryRescue').value = '';
+    document.getElementById('modalResetPwd').style.display = 'flex';
+};
 
-// --- FUNCIÓN DE LOGIN MEJORADA (DETECTA ROL Y GRUPO) ---
-window.attemptLogin = function() {
+window.saveRescueWord = function() {
+    const word = document.getElementById('pRescueWord').value.trim().toLowerCase();
+    if (word.length < 3) return alert("⚠️ La palabra debe tener al menos 3 letras.");
+    
+    if(!window.state.config) window.state.config = {};
+    window.state.config.rescueWord = word;
+    window.save();
+    
+    document.getElementById('modalForceRescue').style.display = 'none';
+    alert("✅ Palabra de rescate guardada. ¡No la olvides!");
+};
+
+window.verifyRescueWord = function() {
+    const tryWord = document.getElementById('pTryRescue').value.trim().toLowerCase();
+    const realWord = window.state.config.rescueWord;
+    
+    if (tryWord === realWord) {
+        document.getElementById('stepRescue1').style.display = 'none';
+        document.getElementById('stepRescue2').style.display = 'block';
+    } else {
+        alert("❌ Palabra incorrecta.");
+    }
+};
+
+window.confirmNewAdminPwd = function() {
+    const newPwd = document.getElementById('pNewAdminPwd').value.trim();
+    if (newPwd.length < 4) return alert("❌ Mínimo 4 caracteres.");
+    if (newPwd === '12345') return alert("❌ No uses la clave inicial.");
+    
+    window.state.config.pwd = newPwd;
+    window.save();
+    
+    document.getElementById('modalResetPwd').style.display = 'none';
+    alert("✅ Clave restablecida. Vuelve a intentar entrar con tu nueva clave.");
+};
+// --- FUNCIÓN DE LOGIN MEJORADA (DETECTA ROL, GRUPO Y ENCRIPTACIÓN) ---
+window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     console.log("🔵 Intentando acceder...");
 
     const input = document.getElementById('mPwd');
@@ -1660,23 +1744,39 @@ window.attemptLogin = function() {
     
     const config = window.state.config;
     
+    // 🔐 0. Encriptamos lo que el usuario acaba de escribir
+    const hashedInput = await window.hashPassword(pwd);
+    
     // 1. SI ES ADMIN (Clave Maestra)
     // -----------------------------
-    // Nota: Usamos config.pwd o el default '12345'
-    if (pwd === (config.pwd || '12345')) {
+    const adminStored = config.pwd || '12345';
+    // Validamos: ¿El hash coincide? O ¿La clave plana coincide? (Compatibilidad)
+    if (hashedInput === adminStored || pwd === adminStored) {
+        
+       // Magia: Si entró con texto plano, lo pasamos a código secreto
+        if (pwd === adminStored && adminStored !== '12345') {
+            config.pwd = hashedInput; 
+            config.latestVersion = APP_VERSION; // 🚀 ¡EL TRUCO: Obliga a actualizar!
+            window.save();
+        }
+
         window.CURRENT_ROLE = 'ADMIN';
         currentSession = { role: 'admin', group: null }; // 🔓 Acceso Total
         enterApp(); 
         return; 
     }
-// ---------------------------------------------------------
+
+    // ---------------------------------------------------------
     // 1.5. ACCESO DE INVITADO (DINÁMICO)
     // ---------------------------------------------------------
-    // Leemos la clave guardada. Si no existe, por defecto será 'visita'
     const guestKey = (window.state.config && window.state.config.guestPwd) ? window.state.config.guestPwd : 'visita';
 
-    if (pwd === guestKey) { 
+    if (hashedInput === guestKey || pwd === guestKey) { 
         console.log("🟢 Acceso concedido como Invitado");
+
+        if (pwd === guestKey && guestKey !== 'visita') {
+            config.guestPwd = hashedInput; window.save();
+        }
         
         window.CURRENT_ROLE = 'GUEST'; 
         document.body.classList.add('guest-mode'); 
@@ -1688,7 +1788,6 @@ window.attemptLogin = function() {
         return; 
     }
 
-
     // 2. SI ES ENCARGADO (Buscamos su grupo)
     // -------------------------------------
     let foundGroup = null;
@@ -1698,8 +1797,13 @@ window.attemptLogin = function() {
         const storedPwd = config.groups[i]; 
         const defaultPwd = 'grupo' + i; 
 
-        // Probamos si la clave coincide con algún grupo
-        if ((storedPwd && String(storedPwd) === pwd) || (!storedPwd && pwd === defaultPwd)) {
+        // Probamos si la clave coincide con algún grupo (ya sea el código secreto o texto plano)
+        if ((storedPwd && (hashedInput === String(storedPwd) || pwd === String(storedPwd))) || (!storedPwd && pwd === defaultPwd)) {
+            
+            if (storedPwd && pwd === String(storedPwd)) {
+                config.groups[i] = hashedInput; window.save();
+            }
+
             foundGroup = i;
             break;
         }
@@ -1714,6 +1818,7 @@ window.attemptLogin = function() {
         alert("❌ Clave incorrecta.");
     }
 };
+
 // --- 3. FUNCIÓN DE CAMBIO DE CLAVE (INDEPENDIENTE) ---
 window.forceUpdatePassword = function() {
     const input = document.getElementById('pForceNew');
@@ -1734,33 +1839,40 @@ window.forceUpdatePassword = function() {
     alert("✅ Clave configurada con éxito.");
 };
 
-// --- 4. FUNCIÓN DE ENTRADA AL SISTEMA (VERSIÓN FINAL BLINDADA) ---
+  // --- 4. FUNCIÓN DE ENTRADA AL SISTEMA (VERSIÓN FINAL BLINDADA) ---
 function enterApp() {
     $('#modalAuth').style.display = 'none';
     $('#app-content').style.display = 'block';
 
-    // 1. VISIBILIDAD DE PESTAÑAS
-    // Si es Admin o Invitado, le ponemos el traje de "role-admin" para que vea todo el menú
     if (window.CURRENT_ROLE === 'ADMIN' || window.CURRENT_ROLE === 'GUEST') {
         document.body.className = 'role-admin'; 
     } else {
         document.body.className = 'role-restricted'; 
     }
 
-    // 2. ¡CORRECCIÓN CRÍTICA! 🔒
-    // Al hacer lo de arriba, se borró el modo invitado. Aquí lo forzamos de nuevo.
     if (window.CURRENT_ROLE === 'GUEST') {
-        document.body.classList.add('guest-mode'); // <--- ESTO BLOQUEA LOS BOTONES OTRA VEZ
+        document.body.classList.add('guest-mode'); 
     }
     
-    // 3. ETIQUETA SUPERIOR (BADGE)
     const badge = $('#roleBadge');
     
     if (window.CURRENT_ROLE === 'ADMIN') {
         badge.innerText = 'Administrador';
         badge.style.background = '#e0e7ff';
         badge.style.color = '#4338ca';
-        addHelpButton(badge); 
+        
+        // --- 🛡️ SISTEMA DE ONBOARDING OBLIGATORIO (BLOQUEANTE) ---
+        // Se ejecuta si no hay palabra de rescate guardada
+        if (!window.state.config.rescueWord) {
+             // Forzamos que se muestre encima de todo
+             const modalRescue = document.getElementById('modalForceRescue');
+             modalRescue.style.display = 'flex';
+             modalRescue.style.zIndex = '999999'; // Nivel más alto posible
+             
+             // NOTA IMPORTANTE: Si falta la palabra, NO renderizamos el resto 
+             // de la app hasta que el usuario termine el proceso y guarde.
+             return; 
+        }
 
     } else if (window.CURRENT_ROLE === 'GUEST') {
         badge.innerText = 'Invitado (Solo Lectura)';
@@ -1917,6 +2029,7 @@ window.renderActividad = function() {
 };
 
     window.updAct = (pid, f, v) => { 
+        if (!window.canWrite(false)) return; // 🛡️ Bloqueo silencioso a invitados
         const k = ymKey(actY, actM); 
         if(!state.activity[k]) state.activity[k] = {}; 
         if(!state.activity[k][pid]) state.activity[k][pid] = {part:false, horas:0, est:0, pa:false}; 
@@ -1925,9 +2038,9 @@ window.renderActividad = function() {
     }
 
    window.savePersona = function() {
+    if (!window.canWrite()) return;
     const id = $('#pId').value, n = $('#pNombre').value.trim();
-    if(!n) return alert("Nombre obligatorio");
-
+     
     // 1. Recopilamos los datos (Igual que antes)
     const data = {
         id: id || 'p' + Date.now(),
@@ -2001,8 +2114,21 @@ window.renderActividad = function() {
     // Usamos tu función de notificaciones si existe, o alert
     if(window.showToast) showToast("Guardado correctamente"); else alert("Guardado");
 };
-    
-    window.deletePersona = function() { const id=$('#pId').value; if(!id)return; if(confirm("¿ELIMINAR miembro?")) { state.personas=state.personas.filter(p=>p.id!==id); save(); renderMiembros(); resetPForm(); showToast("Eliminado"); } }
+   window.deletePersona = function() { 
+        // 🛡️ SEGURIDAD REAL: Prohibir borrado a invitados
+        if (!window.canWrite()) return; // 🛡️ El guardia ya muestra el alert
+
+        const id = $('#pId').value; 
+        if(!id) return; 
+        
+        if(confirm("¿ELIMINAR miembro?")) { 
+            state.personas = state.personas.filter(p => p.id !== id); 
+            save(); 
+            renderMiembros(); 
+            resetPForm(); 
+            showToast("Eliminado"); 
+        } 
+    } 
     
 window.resetPForm = function() { 
         $('#pId').value=''; 
@@ -2186,9 +2312,9 @@ window.updatePassword = async function() {
 
     let huboCambios = false;
 
-    // 1. Guardar Clave Admin (Solo si escribieron algo válido)
+   // 1. Guardar Clave Admin (Solo si escribieron algo válido)
     if (newAdminPwd.length >= 4) {
-        window.state.config.pwd = newAdminPwd;
+        window.state.config.pwd = await window.hashPassword(newAdminPwd); // 🔐 ¡MAGIA! Se guarda encriptada
         huboCambios = true;
     } else if (newAdminPwd.length > 0 && newAdminPwd.length < 4) {
         return alert("⚠️ La clave de Admin es muy corta (mínimo 4).");
@@ -2196,10 +2322,9 @@ window.updatePassword = async function() {
 
     // 2. Guardar Clave Invitado (Solo si escribieron algo)
     if (newGuestPwd.length > 0) {
-        window.state.config.guestPwd = newGuestPwd;
+        window.state.config.guestPwd = await window.hashPassword(newGuestPwd); // 🔐 ¡MAGIA! Se guarda encriptada
         huboCambios = true;
     }
-
     // 3. Si no escribieron nada
     if (!huboCambios) {
         return alert("⚠️ Escribe al menos una clave nueva para guardar.");
@@ -2413,8 +2538,13 @@ window.renderPrecursores = function(yearIn, monthIn) {
 
 
 window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].es[i]||0}" onchange="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].fs[i]||0}" onchange="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
-    window.updAsist=(t,i,v)=>{const k=ymKey(asistY,asistM);state.attendance[k][t][i]=parseInt(v||0);save();}
+window.updAsist = (t, i, v) => { 
+    if (!window.canWrite(false)) return; // 🛡️ Bloqueo silencioso a invitados
 
+    const k = ymKey(asistY, asistM); 
+    state.attendance[k][t][i] = parseInt(v || 0); 
+    save(); 
+}
 window.renderEstadoEspiritual = function() { 
         const tbIn=$('#tblInactivos tbody'), tbIrr=$('#tblIrregulares tbody'); 
         if(!tbIn)return; 
@@ -2847,34 +2977,32 @@ window.importData = (input) => {
 // ==========================================
 window.unsubscribeSync = null; 
 
+// ==========================================
+// 🕹️ INTERRUPTOR ONLINE / OFFLINE (INTELIGENTE)
+// ==========================================
 window.toggleConnection = function() {
     const stored = localStorage.getItem('cong_pro_firebase_creds');
     if (!stored) return alert("⚠️ Primero debes configurar la conexión en Ajustes.");
 
-    const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
+    // 🧠 EL TRUCO: Miramos el color del botón, no la memoria de la app
+    const isVisuallyOffline = document.getElementById('headerStatus').classList.contains('offline');
 
-    if (isForcedOffline) {
-        // --- CONECTAR (De Offline a Online) ---
-        
-        // 1. Quitamos el candado
+    if (isVisuallyOffline) {
+        // --- FORZAR CONEXIÓN (De gris a verde) ---
         localStorage.removeItem('cong_pro_force_offline'); 
-        
         const c = JSON.parse(stored);
         
-        // 2. Conectamos el cable
+        showToast("🟢 Conectando...");
         if(window.connectFirebase) connectFirebase(c.apiKey, c.projectId);
         
-        // 3. 🔥 ¡ESTA ES LA CLAVE! 🔥
-        // Forzamos una subida inmediata de lo que hiciste mientras estabas Offline
-        // para que la nube no te sobrescriba con datos viejos.
+        // Subimos los datos por si trabajaste sin internet
         if(window.save) window.save(); 
-
-        // 4. Feedback visual verde inmediato
+        
+        // Forzamos el color verde al instante
         updateCloudUI(true, c.projectId); 
-        showToast("🟢 Conectando y subiendo cambios...");
 
     } else {
-        // --- DESCONECTAR (De Online a Offline) ---
+        // --- DESCONECTAR (De verde a gris) ---
         if (confirm("¿Desconectar de la Nube y trabajar Offline?")) {
             localStorage.setItem('cong_pro_force_offline', 'true'); 
             
@@ -2888,7 +3016,6 @@ window.toggleConnection = function() {
         }
     }
 };
-
 // --- MOTOR DE ARRANQUE ASÍNCRONO ---
     window.addEventListener("DOMContentLoaded", async () => { 
         try {
