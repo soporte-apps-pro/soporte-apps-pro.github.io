@@ -789,18 +789,20 @@
                 </div>
             </details>
 
-            <div class="settings-group" style="margin-top: 15px;">
+           <div class="settings-group" style="margin-top: 15px;">
                 <div style="padding:15px;">
                     <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">
                         🌐 Versión Web (iPhone/PC)
                     </div>
                     <div style="display:flex; gap:10px; align-items:center;">
-                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0; flex:1;">Para usar en navegador sin instalar.</p>
-                        <button class="btn info" onclick="shareWebLink()" style="padding:8px 12px;">🔗 Compartir</button>
+                        <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+                            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Para usar en navegador sin instalar.</p>
+                            <span style="font-size: 0.75rem; color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; padding: 4px 8px; border-radius: 6px; display: inline-table;">⚠️ Requiere tener la <b>Nube</b> configurada.</span>
+                        </div>
+                        <button class="btn info" onclick="shareWebLink()" style="padding:8px 12px; height: fit-content;">🔗 Compartir</button>
                     </div>
                 </div>
             </div>
-
             <div style="padding:15px; text-align:center; margin-top: 10px;">
                 <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.3.0 • Web/App</span>
                 
@@ -825,7 +827,7 @@
                     Acerca de & Soporte
                 </button>
             </div>        
-        </div> </div> </div> ```
+        </div> </div> </div> 
 
 <div id="modalSupport" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10001; align-items:center; justify-content:center; padding: 20px;">
     <div style="background:white; width:100%; max-width:380px; border-radius:15px; padding:25px; position:relative; text-align:center; font-family: 'Inter', sans-serif;">
@@ -1194,10 +1196,18 @@
         });
     }
 
-    // --- NUEVO: FUNCIÓN PARA COMPARTIR ENLACE WEB ---
+   // --- NUEVO: FUNCIÓN PARA COMPARTIR ENLACE WEB (INTELIGENTE) ---
     window.shareWebLink = function() {
+        // 1. Verificamos si tiene la nube configurada
+        const stored = localStorage.getItem('cong_pro_firebase_creds');
+        if (!stored) {
+            alert("⚠️ ATENCIÓN: No tienes la Nube configurada.\n\nLa versión web necesita internet y conexión a la Nube para funcionar. Si trabajas en modo 100% Offline, la persona que abra este enlace verá la aplicación vacía.\n\nPor favor, configura la Nube primero.");
+            return; // Detenemos la acción
+        }
+
+        // 2. Si la tiene configurada, procedemos a compartir
         const urlWeb = "https://soporte-apps-pro.github.io/app/";
-        const msg = `Hola, puedes usar la App "Congregación Pro" desde tu iPhone o PC entrando aquí:\n${urlWeb}`;
+        const msg = `Hola, puedes usar la App "Congregación Pro" desde tu iPhone o PC entrando aquí:\n${urlWeb}\n\n(Recuerda pedirle la Llave de Acceso al secretario para conectarte).`;
         
         if (navigator.share) {
             navigator.share({
@@ -1208,8 +1218,7 @@
         } else {
             navigator.clipboard.writeText(msg).then(() => showToast("🔗 Enlace copiado"));
         }
-    }
-    // ------------------------------------------------
+    } // ------------------------------------------------
 
     window.copyInstructions = function() {
         const urlOficial = "https://soporte-apps-pro.github.io/"; 
