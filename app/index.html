@@ -804,7 +804,7 @@
                 </div>
             </div>
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.3.0 • Web/App</span>
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.3.1 • Web/App</span>
                 
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
@@ -1110,9 +1110,11 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "./firebase/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "./firebase/firebase-firestore.js";
+ // 🚀 Firebase se cargará dinámicamente desde Google solo al estar Online
     let app, db;
+    window.fbDoc = null;
+    window.fbSetDoc = null;
+    window.fbOnSnapshot = null;
     const DB_KEY = 'cong_pro_v108_master';
     const CRED_KEY = 'cong_pro_firebase_creds';
     const $ = s => document.querySelector(s);
@@ -1256,7 +1258,6 @@
         $('#modalSettings').style.display = 'flex';
         
         const stored = localStorage.getItem(CRED_KEY);
-        // 🛡️ CORRECCIÓN: Revisamos si el usuario la puso en modo offline
         const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
         
         if(stored) {
@@ -1265,31 +1266,39 @@
             $('#fbProjectId').value = c.projectId;
             
             // Solo pintamos de verde si NO está offline Y la base de datos arrancó
+            // PASAMOS "false" PARA NO TOCAR EL HEADER
             if(!isForcedOffline && db) {
-                updateCloudUI(true, c.projectId);
+                updateCloudUI(true, c.projectId, false);
             } else { 
-                updateCloudUI(false); 
+                updateCloudUI(false, null, false); 
             }
         } else { 
-            updateCloudUI(false); 
+            updateCloudUI(false, null, false); 
         }
         
         loadGroupPassword();
         if($('#totalGroupsInput')) $('#totalGroupsInput').value = state.config.totalGroups || 5;
     };
-    function updateCloudUI(connected, pid) {
+    function updateCloudUI(connected, pid, updateHeader = true) {
         const card = $('#cloudStatusCard'); const title = $('#cloudTitle'); const desc = $('#cloudDesc'); const icon = $('#cloudIcon');
         const badge = $('#headerStatus');
         
+        // 1. Actualizar SIEMPRE la tarjeta dentro de Ajustes
         if(connected) { 
             card.className = 'status-card'; icon.innerText = '🟢'; title.innerText = 'Conectado a Nube'; desc.innerText = 'ID: ' + pid; 
-            badge.className = 'status-badge sync'; badge.innerText = '🟢 Online';
         } else { 
             card.className = 'status-card offline'; icon.innerText = '⚡'; title.innerText = 'Modo Local'; desc.innerText = 'Datos solo en este dispositivo.'; 
+        }
+
+        // 2. Actualizar el botón superior (Header) SOLO si se solicita
+        if (!updateHeader) return;
+
+        if(connected) {
+            badge.className = 'status-badge sync'; badge.innerText = '🟢 Online';
+        } else {
             badge.className = 'status-badge offline'; badge.innerText = '⚪ Offline';
         }
     }
-
     window.closeSettings = function() { $('#modalSettings').style.display = 'none'; };
 
     window.renderGroupOptions = function() {
@@ -1625,38 +1634,62 @@ function parseDate(val) {
         connectFirebase(apiKey, projectId);
     }
 
-function connectFirebase(apiKey, projectId) {
-        // 1. NUEVO: Revisamos si el usuario bloqueó la conexión (Offline)
+// Variable global para saber el estado real
+    window.cloudConnected = false;
+
+    // ==========================================
+    // 🌐 CONEXIÓN A LA NUBE (VERSIÓN BLINDADA)
+    // ==========================================
+    window.cloudConnected = false;
+
+    // ==========================================
+    // 🌐 CONEXIÓN A LA NUBE (CARGA PEREZOSA DESDE GOOGLE)
+    // ==========================================
+    window.cloudConnected = false;
+
+    window.connectFirebase = async function(apiKey, projectId) {
         const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
-        
         if (isForcedOffline) {
-            updateCloudUI(false); // Ponemos el icono en gris
-            console.log("🚫 Conexión bloqueada por el usuario (Modo Offline).");
-            return; // ¡Y NOS DETENEMOS AQUÍ! No conectamos.
+            updateCloudUI(false, null, true);
+            window.cloudConnected = false;
+            return false;
         }
 
         const statusSpan = $('#statusIndicator');
         if(statusSpan) statusSpan.innerHTML = '🟡...';
+        
         try {
+            // 🚀 MAGIA: Descargamos Firebase oficial solo en este instante
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js");
+            const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+            
+            // Guardamos las herramientas globalmente para que la app las use
+            window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbOnSnapshot = onSnapshot;
+
             const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
             
-            // Solo inicializamos si no existe ya
             if (!app) app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             
             startRealtimeSync(); // Iniciamos la escucha de datos
             
-            updateCloudUI(true, projectId);
+            window.cloudConnected = true;
+            updateCloudUI(true, projectId, true);
             if($('#modalSettings').style.display === 'flex') showToast("Conectado 🟢");
+            return true;
+            
         } catch(e) {
-            console.error(e);
-            updateCloudUI(false);
+            console.error("Error crítico de Firebase:", e);
+            window.cloudConnected = false;
+            updateCloudUI(false, null, true);
+            alert("🚨 Error de conexión a la Nube:\nVerifica tu conexión o los datos de Ajustes.");
+            return false;
         }
-    }
-
+    };
     function startRealtimeSync() {
-        if(!db) return;
-        window.unsubscribeSync = onSnapshot(doc(db, "congregacion", "datos_generales"), async (docSnap) => {
+        if(!db || !window.fbOnSnapshot) return;
+        
+        window.unsubscribeSync = window.fbOnSnapshot(window.fbDoc(db, "congregacion", "datos_generales"), async (docSnap) => {
             if(docSnap.exists()) {
                 const cloudData = docSnap.data(); 
                 state = cloudData;
@@ -1667,11 +1700,9 @@ function connectFirebase(apiKey, projectId) {
                 if(!state.attendance) state.attendance = {};
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
                 
-                // --- NUEVO: RADAR DE ACTUALIZACIONES ---
                 if (state.config.latestVersion) {
                     const currentV = APP_VERSION.split('.').map(Number);
                     const cloudV = state.config.latestVersion.split('.').map(Number);
-                    
                     let isOld = false;
                     for (let i = 0; i < 3; i++) {
                         if (cloudV[i] > (currentV[i] || 0)) { isOld = true; break; }
@@ -1680,42 +1711,24 @@ function connectFirebase(apiKey, projectId) {
                     if (isOld) document.getElementById('modalAppUpdate').style.display = 'flex';
                 }
                 
-                // GUARDAR EN DISCO DURO LOCAL (DEXIE) LO QUE LLEGA DE LA NUBE
                 try { await localDb.settings.put({ key: "appState", val: state }); } catch(e){}
-                
                 renderAll(); 
             } else { 
                 save(); 
             }
         }, (error) => { 
             console.error("Sync error:", error); 
-            updateCloudUI(false); 
+            updateCloudUI(false, null, true); 
         });
     }
-   window.save = async function() {
-        // 🛡️ SEGURIDAD REAL: Bloqueamos por rol real, no solo por diseño visual
-        if (!window.canWrite(false)) {
-            console.warn("🔒 Bloqueo de seguridad: Un invitado intentó guardar datos.");
-            return; 
-        }
-
-        // 1. GUARDADO ULTRA-RÁPIDO LOCAL (DEXIE)
-        try { await localDb.settings.put({ key: "appState", val: state }); } catch(e) {}
-        updateDatalist(); 
-
-        // 2. EL GUARDA: Verificamos si estamos en Offline
-        const isOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
-        if (isOffline) return; 
-
-        // 3. SINCRONIZAR CON LA NUBE (FIREBASE)
-        if(db) { 
+   // 3. SINCRONIZAR CON LA NUBE (FIREBASE)
+        if(db && window.fbSetDoc) { 
             try { 
-                await setDoc(doc(db, "congregacion", "datos_generales"), state); 
+                await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state); 
             } catch(e) { 
                 console.error("❌ Error subiendo a nube (guardado local exitoso): " + e.message); 
             } 
         }
-    }
     
 // --- SISTEMA DE RESCATE Y OLVIDO DE CLAVES ---
 window.handleForgotPwd = function() {
@@ -3017,39 +3030,54 @@ window.unsubscribeSync = null;
 // ==========================================
 // 🕹️ INTERRUPTOR ONLINE / OFFLINE (INTELIGENTE)
 // ==========================================
-window.toggleConnection = function() {
+// ==========================================
+// 🕹️ INTERRUPTOR ONLINE / OFFLINE (INTELIGENTE Y REAL)
+// ==========================================
+// ==========================================
+// 🕹️ INTERRUPTOR ONLINE / OFFLINE (ROBUSTO)
+// ==========================================
+// ==========================================
+// 🕹️ INTERRUPTOR ONLINE / OFFLINE (ROBUSTO)
+// ==========================================
+window.toggleConnection = async function() {
     const stored = localStorage.getItem('cong_pro_firebase_creds');
     if (!stored) return alert("⚠️ Primero debes configurar la conexión en Ajustes.");
 
-    // 🧠 EL TRUCO: Miramos el color del botón, no la memoria de la app
-    const isVisuallyOffline = document.getElementById('headerStatus').classList.contains('offline');
+    const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
+    const c = JSON.parse(stored);
 
-    if (isVisuallyOffline) {
-        // --- FORZAR CONEXIÓN (De gris a verde) ---
-        localStorage.removeItem('cong_pro_force_offline'); 
-        const c = JSON.parse(stored);
-        
+    // Si está forzado offline O no está conectado -> intentar conectar
+    if (isForcedOffline || !window.cloudConnected) {
+        localStorage.removeItem('cong_pro_force_offline');
         showToast("🟢 Conectando...");
-        if(window.connectFirebase) connectFirebase(c.apiKey, c.projectId);
-        
-        // Subimos los datos por si trabajaste sin internet
-        if(window.save) window.save(); 
-        
-        // Forzamos el color verde al instante
-        updateCloudUI(true, c.projectId); 
 
-    } else {
-       // --- DESCONECTAR (De verde a gris) ---
-        if (confirm("¿Desconectar de la Nube y trabajar Offline?\n\n💡 Recuerda: Sin conexión, deberás ir a Ajustes > Respaldo Local para enviar o recibir los informes mediante archivos.\n\n¿Deseas continuar?")) {
-            
-            if (window.unsubscribeSync) {
-                window.unsubscribeSync(); 
-                window.unsubscribeSync = null;
-            }
-            
-            updateCloudUI(false); 
-            showToast("⚪ Modo Offline");
+        // Llamamos a la versión blindada (con window.)
+        const ok = await window.connectFirebase(c.apiKey, c.projectId); 
+        
+        if (!ok) {
+            localStorage.setItem('cong_pro_force_offline', 'true');
+            updateCloudUI(false, null, true);
+            showToast("⚪ Sin conexión (falló conectar)");
+            return;
         }
+
+        if (window.save) window.save(); 
+        return;
+    }
+
+    // Si ya está conectado -> desconectar
+    if (confirm("¿Desconectar de la Nube y trabajar Offline?\n\n💡 Recuerda: Sin conexión, deberás ir a Ajustes > Respaldo Local para enviar o recibir los informes mediante archivos.\n\n¿Deseas continuar?")) {
+        
+        localStorage.setItem('cong_pro_force_offline', 'true');
+        
+        if (window.unsubscribeSync) {
+            window.unsubscribeSync(); 
+            window.unsubscribeSync = null;
+        }
+        
+        window.cloudConnected = false;
+        updateCloudUI(false, null, true); 
+        showToast("⚪ Modo Offline");
     }
 };
 // --- MOTOR DE ARRANQUE ASÍNCRONO ---
@@ -3368,7 +3396,7 @@ setTimeout(window.renderizarHistorialRapido, 500);
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.3.0</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.3.1</span>
             </div>
         </div>
     </div>
