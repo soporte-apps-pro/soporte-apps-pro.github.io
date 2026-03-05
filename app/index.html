@@ -1721,14 +1721,33 @@ function parseDate(val) {
             updateCloudUI(false, null, true); 
         });
     }
-   // 3. SINCRONIZAR CON LA NUBE (FIREBASE)
-        if(db && window.fbSetDoc) { 
-            try { 
-                await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state); 
-            } catch(e) { 
-                console.error("❌ Error subiendo a nube (guardado local exitoso): " + e.message); 
-            } 
+ // ==========================================
+    // 💾 FUNCIÓN MAESTRA DE GUARDADO (CON AVISOS)
+    // ==========================================
+    window.save = async function(silent = false) {
+        try {
+            // 1. Guardar localmente
+            await localDb.settings.put({ key: "appState", val: state });
+            
+            // 2. Subir a la Nube
+            if (window.cloudConnected && db && window.fbSetDoc) {
+                try {
+                    await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state);
+                    console.log("✅ ÉXITO: Datos guardados en la Nube.");
+                    if (!silent) showToast("☁️ Guardado en la Nube");
+                } catch (errorNube) {
+                    console.error("❌ Error al subir a la Nube:", errorNube);
+                    if (!silent) showToast("💾 Guardado local (Fallo en Nube)");
+                }
+            } else {
+                console.log("✅ ÉXITO: Datos guardados solo Localmente (Offline).");
+                if (!silent) showToast("💾 Guardado en el dispositivo");
+            }
+        } catch (errorLocal) {
+            console.error("❌ Error grave al guardar:", errorLocal);
+            alert("Hubo un problema al guardar los datos en tu dispositivo.");
         }
+    };
     
 // --- SISTEMA DE RESCATE Y OLVIDO DE CLAVES ---
 window.handleForgotPwd = function() {
