@@ -26,7 +26,7 @@
         --text-main: #f1f5f9;      /* Blanco Brillante */
         --text-muted: #94a3b8;     /* Gris Claro */
         --border-light: #334155;   /* Bordes Oscuros */
-        --input-bg: #020617;       /* Inputs Negros */
+        --input-bg: #0f172a;      /* Inputs  */
     }
 
     /* 1. ARREGLO DEL HEADER (BARRA SUPERIOR) */
@@ -576,17 +576,34 @@
 
 <div id="toast"></div>
 
-    <div id="modalAuth" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; justify-content: center; align-items: center; background: #374151;">
-    <div class="card" style="width:360px; max-width:90%; text-align:center; margin-bottom:0; padding: 40px 20px;">
+    <div id="modalAuth" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; justify-content: center; align-items: flex-start; overflow-y:auto; background: #374151;">
+    <div class="card" style="width:min(360px, 92vw); max-width:90%; text-align:center; margin-bottom:0; padding: 40px 20px; max-height: 90vh; overflow-y: auto; max-height: 90vh; overflow-y: auto; padding-bottom: 18px;">
         <div style="background:var(--primary); width:60px; height:60px; border-radius:16px; margin:0 auto 20px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:1.8rem;">🔐</div>
-        <h2 style="font-weight:800; margin-bottom:10px; color:var(--text-main);">Bienvenido</h2>
-        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:30px; line-height: 1.5;">
-        Introduce tu clave de acceso.<br><br>
-    <small style="opacity:0.9; display:block; font-size: 0.85em;">
-        🔑 <b>Administrador:</b> Clave inicial sugerida 12345.<br>
-👥 <b>Encargados:</b> Tu clave inicial es <b>grupo1</b>, <b>grupo2</b> (según tu grupo).<br>
-    👀 <b>Invitado:</b> Pídele la clave al administrador.    </small>
-</p>
+        <h2 style="font-weight:800; margin-bottom:20px; color:var(--primary); font-size: 1.8rem; text-align:center;">Bienvenido</h2>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; text-align: left;">
+            
+            <div style="background: #e2e8f0; border: 1px solid #94a3b8; border-radius: 12px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
+                <span style="font-size: 1.5rem;">✈️</span>
+                <div style="line-height: 1.4;">
+                    <strong style="color: #0f172a; display: block; margin-bottom: 4px; font-size: 0.9rem;">100% Funcional sin Internet</strong>
+                    <span style="color: #334155; font-size: 0.85rem; display: block;">Los datos se guardan en este dispositivo. (Para trabajar online, puedes conectar la <b>Nube</b> en Ajustes ⚙️ al entrar. Es opcional)</span>
+                </div>
+            </div>
+
+            <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 12px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
+                <span style="font-size: 1.4rem;">🔑</span>
+                <div style="line-height: 1.4;">
+                    <strong style="color: #064e3b; display: block; margin-bottom: 4px; font-size: 0.9rem;">Acceso al Sistema</strong>
+                    <span style="color: #064e3b; font-size: 0.85rem; display: block;">
+                        <b>Admin:</b> clave Inicial 12345 (Puedes cambiarla en Configuración) <br>
+                        <b>Encargados:</b> grupo1, grupo2, etc. <br>
+                        <b>Invitados:</b> Solicitar clave al secretario.
+                    </span>
+                </div>
+            </div>
+        </div>
+
         <input type="password" id="mPwd" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:12px; margin-bottom:30px; font-weight:700; border-radius: 12px; padding: 15px;">
         <button class="btn primary" id="mEnter" onclick="window.attemptLogin()" style="width:100%; padding:16px; font-size:1rem;">ENTRAR AL SISTEMA</button>
         <p onclick="handleForgotPwd()" style="margin-top:20px; font-size:0.85rem; color:var(--primary); cursor:pointer; text-decoration:underline; font-weight:600;">
@@ -706,6 +723,17 @@
             <div id="secRespaldo" class="settings-group">
                 <div style="padding:15px;">
                     <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">💾 Respaldo Local</div>
+                    
+                    <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: 10px; padding: 12px; margin-bottom: 15px; display: flex; gap: 12px; align-items: flex-start;">
+                        <span style="font-size: 1.2rem; line-height: 1;">💡</span>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+                            <strong style="color: var(--text-main); display: block; margin-bottom: 3px;">Trabajo sin internet (Offline)</strong>
+                            1. El Secretario <b>Descarga</b> y envía el archivo.<br>
+                            2. El Encargado lo <b>Restaura</b>, anota y devuelve uno nuevo.<br>
+                            3. El Secretario lo <b>Restaura</b> para fusionar los datos.
+                        </div>
+                    </div>
+
                     <div class="action-row">
                         <div class="icon-btn" onclick="exportBackup()"><span>📥</span><small>Descargar</small></div>
                         <div class="icon-btn" style="position:relative;"><span>📤</span><small>Restaurar</small><input type="file" accept=".json,application/json" onchange="window.importData(this)" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;"></div>
@@ -3002,9 +3030,8 @@ window.toggleConnection = function() {
         updateCloudUI(true, c.projectId); 
 
     } else {
-        // --- DESCONECTAR (De verde a gris) ---
-        if (confirm("¿Desconectar de la Nube y trabajar Offline?")) {
-            localStorage.setItem('cong_pro_force_offline', 'true'); 
+       // --- DESCONECTAR (De verde a gris) ---
+        if (confirm("¿Desconectar de la Nube y trabajar Offline?\n\n💡 Recuerda: Sin conexión, deberás ir a Ajustes > Respaldo Local para enviar o recibir los informes mediante archivos.\n\n¿Deseas continuar?")) {
             
             if (window.unsubscribeSync) {
                 window.unsubscribeSync(); 
@@ -3341,6 +3368,65 @@ setTimeout(window.renderizarHistorialRapido, 500);
     body.dark-mode * { color: #e2e8f0 !important; border-color: #334155 !important; }
     body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #020617 !important; color: #fff !important; }
     body.dark-mode .btn, body.dark-mode .status-badge { color: inherit !important; }
+
+/* 🛡️ Evita que el texto del Login se vuelva blanco e invisible */
+body.dark-mode #modalAuth, 
+body.dark-mode #modalAuth * {
+    color: initial !important;
+}
+/* Centra el contenido del login */
+#modalAuth {
+    justify-content: center !important;
+    align-items: center !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* Ocultar scrollbar (pero mantener scroll) SOLO en el login */
+#modalAuth .card{
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge viejo */
+}
+#modalAuth .card::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}
+
+/* LOGIN: que siempre quepa sin scroll */
+#modalAuth .card{
+  width: min(360px, 92vw);
+  padding: clamp(14px, 2.2vh, 22px) !important;
+}
+
+/* Reduce tamaños cuando la pantalla es baja */
+@media (max-height: 720px){
+  #modalAuth .card{ padding: 14px !important; }
+  #modalAuth h1, #modalAuth h2, #modalAuth .title{
+    font-size: 22px !important;
+    margin: 8px 0 !important;
+  }
+  #modalAuth .info-card{
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+  }
+  #modalAuth #mPwd{
+    padding: 10px 12px !important;
+    margin-top: 10px !important;
+  }
+  #modalAuth #mEnter{
+    padding: 12px !important;
+    margin-top: 12px !important;
+  }
+  #modalAuth p[onclick*="Forgot"], 
+  #modalAuth p[onclick*="forgot"], 
+  #modalAuth .forgot{
+    margin-top: 10px !important;
+  }
+}
+
+/* Pantallas MUY bajitas */
+@media (max-height: 620px){
+  #modalAuth .info-card{ display: none !important; } /* opcional: oculta las 2 tarjetas informativas */
+}
 </style>
 
 </body>
