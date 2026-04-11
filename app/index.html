@@ -1600,9 +1600,12 @@ function parseDate(val) {
                 alert("❌ No se encontró a esa persona.\n\nAsegúrate de seleccionarla de la lista que aparece al escribir.");
             }
         };
-        if($('#btnSaveReports')) $('#btnSaveReports').onclick = () => { save(); showToast("Guardado ☁️"); };
-        if($('#btnSaveAsist')) $('#btnSaveAsist').onclick = () => { save(); showToast("Asistencia Guardada"); renderS88Preview(); };
-        
+       if($('#btnSaveReports')) $('#btnSaveReports').onclick = () => { showToast("✅ Cambios guardados automáticamente"); };   
+       if($('#btnSaveAsist')) $('#btnSaveAsist').onclick = async () => {
+       await window.saveAttendanceAtomic(asistY, asistM);
+        showToast("Asistencia Guardada");
+    renderS88Preview();
+};        
         document.querySelectorAll('.tabs button').forEach(b => {
             b.onclick = () => {
                 document.querySelectorAll('.tabs button, .tab').forEach(el=>el.classList.remove('active'));
@@ -1661,11 +1664,9 @@ function parseDate(val) {
         try {
             // 🚀 MAGIA: Descargamos Firebase oficial solo en este instante
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js");
-            const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-            
+            const { getFirestore, doc, setDoc, updateDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");            
             // Guardamos las herramientas globalmente para que la app las use
-            window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbOnSnapshot = onSnapshot;
-
+            window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbUpdateDoc = updateDoc; window.fbOnSnapshot = onSnapshot;
             const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
             
             if (!app) app = initializeApp(firebaseConfig);
@@ -1748,7 +1749,43 @@ function parseDate(val) {
             alert("Hubo un problema al guardar los datos en tu dispositivo.");
         }
     };
-    
+ window.saveActivityAtomic = async function(year, month, pid, payload) {
+    try {
+        await localDb.settings.put({ key: "appState", val: state });
+
+        if (window.cloudConnected && db && window.fbUpdateDoc) {
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            await window.fbUpdateDoc(
+                window.fbDoc(db, "congregacion", "datos_generales"),
+                {
+                    [`activity.${monthKey}.${pid}`]: payload
+                }
+            );
+        }
+    } catch (e) {
+        console.error("Error guardando informe:", e);
+        showToast("⚠️ Error al guardar informe");
+    }
+};
+
+window.saveAttendanceAtomic = async function(year, month) {
+    try {
+        await localDb.settings.put({ key: "appState", val: state });
+
+        if (window.cloudConnected && db && window.fbUpdateDoc) {
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            await window.fbUpdateDoc(
+                window.fbDoc(db, "congregacion", "datos_generales"),
+                {
+                    [`attendance.${monthKey}`]: state.attendance[monthKey]
+                }
+            );
+        }
+    } catch (e) {
+        console.error("Error guardando asistencia:", e);
+        showToast("⚠️ Error al guardar asistencia");
+    }
+};   
 // --- SISTEMA DE RESCATE Y OLVIDO DE CLAVES ---
 window.handleForgotPwd = function() {
     // Si no tienen palabra de rescate, mostramos el mensaje antiguo
@@ -2097,14 +2134,22 @@ window.renderActividad = function() {
     });
 };
 
-    window.updAct = (pid, f, v) => { 
-        if (!window.canWrite(false)) return; // 🛡️ Bloqueo silencioso a invitados
-        const k = ymKey(actY, actM); 
-        if(!state.activity[k]) state.activity[k] = {}; 
-        if(!state.activity[k][pid]) state.activity[k][pid] = {part:false, horas:0, est:0, pa:false}; 
-        state.activity[k][pid][f] = (f==='pa'||f==='part'||f==='nota') ? v : parseFloat(v||0); 
-        save(); 
+    window.updAct = async (pid, f, v) => { 
+    if (!window.canWrite(false)) return;
+
+    const k = ymKey(actY, actM); 
+    if (!state.activity[k]) state.activity[k] = {};
+    if (!state.activity[k][pid]) {
+        state.activity[k][pid] = { part:false, horas:0, est:0, pa:false, nota:'' };
     }
+
+    state.activity[k][pid][f] = (f === 'pa' || f === 'part' || f === 'nota')
+        ? v
+        : parseFloat(v || 0);
+
+    await window.saveActivityAtomic(actY, actM, pid, state.activity[k][pid]);
+   }
+    
 
    window.savePersona = function() {
     if (!window.canWrite()) return;
@@ -2607,14 +2652,18 @@ window.renderPrecursores = function(yearIn, monthIn) {
 
 
 window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].es[i]||0}" onchange="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].fs[i]||0}" onchange="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
-window.updAsist = (t, i, v) => { 
-    if (!window.canWrite(false)) return; // 🛡️ Bloqueo silencioso a invitados
+window.updAsist = async (t, i, v) => { 
+    if (!window.canWrite(false)) return;
 
     const k = ymKey(asistY, asistM); 
+    if (!state.attendance[k]) {
+        state.attendance[k] = { es:[0,0,0,0,0,0], fs:[0,0,0,0,0,0] };
+    }
+
     state.attendance[k][t][i] = parseInt(v || 0); 
-    save(); 
+    await window.saveAttendanceAtomic(asistY, asistM);
 }
-window.renderEstadoEspiritual = function() { 
+    window.renderEstadoEspiritual = function() { 
         const tbIn=$('#tblInactivos tbody'), tbIrr=$('#tblIrregulares tbody'); 
         if(!tbIn)return; 
         tbIn.innerHTML=''; tbIrr.innerHTML=''; 
