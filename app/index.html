@@ -227,12 +227,25 @@
         .tab { display: none; }
         .tab.active { display: block; animation: fadeIn 0.3s ease; }
         body.role-restricted .admin-only { display: none !important; }
-        body.role-restricted .tabs button:not([data-tab="actividad"]) { display: none !important; }
+        body.role-restricted .tabs button:not([data-tab="actividad"]):not([data-tab="inactivos"]) { display: none !important; }
         body.role-admin .restricted-only { display: none !important; }
+
+        /* En computador, mantener visibles todas las secciones sin desplazamiento oculto. */
+        @media (min-width: 769px) {
+            .tabs-container { overflow-x: visible; white-space: normal; }
+            .tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 12px; max-width: 1400px; margin: 0 auto; }
+            .tabs button { min-height: 48px; padding: 10px 4px; line-height: 1.2; white-space: normal; }
+        }
+
+        @media (min-width: 1500px) {
+            .tabs { grid-template-columns: repeat(12, minmax(0, 1fr)); max-width: none; }
+        }
 
         @media (max-width: 768px) {
             header.top { flex-direction: column; align-items: stretch; gap: 12px; }
             .tabs-container { top: 115px; } 
+            .tabs { width: max-content; }
+            .tabs button { white-space: nowrap; }
             .admin-tools-grid, .asist-grid-layout, .stat-grid, .dash-grid { grid-template-columns: 1fr; } 
         }
         /* === PARCHE FINAL: TEXTOS VISIBLES === */
@@ -948,7 +961,8 @@
             <button data-tab="s10" class="admin-only">8. S-10 anual</button>
             <button data-tab="resumen" class="admin-only">9. Resumen</button>
             <button data-tab="sacados" class="admin-only" style="color:var(--danger)">10. Sacados</button>
-            <button data-tab="inactivos" class="admin-only" style="color:var(--warning)">11. Inactivos</button>
+            <button data-tab="inactivos" style="color:var(--warning)">11. Inactivos</button>
+            <button data-tab="s303" class="admin-only">12. Inf-Visita Circuito</button>
         </div>
     </div>
 
@@ -1169,10 +1183,24 @@
             <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha Salida</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
-        <section id="inactivos" class="tab admin-only">
+        <section id="inactivos" class="tab">
             <div class="card"><h3><span style="color:var(--danger)">💤 Inactivos</span> <span id="cIna" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblInactivos"><thead><tr><th>Nombre</th><th>Grupo</th><th>Última Actividad</th><th>Tiempo Inactivo</th></tr></thead><tbody></tbody></table></div></div>
             <div class="card" style="margin-top:20px;"><h3><span style="color:var(--info)">📋 Informes faltantes</span> <span id="cFal" class="count-badge">0</span></h3><p style="color:var(--text-muted); margin-top:-5px;">Informes del mes anterior que todavía están dentro de los 20 días de gracia.</p><div class="table-container"><table class="table" id="tblFaltantes"><thead><tr><th>Nombre</th><th>Grupo</th><th>Informe pendiente</th><th>Plazo</th></tr></thead><tbody></tbody></table></div></div>
             <div class="card" style="margin-top:20px;"><h3><span style="color:var(--warning)">⚠️ Irregulares</span> <span id="cIrr" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblIrregulares"><thead><tr><th>Nombre</th><th>Grupo</th><th>Meses Fallados</th></tr></thead><tbody></tbody></table></div></div>
+        </section>
+
+        <section id="s303" class="tab admin-only">
+            <div class="card">
+                <h3>Informe de visita de circuito</h3>
+                <input type="hidden" id="s303Id">
+                <div class="admin-tools-grid">
+                    <div><label>Fecha de la visita</label><input type="date" id="s303Fecha"></div>
+                    <div><label>Nombre del superintendente</label><input type="text" id="s303Nombre" placeholder="Nombre completo"></div>
+                </div>
+                <div style="margin-top:12px;"><label>Sugerencias y observaciones</label><textarea id="s303Observaciones" rows="6" placeholder="Anote las sugerencias dejadas durante la visita..."></textarea></div>
+                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;"><button class="btn primary" onclick="saveS303Observation()">Guardar observación</button><button class="btn" onclick="clearS303Form()">Limpiar</button></div>
+            </div>
+            <div class="card" style="margin-top:20px;"><h3>Historial de observaciones <span id="cS303" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblS303"><thead><tr><th>Fecha</th><th>Superintendente</th><th>Observaciones</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
         </section>
     </div>
 </div>
@@ -1439,7 +1467,9 @@
 
     let currentSession = { role: null, group: null };
     const groupDirtyReports = new Set();
-    let state = { personas: [], activity: {}, attendance: {}, config: { pwd: '12345', totalGroups: 5, groups: {} } };
+    window.prepareZeroInput = function(input) { if (String(input.value) === '0') input.value = ''; };
+    window.normalizeLeadingZero = function(input) { input.value = String(input.value).replace(/^0+(?=\d)/, ''); };
+    let state = { personas: [], activity: {}, attendance: {}, s303Observaciones: [], config: { pwd: '12345', totalGroups: 5, groups: {} } };
     window.CURRENT_ROLE = 'LOCKED';
     let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
     const previousMonthDate = new Date(curY, curM - 2, 1);
@@ -2024,6 +2054,7 @@ function parseDate(val) {
                 if(b.dataset.tab === 'sacados') renderSacados();
                 if(b.dataset.tab === 'inactivos') renderEstadoEspiritual();
                 if(b.dataset.tab === 's10') renderS10Annual();
+                if(b.dataset.tab === 's303') renderS303Observations();
                 if(b.dataset.tab === 'tarjeta') updateDatalist();
                 if(b.dataset.tab === 'lista_global') renderMiembros();
             };
@@ -2108,6 +2139,7 @@ function parseDate(val) {
                 if(!state.personas) state.personas = [];
                 if(!state.activity) state.activity = {};
                 if(!state.attendance) state.attendance = {};
+                if(!state.s303Observaciones) state.s303Observaciones = [];
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
                 rebuildCalculatedMemberEvents();
                 
@@ -2413,7 +2445,9 @@ function enterApp() {
 
    function renderAll() {
     renderGroupOptions();
-    if(window.CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderEstadoEspiritual(); renderPrecursores(); renderAsistInputs(); }
+    if(window.CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderPrecursores(); renderAsistInputs(); }
+    if(currentSession && ['admin', 'group'].includes(currentSession.role)) renderEstadoEspiritual();
+    if(window.CURRENT_ROLE === 'ADMIN') renderS303Observations();
     renderActividad();
     updateDatalist();
 }
@@ -2528,13 +2562,13 @@ window.renderActividad = function() {
                 </td>
                 
                 <td style="text-align:center;">
-                    <input type="number" value="${escapeHTML(r.horas)}" ${disableAttr} 
+                    <input type="number" value="${escapeHTML(r.horas)}" ${disableAttr} onfocus="prepareZeroInput(this)" onclick="prepareZeroInput(this)" oninput="normalizeLeadingZero(this)"
                     onchange="updAct(decodeURIComponent('${safeId}'),'horas',this.value)" 
                     style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
                 </td>
                 
                 <td style="text-align:center;">
-                    <input type="number" value="${escapeHTML(r.est)}" ${disableAttr} 
+                    <input type="number" value="${escapeHTML(r.est)}" ${disableAttr} onfocus="prepareZeroInput(this)" onclick="prepareZeroInput(this)" oninput="normalizeLeadingZero(this)"
                     onchange="updAct(decodeURIComponent('${safeId}'),'est',this.value)" 
                     style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
                 </td>
@@ -3247,7 +3281,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
 };
 
 
-window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${escapeHTML(state.attendance[k].es[i]||0)}" onchange="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${escapeHTML(state.attendance[k].fs[i]||0)}" onchange="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
+window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${escapeHTML(state.attendance[k].es[i]||0)}" onfocus="prepareZeroInput(this)" onclick="prepareZeroInput(this)" oninput="normalizeLeadingZero(this)" onchange="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${escapeHTML(state.attendance[k].fs[i]||0)}" onfocus="prepareZeroInput(this)" onclick="prepareZeroInput(this)" oninput="normalizeLeadingZero(this)" onchange="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
 window.updAsist = (t, i, v) => { 
     if (!window.isAdmin()) return;
     if (!['es', 'fs'].includes(t) || !Number.isInteger(i) || i < 0 || i > 5) return;
@@ -3277,7 +3311,10 @@ window.renderEstadoEspiritual = function() {
         const previousKey = ymKey(previousYear, previousMonthNumber);
         let countIna = 0, countFal = 0, countIrr = 0;
         
-        state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{ 
+        const visiblePeople = state.personas.filter(p =>
+            !p.sacado && (currentSession.role !== 'group' || p.grupo == currentSession.group)
+        );
+        visiblePeople.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{
             
             // --- A. CÁLCULO DE INACTIVOS (Regla: 6 meses sin reportar, sin importar el año) ---
             const inactivity = getInactivityInfo(p, today);
@@ -3343,6 +3380,11 @@ window.renderEstadoEspiritual = function() {
             tbFal.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay informes pendientes dentro del plazo de gracia.</td></tr>';
         }
     }
+    window.clearS303Form = function() { $('#s303Id').value=''; $('#s303Fecha').value=''; $('#s303Nombre').value=''; $('#s303Observaciones').value=''; };
+    window.renderS303Observations = function() { const tbody=$('#tblS303 tbody'); if(!tbody)return; const records=Array.isArray(state.s303Observaciones)?[...state.s303Observaciones]:[]; records.sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||''))); tbody.innerHTML=records.length?records.map(record=>`<tr><td>${escapeHTML(record.fecha||'')}</td><td>${escapeHTML(record.nombre||'')}</td><td style="white-space:pre-wrap; min-width:260px;">${escapeHTML(record.observaciones||'')}</td><td><button class="btn small" onclick="editS303Observation('${escapeHTML(record.id)}')">Editar</button> <button class="btn danger small" onclick="deleteS303Observation('${escapeHTML(record.id)}')">Eliminar</button></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Todavía no hay observaciones registradas.</td></tr>'; $('#cS303').innerText=`(${records.length})`; };
+    window.saveS303Observation = async function() { if(!window.isAdmin())return; const fecha=$('#s303Fecha').value,nombre=$('#s303Nombre').value.trim(),observaciones=$('#s303Observaciones').value.trim(); if(!fecha||!observaciones)return alert('Complete la fecha y las observaciones.'); if(!Array.isArray(state.s303Observaciones))state.s303Observaciones=[]; const id=$('#s303Id').value; const record={id:id||`s303-${Date.now()}`,fecha,nombre,observaciones}; const index=state.s303Observaciones.findIndex(item=>String(item.id)===String(id)); if(index>=0)state.s303Observaciones[index]=record; else state.s303Observaciones.push(record); await window.save(); clearS303Form(); renderS303Observations(); showToast('Observación S-303 guardada'); };
+    window.editS303Observation = function(id) { if(!window.isAdmin())return; const record=(state.s303Observaciones||[]).find(item=>String(item.id)===String(id)); if(!record)return; $('#s303Id').value=record.id; $('#s303Fecha').value=record.fecha||''; $('#s303Nombre').value=record.nombre||''; $('#s303Observaciones').value=record.observaciones||''; window.scrollTo({top:0,behavior:'smooth'}); };
+    window.deleteS303Observation = async function(id) { if(!window.isAdmin()||!confirm('¿Eliminar esta observación S-303?'))return; state.s303Observaciones=(state.s303Observaciones||[]).filter(item=>String(item.id)!==String(id)); await window.save(); renderS303Observations(); };
     window.toggleS21Inputs = function() { const m=$('#s21Mode').value; $('#s21InputIndiv').style.display=(m==='individual')?'block':'none'; $('#s21InputGroup').style.display=(m==='group')?'block':'none'; $('#preview-viewport').innerHTML=''; }
 
     window.getS21HTML = function(p, sy) { 
@@ -4146,6 +4188,7 @@ window.toggleConnection = async function() {
         if(!state.personas) state.personas = [];
         if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
         if(!state.activity) state.activity = {};
+        if(!state.s303Observaciones) state.s303Observaciones = [];
         rebuildCalculatedMemberEvents();
         await saveLocalState();
 
@@ -4458,6 +4501,30 @@ setTimeout(window.renderizarHistorialRapido, 500);
 body.dark-mode #modalAuth, 
 body.dark-mode #modalAuth * {
     color: initial !important;
+}
+
+/* El campo de acceso debe conservar alto contraste en móvil y modo oscuro. */
+#modalAuth #mPwd,
+body.dark-mode #modalAuth #mPwd {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    caret-color: #4f46e5 !important;
+    border: 2px solid #94a3b8 !important;
+    color-scheme: light;
+}
+#modalAuth #mPwd:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.22) !important;
+}
+#modalAuth #mPwd::placeholder {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    opacity: 1;
+}
+#modalAuth #mPwd:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #111827 !important;
 }
 /* Centra el contenido del login */
 #modalAuth {
