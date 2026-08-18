@@ -266,8 +266,10 @@
             .member-stat-card { padding:8px 10px; min-height:48px; }
             .member-toolbar { grid-template-columns:1fr; padding:11px; }
             .member-toolbar p { grid-column:1; }
+            .member-list-layout, #memberStatsDetail, #memberStatsDetail .card, #memberStatsDetail .table-container { min-width:0; width:100%; max-width:100%; }
+            #memberStatsDetail .table-container { overflow-x:hidden; }
             .group-summary-table thead { display:none; }
-            .group-summary-table, .group-summary-table tbody { display:block; width:100%; }
+            .group-summary-table, .group-summary-table tbody { display:block; width:100%; min-width:0 !important; max-width:100%; }
             .group-summary-table tr { display:block; margin:0 0 10px; padding:8px 10px; border:1px solid var(--border-light); border-radius:10px; background:var(--surface); }
             .group-summary-table td { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:7px 2px; border:0; border-bottom:1px solid var(--border-light); text-align:right; }
             .group-summary-table td:last-child { border-bottom:0; }
