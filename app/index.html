@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script src="vendor/dexie-4.2.1.js"></script>
     <style>
         :root {
             --primary: #4f46e5; --primary-hover: #4338ca; --bg-body: #f3f4f6;
@@ -629,7 +629,7 @@
         <p style="font-size:0.9rem; color:var(--text-muted); margin: 15px 0 20px 0;">
             Para evitar que pierdas tus datos si olvidas tu clave trabajando sin internet, <b>es obligatorio crear una 'Palabra de Rescate' secreta</b>.
         </p>
-        <input type="text" id="pRescueWord" placeholder="Ej: Nombre de tu mascota o ciudad" style="text-align:center; font-size:1.1rem; margin-bottom:15px; width:100%; padding:12px; border: 2px solid #b91c1c; border-radius:8px;">
+        <input type="password" id="pRescueWord" autocomplete="new-password" placeholder="Palabra secreta (mínimo 6 caracteres)" style="text-align:center; font-size:1.1rem; margin-bottom:15px; width:100%; padding:12px; border: 2px solid #b91c1c; border-radius:8px;">
         <button class="btn primary" onclick="window.saveRescueWord()" style="width:100%; padding:15px; font-weight:bold; background:#b91c1c;">GUARDAR Y CONTINUAR</button>
     </div>
 </div>
@@ -642,7 +642,7 @@
         
         <div id="stepRescue1">
             <p style="font-size:0.9rem; color:var(--text-muted); margin: 15px 0;">Escribe tu <b>Palabra de Rescate</b> secreta.</p>
-            <input type="text" id="pTryRescue" placeholder="Palabra secreta..." style="text-align:center; font-size:1.1rem; margin-bottom:15px; width:100%; padding:12px; border: 1px solid #ccc; border-radius:8px;">
+            <input type="password" id="pTryRescue" autocomplete="current-password" placeholder="Palabra secreta..." style="text-align:center; font-size:1.1rem; margin-bottom:15px; width:100%; padding:12px; border: 1px solid #ccc; border-radius:8px;">
             <button class="btn primary" onclick="window.verifyRescueWord()" style="width:100%; padding:15px; font-weight:bold;">VERIFICAR</button>
         </div>
 
@@ -657,12 +657,12 @@
 <div id="modalAppUpdate" style="display: none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 10010; align-items:center; justify-content:center; padding:20px;">
     <div class="card" style="width:100%; max-width:360px; text-align:center; padding: 30px; background:white; border-radius:15px;">
         <div style="font-size:3rem; margin-bottom:10px;">🚀</div>
-        <h2 style="font-weight:800; color:#2563eb; margin:0;">¡Nueva Versión Disponible!</h2>
-        <p style="font-size:0.95rem; color:var(--text-muted); margin: 15px 0;">
+        <h2 id="updateModalTitle" style="font-weight:800; color:#2563eb; margin:0;">¡Nueva Versión Disponible!</h2>
+        <p id="updateModalMessage" style="font-size:0.95rem; color:var(--text-muted); margin: 15px 0;">
             Hemos lanzado una versión mejorada de la App. Para asegurar que todo funcione perfecto, por favor actualiza desde la Play Store.
         </p>
         <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn ghost" onclick="document.getElementById('modalAppUpdate').style.display='none'" style="flex:1;">Más tarde</button>
+            <button id="btnUpdateLater" class="btn ghost" onclick="document.getElementById('modalAppUpdate').style.display='none'" style="flex:1;">Más tarde</button>
             <button class="btn primary" onclick="window.open('market://details?id=com.soporteappspro.congregacion', '_blank')" style="flex:1;">Actualizar</button>
         </div>
     </div>
@@ -766,6 +766,35 @@
                 </div>
             </div>
 
+            <div id="secCongregacion" class="settings-group admin-only" style="margin-top:15px;">
+                <div style="padding:15px;">
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px;">Datos de la congregaci&oacute;n y territorios</div>
+                    <div class="admin-tools-grid">
+                        <div><label>N&uacute;mero de congregaci&oacute;n</label><input type="text" id="cfgCongNumero" maxlength="30"></div>
+                        <div><label>Nombre de la congregaci&oacute;n</label><input type="text" id="cfgCongNombre" maxlength="120"></div>
+                        <div><label>Ciudad</label><input type="text" id="cfgCongCiudad" maxlength="100"></div>
+                        <div><label>Departamento / Provincia</label><input type="text" id="cfgCongRegion" maxlength="100"></div>
+                        <div><label>Pa&iacute;s</label><input type="text" id="cfgCongPais" maxlength="100"></div>
+                        <div><label>N&uacute;mero total de territorios</label><input type="number" id="cfgTotalTerritorios" min="0" step="1"></div>
+                        <div><label>&iquest;Aceptar&iacute;a ayuda para abarcar territorios?</label><select id="cfgAceptaAyuda"><option value="">No definido</option><option value="si">S&iacute;</option><option value="no">No</option><option value="na">No aplica</option></select></div>
+                    </div>
+                    <button class="btn success" onclick="saveCongregationSettings()" style="width:100%; margin-top:10px;">Guardar datos de la congregaci&oacute;n</button>
+                    <small style="display:block; margin-top:8px; color:var(--text-muted);">Los territorios sin abarcar se registrar&aacute;n por cada a&ntilde;o de servicio en el informe anual.</small>
+                </div>
+            </div>
+
+            <div id="secVersiones" class="settings-group admin-only" style="margin-top:15px;">
+                <div style="padding:15px;">
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px;">Control obligatorio de versiones</div>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Versi&oacute;n instalada: <b id="cfgInstalledVersion"></b></p>
+                    <div class="admin-tools-grid">
+                        <div><label>Versi&oacute;n m&aacute;s reciente</label><input type="text" id="cfgLatestVersion" placeholder="1.4.0"></div>
+                        <div><label>Versi&oacute;n m&iacute;nima permitida</label><input type="text" id="cfgMinimumVersion" placeholder="1.4.0"></div>
+                    </div>
+                    <button class="btn warning" onclick="saveVersionPolicy()" style="width:100%;">Guardar pol&iacute;tica de versiones</button>
+                </div>
+            </div>
+
             <details id="secAccesos" class="settings-group admin-only">
                 <summary>🔐 Gestión de Accesos</summary>
                 <div class="settings-content">
@@ -804,7 +833,7 @@
                 </div>
             </div>
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.3.1 • Web/App</span>
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.4.0 • Web/App</span>
                 
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
@@ -866,7 +895,7 @@
             <label style="color:#059669; font-size:0.8rem; font-weight:bold;">Invitado (Solo Lectura)</label>
             
             <div style="background:#f0fdf4; padding:8px; border-radius:6px; margin: 5px 0 10px 0; font-size:0.85rem; color:#166534; border:1px solid #bbf7d0;">
-                Clave Actual: <b id="lblShowGuest">...</b>
+                Clave de invitado: <b id="lblShowGuest">configurada</b>
             </div>
 
             <input type="text" id="pGuestNew" placeholder="Escribe la NUEVA clave aquí" style="margin-bottom:20px; text-align: center; border:1px solid #059669; font-weight:bold; color:#059669;">
@@ -916,9 +945,10 @@
             <button data-tab="precursores" class="admin-only">5. Precursores</button>
             <button data-tab="tarjeta" class="admin-only">6. Tarjeta Publicador</button>
             <button data-tab="s88" class="admin-only">7. Registro Asistencia</button>
-            <button data-tab="resumen" class="admin-only">8. Resumen</button>
-            <button data-tab="sacados" class="admin-only" style="color:var(--danger)">9. Sacados</button>
-            <button data-tab="inactivos" class="admin-only" style="color:var(--warning)">10. Inactivos</button>
+            <button data-tab="s10" class="admin-only">8. S-10 anual</button>
+            <button data-tab="resumen" class="admin-only">9. Resumen</button>
+            <button data-tab="sacados" class="admin-only" style="color:var(--danger)">10. Sacados</button>
+            <button data-tab="inactivos" class="admin-only" style="color:var(--warning)">11. Inactivos</button>
         </div>
     </div>
 
@@ -928,6 +958,7 @@
                 <h3>👥 Gestión de Miembros</h3>
                 <div class="admin-tools-grid">
                     <input type="hidden" id="pId">
+                    <input type="hidden" id="pOriginalGrupo">
                     <div><label>Nombre Completo</label><input type="text" id="pNombre" placeholder="Ej: Juan Pérez"></div>
                     <div><label>Grupo Predicación</label><select id="pGrupo" class="dynamic-group-select"></select></div>
                     <div><label>Sexo</label><select id="pSexo"><option value="Hombre">Hombre</option><option value="Mujer">Mujer</option></select></div>
@@ -942,6 +973,7 @@
                         <input type="month" id="pInicio" title="Mes en que llegó o se reactivó. Antes de esta fecha no contará fallas.">
                     </div>
                     <div><label>Fecha Sacado</label><input type="date" id="pFSac"></div>
+                    <div style="display:flex; align-items:flex-end; padding-bottom:8px;"><label style="display:flex; align-items:center; gap:7px; margin:0;"><input type="checkbox" id="pSalidaPendiente"> Fecha de salida pendiente</label></div>
                     <div id="boxHistorial" style="margin-top: 15px; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px;"></div>
                     <label style="font-weight: bold; color: #0d6efd; display: block; margin-bottom: 5px;">
         <i class="bi bi-clock-history"></i> Historial Rápido (Evitar "Irregular")
@@ -970,6 +1002,16 @@
                         <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pPR"> Prec. Regular</label>
                         <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pPE"> Prec. Especial</label>
                         <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pMis"> Misionero</label>
+                    </div>
+                    <div style="grid-column:1/-1; display:flex; gap:15px; flex-wrap:wrap;">
+                        <div><label>Inicio como precursor regular</label><input type="month" id="pPRInicio"></div>
+                        <div><label>Último mes como precursor regular</label><input type="month" id="pPRFin" title="Completar al dejar de ser precursor regular"></div>
+                    </div>
+                    <div style="grid-column:1/-1; border-top:1px solid var(--border-light); padding-top:12px; display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
+                        <span style="font-weight:700; color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">Datos para informe anual S-10:</span>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pSordoSenas"> Sordo dependiente de lengua de se&ntilde;as</label>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pCiego"> Ciego</label>
+                        <label style="display:flex; align-items:center; gap:6px;"><input type="checkbox" id="pConfinado"> Encarcelado o confinado</label>
                     </div>
                 </div>
                 <div class="admin-tools-grid" style="border-top:2px dashed var(--border-light); margin-top:20px;">
@@ -1059,7 +1101,14 @@
       </thead>
            
     <tbody></tbody>
-</table></div></div>
+</table></div>
+
+        <div style="margin-top:22px; border-top:2px solid var(--border-light); padding-top:18px;">
+            <h3><span>Precursores auxiliares del mes</span> <span id="cAuxMes" class="count-badge">0</span></h3>
+            <div id="auxMonthLabel" style="color:var(--text-muted); margin:-5px 0 10px;"></div>
+            <div class="table-container"><table class="table" id="tblAuxMes"><thead><tr><th>Nombre</th><th>Grupo</th><th>Horas</th></tr></thead><tbody></tbody></table></div>
+        </div>
+</div>
         </section>
 
         <section id="tarjeta" class="tab admin-only">
@@ -1070,7 +1119,7 @@
                     <div id="s21InputIndiv"><label>Buscar Persona</label><input id="s21Search" list="pList" placeholder="Escribe nombre..."></div>
                     <div id="s21InputGroup" style="display:none;"><label>Grupo</label><select id="s21GroupSel" class="dynamic-group-select"></select></div>
                     <div><label>Año Servicio</label><select id="s21Year" style="font-weight:bold;"></select></div>
-                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="previewS21()">👁️ Ver</button><button class="btn success" onclick="downloadPDFS21()">📥 PDF</button></div>
+                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="previewS21()">👁️ Ver</button><button id="btnPdfS21" class="btn success" onclick="downloadPDFS21()">📥 PDF</button></div>
                 </div>
                 <div id="preview-viewport"></div>
             </div>
@@ -1087,6 +1136,24 @@
             </div>
         </section>
 
+        <section id="s10" class="tab admin-only">
+            <div class="card">
+                <h3>Informe anual S-10</h3>
+                <div class="admin-tools-grid">
+                    <div><label>A&ntilde;o de servicio</label><select id="s10Year" style="font-weight:bold;"></select></div>
+                    <div><label>Territorios sin abarcar</label><input type="number" id="s10TerritoriosSinAbarcar" min="0" step="1" value="0"></div>
+                    <div style="display:flex; align-items:flex-end;"><button class="btn primary" onclick="renderS10Annual()" style="width:100%;">Calcular informe</button></div>
+                    <div style="display:flex; align-items:flex-end;"><button id="btnSaveS10Territory" class="btn success" onclick="saveS10AnnualInputs()" style="width:100%;">Guardar dato territorial</button></div>
+                </div>
+                <div id="s10Status" style="margin:12px 0; color:var(--text-muted);"></div>
+                <div id="s10Content"></div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; justify-content:flex-end;">
+                    <button id="btnCloseS10" class="btn warning" onclick="closeS10AnnualReport()">Cerrar informe anual</button>
+                    <button id="btnPdfS10" class="btn success" onclick="downloadS10PDF()">Descargar PDF</button>
+                </div>
+            </div>
+        </section>
+
         <section id="resumen" class="tab admin-only">
             <div class="card">
                 <h3>📊 Resumen Mensual</h3>
@@ -1099,12 +1166,13 @@
         </section>
 
         <section id="sacados" class="tab admin-only">
-            <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha Salida</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha Salida</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
         <section id="inactivos" class="tab admin-only">
             <div class="card"><h3><span style="color:var(--danger)">💤 Inactivos</span> <span id="cIna" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblInactivos"><thead><tr><th>Nombre</th><th>Grupo</th><th>Última Actividad</th><th>Tiempo Inactivo</th></tr></thead><tbody></tbody></table></div></div>
-            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--warning)">⚠️ Irregulares</span></h3><div class="table-container"><table class="table" id="tblIrregulares"><thead><tr><th>Nombre</th><th>Grupo</th><th>Meses Fallados</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--info)">📋 Informes faltantes</span> <span id="cFal" class="count-badge">0</span></h3><p style="color:var(--text-muted); margin-top:-5px;">Informes del mes anterior que todavía están dentro de los 20 días de gracia.</p><div class="table-container"><table class="table" id="tblFaltantes"><thead><tr><th>Nombre</th><th>Grupo</th><th>Informe pendiente</th><th>Plazo</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--warning)">⚠️ Irregulares</span> <span id="cIrr" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblIrregulares"><thead><tr><th>Nombre</th><th>Grupo</th><th>Meses Fallados</th></tr></thead><tbody></tbody></table></div></div>
         </section>
     </div>
 </div>
@@ -1114,14 +1182,30 @@
     let app, db;
     window.fbDoc = null;
     window.fbSetDoc = null;
+    window.fbUpdateDoc = null;
+    window.fbFieldPath = null;
     window.fbOnSnapshot = null;
     const DB_KEY = 'cong_pro_v108_master';
     const CRED_KEY = 'cong_pro_firebase_creds';
     const $ = s => document.querySelector(s);
+    // Escapa cualquier dato antes de insertarlo en plantillas HTML. Los respaldos
+    // y Firestore son entradas no confiables, aunque hayan sido creados por la app.
+    const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+    const normalizePersonName = value => String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('es')
+        .replace(/[^a-z0-9ñ]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+    const safeInlineId = value => encodeURIComponent(String(value ?? ''));
     const ymKey = (y,m) => `${y}-${String(m).padStart(2,'0')}`;
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
-    const APP_VERSION = "1.3.1"; // <-- NUEVO: LA VERSIÓN ACTUAL DE LA APP
+    const APP_VERSION = "1.4.0";
+    window.versionBlocked = false;
     // ... debajo de const CICLO_S88 ...
 
     // NUEVO: Función para obtener el Año de Servicio actual
@@ -1132,6 +1216,55 @@
         return d.getMonth() >= 8 ? d.getFullYear() + 1 : d.getFullYear();
     };
 
+    function setDefaultMonthlySummaryPeriod() {
+        const today = new Date();
+        const target = today.getDate() <= 20
+            ? new Date(today.getFullYear(), today.getMonth() - 1, 1)
+            : new Date(today.getFullYear(), today.getMonth(), 1);
+        if ($('#resMonth')) $('#resMonth').value = target.getMonth() + 1;
+        if ($('#resYear')) $('#resYear').value = target.getFullYear();
+        return { year: target.getFullYear(), month: target.getMonth() + 1 };
+    }
+
+    function compareAppVersions(left, right) {
+        const a = String(left || '0').split('.').map(value => Number(value) || 0);
+        const b = String(right || '0').split('.').map(value => Number(value) || 0);
+        for (let index = 0; index < Math.max(a.length, b.length, 3); index++) {
+            if ((a[index] || 0) > (b[index] || 0)) return 1;
+            if ((a[index] || 0) < (b[index] || 0)) return -1;
+        }
+        return 0;
+    }
+
+    function enforceVersionPolicy() {
+        const config = state?.config || {};
+        const minimum = config.minimumVersion || '';
+        const latest = config.latestVersion || '';
+        const blocked = Boolean(minimum && compareAppVersions(APP_VERSION, minimum) < 0);
+        window.versionBlocked = blocked;
+        const modal = $('#modalAppUpdate');
+        if (!modal) return blocked;
+        const updateAvailable = Boolean(latest && compareAppVersions(APP_VERSION, latest) < 0);
+        if (blocked) {
+            currentSession = { role: null, group: null };
+            window.CURRENT_ROLE = 'LOCKED';
+            $('#app-content').style.display = 'none';
+            $('#modalAuth').style.display = 'none';
+            $('#updateModalTitle').textContent = 'Actualización obligatoria';
+            $('#updateModalMessage').textContent = `Esta versión (${APP_VERSION}) fue bloqueada por el administrador. Debes instalar la versión ${minimum} o una posterior para ingresar y guardar información.`;
+            $('#btnUpdateLater').style.display = 'none';
+            modal.style.display = 'flex';
+        } else if (updateAvailable) {
+            $('#updateModalTitle').textContent = '¡Nueva versión disponible!';
+            $('#updateModalMessage').textContent = `Está disponible la versión ${latest}. Te recomendamos actualizar la aplicación.`;
+            $('#btnUpdateLater').style.display = '';
+            modal.style.display = 'flex';
+        } else {
+            modal.style.display = 'none';
+        }
+        return blocked;
+    }
+
     // NUEVO: Convierte mes calendario a año correcto según el Año de Servicio elegido
     // targetYear: El año de servicio (ej: 2024). mes: 0-11
     const getYearForMonth = (targetYear, mesIndex) => {
@@ -1141,23 +1274,199 @@
         return targetYear;
     };
 
-    let currentSession = { role: 'admin', group: null }; // 👈 NUEVA VARIABLE DE SEGURIDAD
+    function getInactivityInfo(person, referenceDate = new Date()) {
+        const graceOpen = referenceDate.getDate() <= 20;
+        const firstFinalizedOffset = graceOpen ? 2 : 1;
+        let missingMonths = 0;
+        let lastActivity = '-';
+
+        for (let step = 0; step < 36; step++) {
+            const offset = firstFinalizedOffset + step;
+            let year = referenceDate.getFullYear();
+            let month = (referenceDate.getMonth() + 1) - offset;
+            while (month <= 0) { month += 12; year--; }
+
+            const key = ymKey(year, month);
+            if (person.inicio && key < person.inicio) break;
+
+            const report = state.activity[key]?.[person.id];
+            if (report && (report.horas > 0 || report.part)) {
+                lastActivity = `${MESES_NOM[month - 1]} ${year}`;
+                break;
+            }
+            if (step < 6) missingMonths++;
+        }
+
+        return { inactive: missingMonths >= 6, lastActivity, missingMonths };
+    }
+
+    const EVENT_LABELS = {
+        ingreso: 'Ingreso a la congregación',
+        salida: 'Salida de la congregación',
+        inactividad: 'Se hizo inactivo',
+        reactivacion: 'Reactivación',
+        registro_inicial: 'Inicio/Reactivación registrado anteriormente'
+    };
+
+    function addMemberEvent(person, type, date, origin = 'registrado', note = '') {
+        if (!person || !EVENT_LABELS[type] || !/^\d{4}-\d{2}(?:-\d{2})?$/.test(String(date || ''))) return false;
+        if (!Array.isArray(person.eventos)) person.eventos = [];
+        const normalizedDate = String(date).slice(0, 10);
+        if (person.eventos.some(event => event.type === type && event.date === normalizedDate)) return false;
+        person.eventos.push({
+            id: `${type}-${normalizedDate}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            type,
+            date: normalizedDate,
+            origin,
+            note
+        });
+        person.eventos.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+        return true;
+    }
+
+    function addMonthsToKey(key, amount) {
+        const [year, month] = key.split('-').map(Number);
+        const date = new Date(year, month - 1 + amount, 1);
+        return ymKey(date.getFullYear(), date.getMonth() + 1);
+    }
+
+    function rebuildCalculatedMemberEvents(referenceDate = new Date()) {
+        const finalizedOffset = referenceDate.getDate() <= 20 ? 2 : 1;
+        const lastFinalized = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - finalizedOffset, 1);
+        const lastKey = ymKey(lastFinalized.getFullYear(), lastFinalized.getMonth() + 1);
+        const activityKeys = Object.keys(state.activity || {}).filter(key => /^\d{4}-(0[1-9]|1[0-2])$/.test(key)).sort();
+
+        (state.personas || []).forEach(person => {
+            const keptEvents = Array.isArray(person.eventos)
+                ? person.eventos.filter(event => event && event.origin !== 'calculado')
+                : [];
+            person.eventos = keptEvents;
+
+            const hasInitialEvent = person.eventos.some(event => ['ingreso', 'registro_inicial'].includes(event.type));
+            if (!hasInitialEvent && /^\d{4}-(0[1-9]|1[0-2])$/.test(person.inicio || '')) {
+                addMemberEvent(person, 'registro_inicial', person.inicio, 'migrado', 'Procede del antiguo campo Inicio/Reactivación');
+            }
+            const participatedKeys = activityKeys.filter(key => {
+                const report = state.activity[key]?.[person.id];
+                return Boolean(report && (Number(report.horas) > 0 || report.part));
+            });
+            const explicitStartCandidates = person.eventos
+                .filter(event => ['ingreso', 'registro_inicial'].includes(event.type))
+                .map(event => String(event.date).slice(0, 7))
+                .filter(key => /^\d{4}-(0[1-9]|1[0-2])$/.test(key));
+            if (/^\d{4}-(0[1-9]|1[0-2])$/.test(person.inicio || '')) explicitStartCandidates.push(person.inicio);
+
+            // Para fichas antiguas sin una fecha de ingreso confiable, el
+            // seguimiento comienza con la primera participación confirmada.
+            // Los meses vacíos anteriores no prueban que estuvo inactivo y el
+            // primer informe nunca debe contarse como una reactivación.
+            const candidates = [...explicitStartCandidates, ...participatedKeys];
+            if (!candidates.length) return;
+
+            let key = candidates.sort()[0];
+            const exitKey = String(person.fsac || person.sacado || '').slice(0, 7);
+            const exitMonths = new Set(person.eventos.filter(event => event.type === 'salida').map(event => String(event.date).slice(0, 7)));
+            const returnMonths = new Set(person.eventos.filter(event => event.type === 'reactivacion' && event.origin !== 'calculado').map(event => String(event.date).slice(0, 7)));
+            let missing = 0;
+            let inactive = false;
+            let isMember = true;
+            person.eventos
+                .filter(event => event.origin !== 'calculado' && String(event.date).slice(0, 7) < key)
+                .sort((a,b) => String(a.date).localeCompare(String(b.date)))
+                .forEach(event => {
+                    if (event.type === 'salida') isMember = false;
+                    if (event.type === 'ingreso' || event.type === 'reactivacion') isMember = true;
+                });
+            if (/^\d{4}-(0[1-9]|1[0-2])$/.test(exitKey) && exitKey < key && ![...returnMonths].some(month => month > exitKey && month < key)) {
+                isMember = false;
+            }
+            let guard = 0;
+            while (key <= lastKey && guard++ < 600) {
+                if (exitMonths.has(key) || (exitKey && key === exitKey)) {
+                    isMember = false;
+                    missing = 0;
+                    inactive = false;
+                }
+                if (returnMonths.has(key)) isMember = true;
+                if (!isMember) {
+                    key = addMonthsToKey(key, 1);
+                    continue;
+                }
+                const report = state.activity[key]?.[person.id];
+                const participated = Boolean(report && (Number(report.horas) > 0 || report.part));
+                if (participated) {
+                    if (inactive) addMemberEvent(person, 'reactivacion', key, 'calculado', 'Detectada por un nuevo informe después de seis meses consecutivos sin informar');
+                    inactive = false;
+                    missing = 0;
+                } else if (!inactive) {
+                    missing++;
+                    if (missing === 6) {
+                        inactive = true;
+                        addMemberEvent(person, 'inactividad', key, 'calculado', 'Detectada después de seis meses consecutivos sin informar');
+                    }
+                }
+                key = addMonthsToKey(key, 1);
+            }
+            person.eventos.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+        });
+    }
+
+    function renderMemberEventHistory(person = null) {
+        const box = $('#boxHistorial');
+        if (!box) return;
+        if (!person) {
+            box.innerHTML = '<small>El historial de ingreso, salida, inactividad y reactivación aparecerá aquí después de guardar al miembro.</small>';
+            return;
+        }
+        rebuildCalculatedMemberEvents();
+        const events = Array.isArray(person.eventos) ? [...person.eventos].sort((a,b) => String(b.date).localeCompare(String(a.date))) : [];
+        box.innerHTML = `<label style="font-weight:bold; display:block; margin-bottom:6px;">Historial de eventos</label>${events.length
+            ? events.map(event => `<div style="padding:5px 0; border-top:1px solid var(--border-light);"><b>${escapeHTML(event.date)}</b> · ${escapeHTML(EVENT_LABELS[event.type] || event.type)}${event.origin === 'calculado' ? ' <small>(calculado)</small>' : ''}</div>`).join('')
+            : '<small>Todavía no hay eventos registrados.</small>'}`;
+    }
+
+    function wasRegularPioneer(person, year, month) {
+        const key = ymKey(year, month);
+        const start = person.prInicio || '';
+        const end = person.prFin || '';
+
+        // Compatibilidad con fichas antiguas que solo guardaban true/false.
+        if (!start && !end) return Boolean(person.pr);
+        if (start && key < start) return false;
+        if (end && key > end) return false;
+        return Boolean(person.pr || end);
+    }
+
+    let currentSession = { role: null, group: null };
+    const groupDirtyReports = new Set();
     let state = { personas: [], activity: {}, attendance: {}, config: { pwd: '12345', totalGroups: 5, groups: {} } };
-    let CURRENT_ROLE = 'ADMIN'; 
+    window.CURRENT_ROLE = 'LOCKED';
     let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
-    let actY = curY, actM = curM, asistY = curY, asistM = curM;
+    const previousMonthDate = new Date(curY, curM - 2, 1);
+    let actY = previousMonthDate.getFullYear(), actM = previousMonthDate.getMonth() + 1;
+    let asistY = curY, asistM = curM;
 
     // --- 🛡️ GUARDIA DE SEGURIDAD CENTRALIZADO ---
     window.canWrite = function(mostrarAviso = true) {
-        // Verificamos por la variable de rol, por la sesión y por la clase visual
-        if (window.CURRENT_ROLE === 'GUEST' || 
-           (window.currentSession && window.currentSession.role === 'guest') || 
-           document.body.classList.contains('guest-mode')) {
-            
-            if (mostrarAviso) alert("❌ Seguridad: Modo Invitado. No tienes permiso para modificar datos.");
-            return false; // ⛔ NO puede escribir
-        }
-        return true; // ✅ SÍ puede escribir
+        const allowed = currentSession && ['admin', 'group'].includes(currentSession.role) &&
+            !document.body.classList.contains('guest-mode') && !window.versionBlocked;
+        if (!allowed && mostrarAviso) alert("❌ Seguridad: no tienes permiso para modificar datos.");
+        return Boolean(allowed);
+    };
+    window.isAdmin = function(mostrarAviso = true) {
+        const allowed = currentSession && currentSession.role === 'admin' && window.CURRENT_ROLE === 'ADMIN';
+        if (!allowed && mostrarAviso) alert("❌ Seguridad: esta operación requiere acceso de administrador.");
+        return allowed;
+    };
+    window.canEditActivity = function(personId, mostrarAviso = true) {
+        if (!window.canWrite(mostrarAviso)) return false;
+        if (currentSession.role === 'admin') return true;
+
+        const person = state.personas.find(p => String(p.id) === String(personId));
+        const allowed = currentSession.role === 'group' && person &&
+            String(person.grupo) === String(currentSession.group);
+        if (!allowed && mostrarAviso) alert("❌ Seguridad: solo puedes modificar informes de tu grupo.");
+        return Boolean(allowed);
     };
     // --- 🔐 MOTOR DE ENCRIPTACIÓN DE CLAVES (SHA-256) ---
     window.hashPassword = async function(password) {
@@ -1170,17 +1479,44 @@
 
 
     // --- NUEVO SISTEMA DE GUARDADO LOCAL ULTRA-RÁPIDO (DEXIE) ---
-    const localDb = new Dexie("CongregacionProDB");
-    localDb.version(1).stores({
-        settings: 'key' 
-    });
+    const localDb = typeof Dexie !== 'undefined' ? new Dexie("CongregacionProDB") : null;
+    if (localDb) {
+        localDb.version(1).stores({ settings: 'key' });
+    } else {
+        console.error("Dexie no pudo cargarse; se usará almacenamiento de emergencia.");
+    }
+
+    async function loadLocalState() {
+        if (localDb) {
+            try {
+                const record = await localDb.settings.get("appState");
+                if (record && record.val) return record.val;
+            } catch (error) {
+                console.error("IndexedDB no está disponible; usando respaldo local.", error);
+            }
+        }
+        const fallback = localStorage.getItem(DB_KEY);
+        return fallback ? JSON.parse(fallback) : null;
+    }
+
+    async function saveLocalState() {
+        if (localDb) {
+            try {
+                await localDb.settings.put({ key: "appState", val: state });
+                return;
+            } catch (error) {
+                console.error("No se pudo guardar en IndexedDB; usando respaldo local.", error);
+            }
+        }
+        localStorage.setItem(DB_KEY, JSON.stringify(state));
+    }
 
 // --- FUNCIÓN PARA LLENAR AÑOS (2025 - 2026) ---
     function populateSelects() {
         const startYear = 2023; 
         const currentYear = new Date().getFullYear(); 
         const endYear = currentYear + 2; 
-        const selects = ['precAno', 's21Year', 's88Year'];
+        const selects = ['precAno', 's21Year', 's88Year', 's10Year'];
 
         selects.forEach(id => {
             const sel = document.getElementById(id);
@@ -1233,6 +1569,7 @@
     }
 
     window.copyRawToken = function() {
+        if (!window.isAdmin()) return;
         const k = $('#fbApiKey').value;
         const p = $('#fbProjectId').value;
         if(!k || !p) return alert("Primero debes conectar tu propia nube.");
@@ -1276,8 +1613,56 @@
             updateCloudUI(false, null, false); 
         }
         
-        loadGroupPassword();
+        if (window.isAdmin(false)) loadGroupPassword();
         if($('#totalGroupsInput')) $('#totalGroupsInput').value = state.config.totalGroups || 5;
+        const cong = state.config.congregacion || {};
+        $('#cfgCongNumero').value = cong.numero || '';
+        $('#cfgCongNombre').value = cong.nombre || '';
+        $('#cfgCongCiudad').value = cong.ciudad || '';
+        $('#cfgCongRegion').value = cong.region || '';
+        $('#cfgCongPais').value = cong.pais || '';
+        $('#cfgTotalTerritorios').value = Number.isInteger(cong.totalTerritorios) ? cong.totalTerritorios : '';
+        $('#cfgAceptaAyuda').value = cong.aceptaAyuda || '';
+        $('#cfgInstalledVersion').textContent = APP_VERSION;
+        $('#cfgLatestVersion').value = state.config.latestVersion || APP_VERSION;
+        $('#cfgMinimumVersion').value = state.config.minimumVersion || APP_VERSION;
+    };
+
+    window.saveCongregationSettings = function() {
+        if (!window.isAdmin()) return;
+        const rawTerritories = $('#cfgTotalTerritorios').value.trim();
+        const totalTerritorios = rawTerritories === '' ? null : Number(rawTerritories);
+        if (totalTerritorios !== null && (!Number.isInteger(totalTerritorios) || totalTerritorios < 0)) {
+            return alert("El total de territorios debe ser un número entero igual o mayor que cero.");
+        }
+        state.config.congregacion = {
+            ...(state.config.congregacion || {}),
+            numero: $('#cfgCongNumero').value.trim(),
+            nombre: $('#cfgCongNombre').value.trim(),
+            ciudad: $('#cfgCongCiudad').value.trim(),
+            region: $('#cfgCongRegion').value.trim(),
+            pais: $('#cfgCongPais').value.trim(),
+            totalTerritorios,
+            aceptaAyuda: $('#cfgAceptaAyuda').value
+        };
+        save();
+        showToast("Datos de la congregación guardados");
+    };
+
+    window.saveVersionPolicy = async function() {
+        if (!window.isAdmin()) return;
+        const latest = $('#cfgLatestVersion').value.trim();
+        const minimum = $('#cfgMinimumVersion').value.trim();
+        const validVersion = /^\d+\.\d+\.\d+$/;
+        if (!validVersion.test(latest) || !validVersion.test(minimum)) return alert('Usa versiones con formato X.Y.Z, por ejemplo 1.4.0.');
+        if (compareAppVersions(minimum, latest) > 0) return alert('La versión mínima no puede ser superior a la versión más reciente.');
+        if (compareAppVersions(minimum, APP_VERSION) > 0) return alert(`No puedes exigir ${minimum} desde una instalación ${APP_VERSION}. Actualiza primero esta aplicación.`);
+        if (!confirm(`¿Aplicar esta política?\n\nVersión reciente: ${latest}\nVersión mínima permitida: ${minimum}\n\nLas instalaciones inferiores a la mínima quedarán bloqueadas.`)) return;
+        state.config.latestVersion = latest;
+        state.config.minimumVersion = minimum;
+        await save();
+        enforceVersionPolicy();
+        showToast('Política de versiones guardada');
     };
     function updateCloudUI(connected, pid, updateHeader = true) {
         const card = $('#cloudStatusCard'); const title = $('#cloudTitle'); const desc = $('#cloudDesc'); const icon = $('#cloudIcon');
@@ -1311,6 +1696,7 @@
     }
 
     window.updateTotalGroups = function() {
+        if (!window.isAdmin()) return;
         const val = parseInt($('#totalGroupsInput').value);
         if(!val || val < 1 || val > 50) return alert("Entre 1 y 50.");
         state.config.totalGroups = val;
@@ -1320,19 +1706,23 @@
     }
 
     window.loadGroupPassword = function() {
+        if (!window.isAdmin()) return;
         if(!state.config.groups) state.config.groups = {};
         const gID = $('#groupSelector').value;
-        const currentPwd = state.config.groups[gID] || ('grupo' + gID); 
-        $('#groupPwdInput').value = currentPwd;
+        const input = $('#groupPwdInput');
+        input.value = '';
+        input.placeholder = state.config.groups[gID] ? 'Clave configurada' : `Predeterminada: grupo${gID}`;
     }
 
-    window.saveSingleGroupPassword = function() {
+    window.saveSingleGroupPassword = async function() {
+        if (!window.isAdmin()) return;
         if(!state.config.groups) state.config.groups = {};
         const gID = $('#groupSelector').value;
         const newPwd = $('#groupPwdInput').value.trim();
-        if(!newPwd) return alert("La clave no puede estar vacía");
-        state.config.groups[gID] = newPwd;
-        save();
+        if(newPwd.length < 4) return alert("La clave debe tener al menos 4 caracteres");
+        state.config.groups[gID] = await window.hashPassword(newPwd);
+        await save();
+        $('#groupPwdInput').value = '';
         showToast(`Clave del Grupo ${gID} guardada`);
     }
 
@@ -1341,6 +1731,7 @@
 // 1. GENERAR PLANTILLA "INTUITIVA" (DOBLE COLUMNA)
 // ==========================================
 window.downloadExcelTemplate = function() {
+    if (!window.isAdmin()) return;
     // Encabezados de Datos Personales
     const headersDatos = [
         "NOMBRE COMPLETO", "GRUPO (1-5)", "SEXO (H/M)", "F. NACIMIENTO", "F. BAUTISMO", 
@@ -1394,6 +1785,7 @@ window.downloadExcelTemplate = function() {
 // 2. IMPORTADOR MAESTRO (SIN SALIRSE DE LA APP)
 // ==========================================
 window.importFromExcel = function(input) {
+    if (!window.isAdmin()) { input.value = ''; return; }
     const file = input.files[0];
     if(!file) return;
 
@@ -1562,26 +1954,40 @@ function parseDate(val) {
         if($('#headerYear')) $('#headerYear').value = curY; 
         
         // El informe mensual (actYearInput) también suele ser calendario
-        if($('#actYearInput')) $('#actYearInput').value = curY; 
+        if($('#actMonthSelect')) $('#actMonthSelect').value = actM;
+        if($('#actYearInput')) $('#actYearInput').value = actY; 
         if($('#asistYearInput')) $('#asistYearInput').value = curY;
         if($('#resYear')) $('#resYear').value = curY;
+        setDefaultMonthlySummaryPeriod();
 
         // AQUÍ EL CAMBIO IMPORTANTE:
         // La Tarjeta (S-21) y el Registro (S-88) deben iniciar mostrando el AÑO DE SERVICIO
         if($('#s21Year')) $('#s21Year').value = currentServiceYear;
         if($('#s88Year')) $('#s88Year').value = currentServiceYear;
+        if($('#s10Year')) $('#s10Year').value = currentServiceYear;
+        if($('#precMes')) $('#precMes').value = new Date().getMonth();
         // ------------------        
         if($('#headerMonth')) $('#headerMonth').onchange = (e) => { curM=parseInt(e.target.value); renderAll(); };
         if($('#headerYear')) $('#headerYear').onchange = (e) => { curY=parseInt(e.target.value); renderAll(); };
         if($('#selGInforme')) $('#selGInforme').onchange = renderActividad;
-        if($('#actMonthSelect')) $('#actMonthSelect').onchange = (e) => { actM=parseInt(e.target.value); renderActividad(); };
-        if($('#actYearInput')) $('#actYearInput').onchange = (e) => { actY=parseInt(e.target.value); renderActividad(); };
+        if($('#actMonthSelect')) $('#actMonthSelect').onchange = (e) => {
+            actM=parseInt(e.target.value);
+            window.forceUnlock=false;
+            renderActividad();
+        };
+        if($('#actYearInput')) $('#actYearInput').onchange = (e) => {
+            actY=parseInt(e.target.value);
+            window.forceUnlock=false;
+            renderActividad();
+        };
         if($('#asistMonthSelect')) $('#asistMonthSelect').onchange = (e) => { asistM=parseInt(e.target.value); renderAsistInputs(); };
         if($('#asistYearInput')) $('#asistYearInput').onchange = (e) => { asistY=parseInt(e.target.value); renderAsistInputs(); };
         if($('#btnSearchRes')) $('#btnSearchRes').onclick = () => renderResumenMensual(parseInt($('#resYear').value), parseInt($('#resMonth').value));
         
         if($('#btnSaveP')) $('#btnSaveP').onclick = savePersona;
         if($('#btnDeleteP')) $('#btnDeleteP').onclick = deletePersona;
+        if($('#pSalidaPendiente')) $('#pSalidaPendiente').onchange = (event) => { if (event.target.checked) $('#pFSac').value = ''; };
+        if($('#pFSac')) $('#pFSac').onchange = (event) => { if (event.target.value) $('#pSalidaPendiente').checked = false; };
 // Lógica mejorada para el botón EDITAR
         if($('#btnQEdit')) $('#btnQEdit').onclick = () => { 
             const n = $('#qPersona').value.trim();
@@ -1600,12 +2006,9 @@ function parseDate(val) {
                 alert("❌ No se encontró a esa persona.\n\nAsegúrate de seleccionarla de la lista que aparece al escribir.");
             }
         };
-       if($('#btnSaveReports')) $('#btnSaveReports').onclick = () => { showToast("✅ Cambios guardados automáticamente"); };   
-       if($('#btnSaveAsist')) $('#btnSaveAsist').onclick = async () => {
-       await window.saveAttendanceAtomic(asistY, asistM);
-        showToast("Asistencia Guardada");
-    renderS88Preview();
-};        
+        if($('#btnSaveReports')) $('#btnSaveReports').onclick = () => { if (!window.canWrite()) return; save(); showToast("Guardado ☁️"); };
+        if($('#btnSaveAsist')) $('#btnSaveAsist').onclick = () => { if (!window.isAdmin()) return; save(); showToast("Asistencia Guardada"); renderS88Preview(); };
+        
         document.querySelectorAll('.tabs button').forEach(b => {
             b.onclick = () => {
                 document.querySelectorAll('.tabs button, .tab').forEach(el=>el.classList.remove('active'));
@@ -1614,9 +2017,13 @@ function parseDate(val) {
                 if(b.dataset.tab === 'actividad') renderActividad();
                 if(b.dataset.tab === 'asistencia') renderAsistInputs();
                 if(b.dataset.tab === 'precursores') { renderPrecursores(); }
-                if(b.dataset.tab === 'resumen') renderResumenMensual(parseInt($('#resYear').value), parseInt($('#resMonth').value));
+                if(b.dataset.tab === 'resumen') {
+                    const period = setDefaultMonthlySummaryPeriod();
+                    renderResumenMensual(period.year, period.month);
+                }
                 if(b.dataset.tab === 'sacados') renderSacados();
                 if(b.dataset.tab === 'inactivos') renderEstadoEspiritual();
+                if(b.dataset.tab === 's10') renderS10Annual();
                 if(b.dataset.tab === 'tarjeta') updateDatalist();
                 if(b.dataset.tab === 'lista_global') renderMiembros();
             };
@@ -1664,9 +2071,11 @@ function parseDate(val) {
         try {
             // 🚀 MAGIA: Descargamos Firebase oficial solo en este instante
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js");
-            const { getFirestore, doc, setDoc, updateDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");            
+            const { getFirestore, doc, setDoc, updateDoc, onSnapshot, FieldPath } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+            
             // Guardamos las herramientas globalmente para que la app las use
-            window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbUpdateDoc = updateDoc; window.fbOnSnapshot = onSnapshot;
+            window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbUpdateDoc = updateDoc; window.fbFieldPath = FieldPath; window.fbOnSnapshot = onSnapshot;
+
             const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
             
             if (!app) app = initializeApp(firebaseConfig);
@@ -1700,19 +2109,11 @@ function parseDate(val) {
                 if(!state.activity) state.activity = {};
                 if(!state.attendance) state.attendance = {};
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
+                rebuildCalculatedMemberEvents();
                 
-                if (state.config.latestVersion) {
-                    const currentV = APP_VERSION.split('.').map(Number);
-                    const cloudV = state.config.latestVersion.split('.').map(Number);
-                    let isOld = false;
-                    for (let i = 0; i < 3; i++) {
-                        if (cloudV[i] > (currentV[i] || 0)) { isOld = true; break; }
-                        if (cloudV[i] < (currentV[i] || 0)) { break; }
-                    }
-                    if (isOld) document.getElementById('modalAppUpdate').style.display = 'flex';
-                }
+                enforceVersionPolicy();
                 
-                try { await localDb.settings.put({ key: "appState", val: state }); } catch(e){}
+                try { await saveLocalState(); } catch(e){}
                 renderAll(); 
             } else { 
                 save(); 
@@ -1726,14 +2127,48 @@ function parseDate(val) {
     // 💾 FUNCIÓN MAESTRA DE GUARDADO (CON AVISOS)
     // ==========================================
     window.save = async function(silent = false) {
+        if (window.versionBlocked) {
+            if (!silent) alert('Esta versión está bloqueada. Actualiza la aplicación para guardar información.');
+            return false;
+        }
         try {
+            rebuildCalculatedMemberEvents();
             // 1. Guardar localmente
-            await localDb.settings.put({ key: "appState", val: state });
+            await saveLocalState();
             
             // 2. Subir a la Nube
             if (window.cloudConnected && db && window.fbSetDoc) {
                 try {
-                    await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state);
+                    if (currentSession.role === 'group') {
+                        if (!window.fbUpdateDoc || !window.fbFieldPath) throw new Error('Actualización segura no disponible');
+                        const updateArgs = [];
+                        const uploadedKeys = [];
+                        for (const dirtyKey of groupDirtyReports) {
+                            const separator = dirtyKey.indexOf('|');
+                            const monthKey = dirtyKey.slice(0, separator);
+                            const personId = dirtyKey.slice(separator + 1);
+                            const person = state.personas.find(item => String(item.id) === String(personId));
+                            if (!person || String(person.grupo) !== String(currentSession.group)) continue;
+                            const report = state.activity[monthKey]?.[personId] || {};
+                            const safeReport = {
+                                part: Boolean(report.part),
+                                horas: Math.max(0, Math.min(1000, Number(report.horas) || 0)),
+                                est: Math.max(0, Math.min(100, Math.trunc(Number(report.est) || 0))),
+                                pa: Boolean(report.pa),
+                                nota: String(report.nota || '').slice(0, 500)
+                            };
+                            updateArgs.push(new window.fbFieldPath('activity', monthKey, String(personId)), safeReport);
+                            uploadedKeys.push(dirtyKey);
+                        }
+                        if (updateArgs.length) {
+                            await window.fbUpdateDoc(window.fbDoc(db, "congregacion", "datos_generales"), ...updateArgs);
+                            uploadedKeys.forEach(key => groupDirtyReports.delete(key));
+                        }
+                    } else if (currentSession.role === 'admin') {
+                        await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state);
+                    } else {
+                        throw new Error('Rol sin permiso de escritura');
+                    }
                     console.log("✅ ÉXITO: Datos guardados en la Nube.");
                     if (!silent) showToast("☁️ Guardado en la Nube");
                 } catch (errorNube) {
@@ -1749,43 +2184,7 @@ function parseDate(val) {
             alert("Hubo un problema al guardar los datos en tu dispositivo.");
         }
     };
- window.saveActivityAtomic = async function(year, month, pid, payload) {
-    try {
-        await localDb.settings.put({ key: "appState", val: state });
-
-        if (window.cloudConnected && db && window.fbUpdateDoc) {
-            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-            await window.fbUpdateDoc(
-                window.fbDoc(db, "congregacion", "datos_generales"),
-                {
-                    [`activity.${monthKey}.${pid}`]: payload
-                }
-            );
-        }
-    } catch (e) {
-        console.error("Error guardando informe:", e);
-        showToast("⚠️ Error al guardar informe");
-    }
-};
-
-window.saveAttendanceAtomic = async function(year, month) {
-    try {
-        await localDb.settings.put({ key: "appState", val: state });
-
-        if (window.cloudConnected && db && window.fbUpdateDoc) {
-            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-            await window.fbUpdateDoc(
-                window.fbDoc(db, "congregacion", "datos_generales"),
-                {
-                    [`attendance.${monthKey}`]: state.attendance[monthKey]
-                }
-            );
-        }
-    } catch (e) {
-        console.error("Error guardando asistencia:", e);
-        showToast("⚠️ Error al guardar asistencia");
-    }
-};   
+    
 // --- SISTEMA DE RESCATE Y OLVIDO DE CLAVES ---
 window.handleForgotPwd = function() {
     // Si no tienen palabra de rescate, mostramos el mensaje antiguo
@@ -1801,23 +2200,30 @@ window.handleForgotPwd = function() {
     document.getElementById('modalResetPwd').style.display = 'flex';
 };
 
-window.saveRescueWord = function() {
+window.saveRescueWord = async function() {
+    if (!window.isAdmin()) return;
     const word = document.getElementById('pRescueWord').value.trim().toLowerCase();
-    if (word.length < 3) return alert("⚠️ La palabra debe tener al menos 3 letras.");
+    if (word.length < 6) return alert("⚠️ La palabra debe tener al menos 6 caracteres.");
     
     if(!window.state.config) window.state.config = {};
-    window.state.config.rescueWord = word;
-    window.save();
+    window.state.config.rescueWord = await window.hashPassword(word);
+    await window.save();
     
     document.getElementById('modalForceRescue').style.display = 'none';
     alert("✅ Palabra de rescate guardada. ¡No la olvides!");
 };
 
-window.verifyRescueWord = function() {
+window.verifyRescueWord = async function() {
     const tryWord = document.getElementById('pTryRescue').value.trim().toLowerCase();
     const realWord = window.state.config.rescueWord;
+    const hashedTryWord = await window.hashPassword(tryWord);
     
-    if (tryWord === realWord) {
+    if (hashedTryWord === realWord || tryWord === realWord) {
+        // Migra instalaciones antiguas que guardaban la palabra en texto plano.
+        if (tryWord === realWord) {
+            window.state.config.rescueWord = hashedTryWord;
+            await window.save(true);
+        }
         document.getElementById('stepRescue1').style.display = 'none';
         document.getElementById('stepRescue2').style.display = 'block';
     } else {
@@ -1825,19 +2231,20 @@ window.verifyRescueWord = function() {
     }
 };
 
-window.confirmNewAdminPwd = function() {
+window.confirmNewAdminPwd = async function() {
     const newPwd = document.getElementById('pNewAdminPwd').value.trim();
     if (newPwd.length < 4) return alert("❌ Mínimo 4 caracteres.");
     if (newPwd === '12345') return alert("❌ No uses la clave inicial.");
     
-    window.state.config.pwd = newPwd;
-    window.save();
+    window.state.config.pwd = await window.hashPassword(newPwd);
+    await window.save();
     
     document.getElementById('modalResetPwd').style.display = 'none';
     alert("✅ Clave restablecida. Vuelve a intentar entrar con tu nueva clave.");
 };
 // --- FUNCIÓN DE LOGIN MEJORADA (DETECTA ROL, GRUPO Y ENCRIPTACIÓN) ---
 window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
+    if (enforceVersionPolicy()) return alert('Debes actualizar la aplicación antes de ingresar.');
     console.log("🔵 Intentando acceder...");
 
     const input = document.getElementById('mPwd');
@@ -1926,7 +2333,8 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
 };
 
 // --- 3. FUNCIÓN DE CAMBIO DE CLAVE (INDEPENDIENTE) ---
-window.forceUpdatePassword = function() {
+window.forceUpdatePassword = async function() {
+    if (!window.isAdmin()) return;
     const input = document.getElementById('pForceNew');
     const newP = input ? input.value.trim() : "";
     if (newP.length < 4) return alert("❌ Mínimo 4 caracteres.");
@@ -1934,9 +2342,9 @@ window.forceUpdatePassword = function() {
     
     if(!window.state) window.state = {};
     if(!window.state.config) window.state.config = {};
-    window.state.config.pwd = newP;
+    window.state.config.pwd = await window.hashPassword(newP);
     
-    if (typeof window.save === 'function') { window.save(); }
+    if (typeof window.save === 'function') { await window.save(); }
     
     document.getElementById('modalForcePass').style.display = 'none';
     document.getElementById('modalAuth').style.display = 'none'; 
@@ -1966,6 +2374,11 @@ function enterApp() {
         badge.innerText = 'Administrador';
         badge.style.background = '#e0e7ff';
         badge.style.color = '#4338ca';
+
+        if (window.state.config.pwd === '12345') {
+            document.getElementById('modalForcePass').style.display = 'flex';
+            return;
+        }
         
         // --- 🛡️ SISTEMA DE ONBOARDING OBLIGATORIO (BLOQUEANTE) ---
         // Se ejecuta si no hay palabra de rescate guardada
@@ -2000,7 +2413,7 @@ function enterApp() {
 
    function renderAll() {
     renderGroupOptions();
-    if(CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderEstadoEspiritual(); renderPrecursores(); renderAsistInputs(); }
+    if(window.CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderEstadoEspiritual(); renderPrecursores(); renderAsistInputs(); }
     renderActividad();
     updateDatalist();
 }
@@ -2026,27 +2439,32 @@ window.renderActividad = function() {
     
    // 2. LÓGICA DE CONTROL (AÑO FUTURO + MES DE GRACIA)
         const hoy = new Date();
-        const anioActualReal = hoy.getFullYear();
         const diaDelMes = hoy.getDate(); 
         const difMeses = (hoy.getFullYear() - actY) * 12 + (hoy.getMonth() - (actM - 1));
         
         let esPasado = false;
-        let mensajeError = ""; // Aquí guardaremos el motivo real
+        let puedeDesbloquear = false;
+        let mensajeError = "";
 
-        if (actY > anioActualReal) {
+        if (difMeses < 0) {
             esPasado = true;
-            mensajeError = "🚫 INFORME FUTURO: Este año aún no ha comenzado.";
+            mensajeError = "🚫 INFORME FUTURO: No se pueden registrar meses futuros.";
+        } else if (difMeses === 0) {
+            esPasado = true;
+            mensajeError = "🚫 MES EN CURSO: Registra este informe durante los primeros 20 días del próximo mes.";
         } else if (difMeses > 1) {
             esPasado = true;
+            puedeDesbloquear = window.isAdmin(false);
             mensajeError = "🔒 MES CERRADO: Este es un informe antiguo.";
         } else if (difMeses === 1 && diaDelMes > 20) {
             esPasado = true;
+            puedeDesbloquear = window.isAdmin(false);
             mensajeError = "⏰ PLAZO VENCIDO: Los 20 días de gracia han terminado.";
         }
     
     // ESTADO DEL CANDADO: Bloqueado si es pasado Y no hemos pulsado el botón de desbloquear
 // BLOQUEO: Solo si es pasado Y no estamos en el periodo de gracia, ni se ha desbloqueado manualmente
-        const isLocked = esPasado && !window.forceUnlock;
+        const isLocked = esPasado && (!puedeDesbloquear || !window.forceUnlock);
     // 3. ACTUALIZAR INTERFAZ (Botón de Desbloqueo)
     // Buscamos si ya existe el aviso, si no lo creamos
     let lockBanner = document.getElementById('lockBanner');
@@ -2058,7 +2476,7 @@ window.renderActividad = function() {
     }
 
     if (esPasado) {
-        if (window.forceUnlock) {
+        if (puedeDesbloquear && window.forceUnlock) {
             lockBanner.innerHTML = `
                 <div style="background:#fef3c7; color:#92400e; padding:10px; border-radius:8px; border:1px solid #fcd34d; display:flex; justify-content:space-between; align-items:center;">
                     <span>🔓 <b>EDICIÓN HABILITADA:</b> Ten cuidado, estás modificando el historial.</span>
@@ -2070,15 +2488,15 @@ window.renderActividad = function() {
                         <span style="display: flex; align-items: center; gap: 8px;">
                             ${mensajeError}
                         </span>
-                        <button class="btn warning" onclick="window.forceUnlock=true; renderActividad();" style="font-size: 0.8rem; padding: 6px 12px;">
+                        ${puedeDesbloquear ? `<button class="btn warning" onclick="window.forceUnlock=true; renderActividad();" style="font-size: 0.8rem; padding: 6px 12px;">
                             🔓 Desbloquear
-                        </button>
+                        </button>` : ''}
                     </div>`;
         }
         lockBanner.style.display = 'block';
     } else {
         lockBanner.style.display = 'none';
-        window.forceUnlock = false; // Resetear si volvemos al mes actual
+        window.forceUnlock = false;
     }
 
     // 4. GENERAR TABLA
@@ -2088,7 +2506,7 @@ window.renderActividad = function() {
     const cEl = document.getElementById('cAct'); if(cEl) cEl.innerText = `(${list.length})`;
     
     if(list.length === 0) { 
-        tb.innerHTML = `<tr><td colspan="6" style="padding:25px; text-align:center; color:#6b7280;">No hay miembros en el Grupo ${g}.</td></tr>`; 
+        tb.innerHTML = `<tr><td colspan="6" style="padding:25px; text-align:center; color:#6b7280;">No hay miembros en el Grupo ${escapeHTML(g)}.</td></tr>`; 
         return; 
     }
 
@@ -2098,62 +2516,88 @@ window.renderActividad = function() {
 
     list.forEach(p => {
         const r = state.activity[k]?.[p.id] || {part:false, horas:0, est:0, pa:false, nota:''};
+        const safeId = safeInlineId(p.id);
         
         tb.innerHTML += `
             <tr>
-                <td style="font-weight:600; color:#374151;">${p.nombre}</td>
+                <td style="font-weight:600; color:#374151;">${escapeHTML(p.nombre)}</td>
                 
                 <td style="text-align:center;">
                     <input type="checkbox" ${r.part?'checked':''} ${disableAttr} 
-                    onchange="updAct('${p.id}','part',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
+                    onchange="updAct(decodeURIComponent('${safeId}'),'part',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
                 </td>
                 
                 <td style="text-align:center;">
-                    <input type="number" value="${r.horas}" ${disableAttr} 
-                    onchange="updAct('${p.id}','horas',this.value)" 
+                    <input type="number" value="${escapeHTML(r.horas)}" ${disableAttr} 
+                    onchange="updAct(decodeURIComponent('${safeId}'),'horas',this.value)" 
                     style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
                 </td>
                 
                 <td style="text-align:center;">
-                    <input type="number" value="${r.est}" ${disableAttr} 
-                    onchange="updAct('${p.id}','est',this.value)" 
+                    <input type="number" value="${escapeHTML(r.est)}" ${disableAttr} 
+                    onchange="updAct(decodeURIComponent('${safeId}'),'est',this.value)" 
                     style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
                 </td>
                 
                 <td style="text-align:center;">
                     <input type="checkbox" ${r.pa?'checked':''} ${disableAttr} 
-                    onchange="updAct('${p.id}','pa',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
+                    onchange="updAct(decodeURIComponent('${safeId}'),'pa',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
                 </td>
                 
                 <td>
-                    <input type="text" value="${r.nota||''}" ${disableAttr} 
-                    onchange="updAct('${p.id}','nota',this.value)" placeholder="..." 
+                    <input type="text" value="${escapeHTML(r.nota || '')}" ${disableAttr} 
+                    onchange="updAct(decodeURIComponent('${safeId}'),'nota',this.value)" placeholder="..." 
                     style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:4px; ${styleAttr}">
                 </td>
             </tr>`;
     });
 };
 
-    window.updAct = async (pid, f, v) => { 
-    if (!window.canWrite(false)) return;
-
-    const k = ymKey(actY, actM); 
-    if (!state.activity[k]) state.activity[k] = {};
-    if (!state.activity[k][pid]) {
-        state.activity[k][pid] = { part:false, horas:0, est:0, pa:false, nota:'' };
+    window.updAct = (pid, f, v) => { 
+        if (!window.canEditActivity(pid)) return;
+        if (!['part', 'horas', 'est', 'pa', 'nota'].includes(f)) return;
+        const hoy = new Date();
+        const difMeses = (hoy.getFullYear() - actY) * 12 + (hoy.getMonth() - (actM - 1));
+        if (difMeses < 0) {
+            alert("❌ No se pueden guardar informes en meses futuros.");
+            renderActividad();
+            return;
+        }
+        if (difMeses === 0) {
+            alert("❌ El mes en curso no se puede registrar todavía.");
+            renderActividad();
+            return;
+        }
+        const adminHistoricalUnlock = window.isAdmin(false) && window.forceUnlock;
+        if ((difMeses > 1 || (difMeses === 1 && hoy.getDate() > 20)) && !adminHistoricalUnlock) {
+            alert("❌ El plazo de registro terminó. Desbloquea el mes manualmente para editarlo.");
+            renderActividad();
+            return;
+        }
+        const k = ymKey(actY, actM); 
+        if(!state.activity[k]) state.activity[k] = {}; 
+        if(!state.activity[k][pid]) state.activity[k][pid] = {part:false, horas:0, est:0, pa:false}; 
+        state.activity[k][pid][f] = (f==='pa'||f==='part'||f==='nota') ? v : parseFloat(v||0); 
+        if (currentSession.role === 'group') groupDirtyReports.add(`${k}|${pid}`);
+        save(); 
     }
 
-    state.activity[k][pid][f] = (f === 'pa' || f === 'part' || f === 'nota')
-        ? v
-        : parseFloat(v || 0);
-
-    await window.saveActivityAtomic(actY, actM, pid, state.activity[k][pid]);
-   }
-    
-
    window.savePersona = function() {
-    if (!window.canWrite()) return;
+    if (!window.isAdmin()) return;
     const id = $('#pId').value, n = $('#pNombre').value.trim();
+    const existingPerson = id ? state.personas.find(person => person.id == id) : null;
+
+    if (!n) return alert("❌ El nombre del miembro es obligatorio.");
+    const normalizedName = normalizePersonName(n);
+    const shouldCheckDuplicate = !existingPerson || normalizePersonName(existingPerson.nombre) !== normalizedName;
+    const duplicatePerson = shouldCheckDuplicate
+        ? state.personas.find(person => String(person.id) !== String(id || '') && normalizePersonName(person.nombre) === normalizedName)
+        : null;
+    if (duplicatePerson) {
+        return alert(`❌ Ya existe un publicador con este nombre:\n\n${duplicatePerson.nombre} — Grupo ${duplicatePerson.grupo}\n\nBusca y edita esa ficha en lugar de crear otra.`);
+    }
+    const exitDateValue = $('#pFSac').value;
+    const pendingExitDate = $('#pSalidaPendiente').checked && !exitDateValue;
      
     // 1. Recopilamos los datos (Igual que antes)
     const data = {
@@ -2165,23 +2609,77 @@ window.renderActividad = function() {
         nac: $('#pNac').value,
         bau: $('#pBau').value,
         inicio: $('#pInicio').value, 
-        fsac: $('#pFSac').value,
+        fsac: exitDateValue,
+        salidaPendiente: pendingExitDate,
+        excluirS10Desde: pendingExitDate ? (existingPerson?.excluirS10Desde || `${getServiceYear() - 1}-09`) : (existingPerson?.excluirS10Desde || ''),
         pr: $('#pPR').checked,
+        prInicio: $('#pPRInicio').value,
+        prFin: $('#pPRFin').value,
         anciano: $('#pAnc').checked,
         sm: $('#pSM').checked,
         pe: $('#pPE').checked,
+        sordoSenas: $('#pSordoSenas').checked,
+        ciego: $('#pCiego').checked,
+        confinado: $('#pConfinado').checked,
         // Agrego protección por si estos campos no existen en todos lados
         mis: $('#pMis') ? $('#pMis').checked : false, 
-        sacado: $('#pFSac').value 
+        sacado: exitDateValue || pendingExitDate
     };
+
+    const originalGroup = $('#pOriginalGrupo').value;
+    if (!data.grupo) return alert('Selecciona el grupo correcto antes de guardar.');
+    if (existingPerson && originalGroup && String(data.grupo) !== originalGroup) {
+        if (!confirm(`¿Confirmas el cambio de grupo de ${n}?\n\nGrupo anterior: ${originalGroup}\nGrupo nuevo: ${data.grupo}`)) return;
+    }
+
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const currentMonth = todayKey.slice(0, 7);
+    if (data.nac && data.nac > todayKey) return alert("❌ La fecha de nacimiento no puede ser futura.");
+    if (data.bau && data.bau > todayKey) return alert("❌ La fecha de bautismo no puede ser futura.");
+    if (data.nac && data.bau && data.bau < data.nac) return alert("❌ La fecha de bautismo no puede ser anterior al nacimiento.");
+    if (data.fsac && data.fsac > todayKey) return alert("❌ La fecha de salida no puede ser futura.");
+    if (data.inicio && data.inicio > currentMonth) return alert("❌ Inicio/Reactivación no puede ser un mes futuro.");
+    if (data.prInicio && data.prInicio > currentMonth) return alert("❌ El inicio como precursor no puede ser futuro.");
+    if (data.prFin && data.prFin > currentMonth) return alert("❌ El último mes como precursor no puede ser futuro.");
+    if (data.prInicio && data.prFin && data.prFin < data.prInicio) {
+        return alert("❌ El último mes como precursor no puede ser anterior al inicio.");
+    }
+    if (data.pr) {
+        if (!data.prInicio && !existingPerson?.pr) data.prInicio = currentMonth;
+        data.prFin = '';
+    } else if (existingPerson?.pr && !data.prFin) {
+        return alert("❌ Indica el último mes en que sirvió como precursor regular.");
+    }
+
+    if (existingPerson?.sacado && !data.sacado) {
+        const currentMonth = ymKey(new Date().getFullYear(), new Date().getMonth() + 1);
+        const exitMonth = String(existingPerson.fsac || existingPerson.sacado).slice(0, 7);
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(data.inicio)) {
+            return alert("❌ Para reactivar a esta persona debes indicar un mes válido en Inicio/Reactivación.");
+        }
+        if (data.inicio > currentMonth) return alert("❌ La reactivación no puede ser futura.");
+        if (exitMonth && data.inicio < exitMonth) return alert("❌ La reactivación no puede ser anterior a la fecha de salida.");
+    }
 
     // 2. Guardamos (Lógica ajustada a TU código original)
     if(id) {
-        // Es una EDICIÓN: Buscamos y actualizamos
+        // Es una EDICIÓN: conservamos cualquier campo existente que no
+        // pertenezca al formulario y actualizamos solo la ficha editable.
         const index = state.personas.findIndex(x => x.id == id);
-        if(index >= 0) state.personas[index] = data;
+        if(index < 0) return alert("❌ No se encontró el miembro que intentas editar.");
+        const wasRemoved = Boolean(state.personas[index].sacado || state.personas[index].fsac || state.personas[index].salidaPendiente);
+        const previousExitDate = String(state.personas[index].fsac || '');
+        state.personas[index] = { ...state.personas[index], ...data, id: state.personas[index].id };
+        const updatedPerson = state.personas[index];
+        if (data.fsac && previousExitDate !== data.fsac) {
+            addMemberEvent(updatedPerson, 'salida', data.fsac, 'registrado');
+        } else if (wasRemoved && !data.sacado) {
+            addMemberEvent(updatedPerson, 'reactivacion', data.inicio, 'registrado', 'Reactivación indicada al editar la ficha');
+        }
     } else {
         // Es NUEVO: Lo agregamos a la lista
+        addMemberEvent(data, 'ingreso', data.inicio || currentMonth, 'registrado');
+        if (data.fsac) addMemberEvent(data, 'salida', data.fsac, 'registrado');
         state.personas.push(data);
         
  // --- CORRECCIÓN INTELIGENTE: GUARDAR HISTORIAL ---
@@ -2191,16 +2689,8 @@ window.renderActividad = function() {
             checks.forEach(check => {
                 const mes = parseInt(check.value);
                 
-                // --- LÓGICA INTELIGENTE DE AÑO ---
-                // Si el mes seleccionado es MAYOR al mes actual real, 
-                // asumimos que fue el año pasado.
-                let anioDestino = actY; 
-                const fechaHoy = new Date();
-                
-                if (actY === fechaHoy.getFullYear() && mes > fechaHoy.getMonth()) {
-                    anioDestino = actY - 1;
-                }
-                // ----------------------------------
+                // El historial pertenece al ciclo de servicio actual.
+                const anioDestino = getYearForMonth(getServiceYear(), mes - 1);
 
                 const k = ymKey(anioDestino, mes); 
 
@@ -2229,8 +2719,7 @@ window.renderActividad = function() {
     if(window.showToast) showToast("Guardado correctamente"); else alert("Guardado");
 };
    window.deletePersona = function() { 
-        // 🛡️ SEGURIDAD REAL: Prohibir borrado a invitados
-        if (!window.canWrite()) return; // 🛡️ El guardia ya muestra el alert
+        if (!window.isAdmin()) return;
 
         const id = $('#pId').value; 
         if(!id) return; 
@@ -2246,14 +2735,16 @@ window.renderActividad = function() {
     
 window.resetPForm = function() { 
         $('#pId').value=''; 
+        $('#pOriginalGrupo').value='';
         $('#pNombre').value=''; 
         // 👇 AQUI AGREGAMOS 'pInicio' A LA LISTA DE LIMPIEZA
-        ['pNac','pBau','pFSac','pInicio','pSexo','pEsp'].forEach(id=>$('#'+id).value=''); 
-        ['pAnc','pSM','pPE','pMis','pPR'].forEach(id=>$('#'+id).checked=false); 
+        ['pNac','pBau','pFSac','pInicio','pPRInicio','pPRFin','pSexo','pEsp'].forEach(id=>$('#'+id).value=''); 
+        ['pAnc','pSM','pPE','pMis','pPR','pSordoSenas','pCiego','pConfinado','pSalidaPendiente'].forEach(id=>$('#'+id).checked=false); 
         $('#btnCancelEdit').style.display='none'; 
         $('#btnDeleteP').style.display='none'; 
         $('#btnSaveP').textContent = '💾 Guardar Miembro'; 
         $('#btnSaveP').className = 'btn primary'; 
+        renderMemberEventHistory();
     }    
     window.renderMiembros = function() { 
         const tb=$('#tblMiembros tbody'); if(!tb)return; tb.innerHTML=''; 
@@ -2261,7 +2752,8 @@ window.resetPForm = function() {
         const cEl = $('#cGen'); if(cEl) cEl.innerText = `(${list.length})`;
         list.forEach(p=>{ 
             const tr=document.createElement('tr'); 
-            tr.innerHTML=`<td><div style="font-weight:700;">${p.nombre}</div><div style="font-size:0.75rem; color:var(--text-muted);">${getPrivilegesString(p)}</div></td><td><span style="background:#f3f4f6; padding:2px 8px; border-radius:4px; font-weight:600;">G${p.grupo}</span></td><td><button class="btn ghost" style="padding:4px 8px; font-size:0.8rem;" onclick="editP('${p.id}')">✏️ Editar</button></td>`; 
+            const safeId = safeInlineId(p.id);
+            tr.innerHTML=`<td><div style="font-weight:700;">${escapeHTML(p.nombre)}</div><div style="font-size:0.75rem; color:var(--text-muted);">${escapeHTML(getPrivilegesString(p))}</div></td><td><span style="background:#f3f4f6; padding:2px 8px; border-radius:4px; font-weight:600;">G${escapeHTML(p.grupo)}</span></td><td><button class="btn ghost" style="padding:4px 8px; font-size:0.8rem;" onclick="editP(decodeURIComponent('${safeId}'))">✏️ Editar</button></td>`; 
             tb.appendChild(tr); 
         }); 
     }
@@ -2271,18 +2763,28 @@ window.resetPForm = function() {
 // FUNCIÓN EDITAR (CON CAMBIO DE PESTAÑA AUTOMÁTICO)
 // ==========================================
 window.editP = (id) => {
+    if (!window.isAdmin()) return;
     const p = state.personas.find(x => x.id === id); 
     if (!p) return;
 
     // 1. LLENAR LOS CAMPOS DEL FORMULARIO
     $('#pId').value = p.id;
     $('#pNombre').value = p.nombre;
+    const savedGroup = String(p.grupo ?? '').replace(/^Grupo\s*/i, '').trim();
+    const groupSelect = $('#pGrupo');
+    if (savedGroup && !Array.from(groupSelect.options).some(option => option.value === savedGroup)) {
+        groupSelect.add(new Option(`Grupo ${savedGroup}`, savedGroup));
+    }
+    groupSelect.value = savedGroup;
+    $('#pOriginalGrupo').value = savedGroup;
     $('#pSexo').value = p.sexo;
     $('#pEsp').value = p.esp;
     $('#pNac').value = p.nac || '';
     $('#pBau').value = p.bau || '';
     $('#pInicio').value = p.inicio || ''; 
     $('#pFSac').value = p.fsac || '';
+    $('#pPRInicio').value = p.prInicio || '';
+    $('#pPRFin').value = p.prFin || '';
 
     // Privilegios
     $('#pPR').checked = !!p.pr;
@@ -2290,6 +2792,11 @@ window.editP = (id) => {
     $('#pSM').checked = !!p.sm;
     $('#pPE').checked = !!p.pe;
     if($('#pMis')) $('#pMis').checked = !!p.mis; 
+    $('#pSordoSenas').checked = !!p.sordoSenas;
+    $('#pCiego').checked = !!p.ciego;
+    $('#pConfinado').checked = !!p.confinado;
+    $('#pSalidaPendiente').checked = !!p.salidaPendiente;
+    renderMemberEventHistory(p);
 
     // 2. CAMBIAR A LA PESTAÑA DE GESTIÓN (ID "personas")
     // Desactivamos todas las pestañas primero
@@ -2312,12 +2819,28 @@ window.editP = (id) => {
     // 4. IR AL INICIO DE LA PÁGINA
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-    window.updateDatalist = function() { const l=$('#pList'); if(l){ l.innerHTML = ''; state.personas.forEach(p => l.innerHTML += `<option value="${p.nombre}">`); } }
-    window.showToast = function(m) { const t=$('#toast'); t.innerHTML = `<span>${m}</span>`; t.style.display='block'; setTimeout(()=>t.style.display='none', 3000); }
+    window.updateDatalist = function() {
+        const l = $('#pList');
+        if (!l) return;
+        l.replaceChildren(...state.personas.map(p => {
+            const option = document.createElement('option');
+            option.value = String(p.nombre ?? '');
+            return option;
+        }));
+    }
+    window.showToast = function(m) {
+        const t = $('#toast');
+        const span = document.createElement('span');
+        span.textContent = String(m ?? '');
+        t.replaceChildren(span);
+        t.style.display='block';
+        setTimeout(()=>t.style.display='none', 3000);
+    }
     // ==========================================
 // EXPORTADOR DE RESPALDOS (JSON) - SEGURO
 // ==========================================
 window.exportBackup = async function() {
+    if (!window.canWrite()) return;
     const isApp = window.hasOwnProperty('Capacitor');
     
     // 1. Crear una copia profunda de los datos para no afectar la app en vivo
@@ -2393,12 +2916,11 @@ window.exportBackup = async function() {
    
     // --- FUNCIÓN PARA ABRIR EL MODAL Y MOSTRAR CLAVE ACTUAL ---
 window.openPwdModal = function() {
-    // 1. Buscamos la clave guardada (o 'visita' si es nueva instalación)
-    const currentGuest = (window.state.config && window.state.config.guestPwd) ? window.state.config.guestPwd : 'visita';
-    
-    // 2. La escribimos en la etiqueta <b> del modal
+    if (!window.isAdmin()) return;
+    // Los hashes no son contraseñas recuperables y nunca deben mostrarse.
+    const guestConfigured = Boolean(window.state.config && window.state.config.guestPwd);
     const label = document.getElementById('lblShowGuest');
-    if(label) label.innerText = currentGuest;
+    if(label) label.innerText = guestConfigured ? 'configurada' : 'predeterminada';
     
     // 3. Limpiamos los inputs para que estén vacíos y listos para escribir
     document.getElementById('pNew').value = '';
@@ -2411,6 +2933,7 @@ window.openPwdModal = function() {
 // };  <-- Cierra la función anterior
 // --- 3. FUNCIÓN DE CAMBIO DE CLAVE (MEJORADA PARA INVITADO) ---
 window.updatePassword = async function() {
+    if (!window.isAdmin()) return;
     console.log("🔵 Guardando claves...");
     
     const inputAdmin = document.getElementById('pNew');
@@ -2460,12 +2983,70 @@ window.updatePassword = async function() {
         const tb=$('#tblSacados tbody');if(!tb)return;tb.innerHTML='';
         const list = state.personas.filter(p=>p.sacado);
         const cEl = $('#cSac'); if(cEl) cEl.innerText = `(${list.length})`;
-        list.forEach(p=>{tb.innerHTML+=`<tr><td>${p.nombre}</td><td>${p.bau||'-'}</td><td style="color:var(--danger)">${p.fsac||'-'}</td></tr>`;});
+        list.forEach(p=>{
+            const safeId = safeInlineId(p.id);
+            const exitDisplay = p.salidaPendiente ? 'Pendiente de fecha' : (p.fsac || '-');
+            tb.innerHTML+=`<tr><td>${escapeHTML(p.nombre)}</td><td>${escapeHTML(p.bau||'-')}</td><td style="color:var(--danger)">${escapeHTML(exitDisplay)}</td><td><button class="btn success" style="padding:6px 10px; font-size:0.8rem;" onclick="reactivatePerson(decodeURIComponent('${safeId}'))">↩️ Reactivar</button></td></tr>`;
+        });
+    }
+
+    window.reactivatePerson = async function(id) {
+        if (!window.isAdmin()) return;
+        const person = state.personas.find(p => String(p.id) === String(id));
+        if (!person || !person.sacado) return alert("❌ No se encontró una persona sacada con ese identificador.");
+
+        const now = new Date();
+        const currentMonth = ymKey(now.getFullYear(), now.getMonth() + 1);
+        const exitMonth = String(person.fsac || '').slice(0, 7);
+        const reactivationMonth = prompt(
+            `REACTIVAR A ${person.nombre}\n\nEscribe el mes de regreso en formato AAAA-MM:`,
+            currentMonth
+        );
+        if (reactivationMonth === null) return;
+
+        const month = reactivationMonth.trim();
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+            return alert("❌ Formato inválido. Usa AAAA-MM, por ejemplo 2026-08.");
+        }
+        if (month > currentMonth) return alert("❌ El mes de reactivación no puede ser futuro.");
+        if (exitMonth && month < exitMonth) return alert("❌ La reactivación no puede ser anterior a la fecha de salida.");
+        if (!confirm(`¿Confirmas la reactivación de ${person.nombre} desde ${month}?\n\nSe conservará todo su historial anterior.`)) return;
+
+        person.fsac = '';
+        person.sacado = '';
+        person.salidaPendiente = false;
+        person.inicio = month;
+        addMemberEvent(person, 'reactivacion', month, 'registrado', 'Reactivación realizada desde la lista de sacados');
+        await save();
+        renderAll();
+        showToast("✅ Persona reactivada correctamente");
     }
     
 // ==========================================
 // FUNCIÓN MAESTRA: Lee el botón "Ver Datos"
 // ==========================================
+window.renderAuxiliaresMes = function(serviceYear, monthIndex) {
+    const tbody = document.querySelector('#tblAuxMes tbody');
+    if (!tbody) return;
+    const selectedServiceYear = Number(serviceYear) || getServiceYear();
+    const selectedMonthIndex = Number.isInteger(Number(monthIndex)) ? Number(monthIndex) : new Date().getMonth();
+    const calendarYear = getYearForMonth(selectedServiceYear, selectedMonthIndex);
+    const key = ymKey(calendarYear, selectedMonthIndex + 1);
+    const list = state.personas.filter(person => {
+        const report = state.activity[key]?.[person.id];
+        return Boolean(report?.pa) && isMemberInS10Month(person, key);
+    }).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+    const counter = $('#cAuxMes');
+    if (counter) counter.textContent = `(${list.length})`;
+    const label = $('#auxMonthLabel');
+    if (label) label.textContent = `${MESES_NOM[selectedMonthIndex]} ${calendarYear}`;
+    tbody.innerHTML = list.length ? list.map(person => {
+        const report = state.activity[key]?.[person.id] || {};
+        return `<tr><td><b>${escapeHTML(person.nombre)}</b></td><td>G${escapeHTML(person.grupo)}</td><td>${escapeHTML(Number(report.horas) || 0)}</td></tr>`;
+    }).join('') : '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Nadie figura como precursor auxiliar en este mes.</td></tr>';
+};
+
 window.renderAllPrecursores = function() {
     // 1. LEER lo que el usuario seleccionó en las cajitas
     const elAno = document.getElementById('precAno');
@@ -2490,6 +3071,7 @@ window.renderAllPrecursores = function() {
     // 3. EJECUTAR la búsqueda con los datos correctos
     console.log("Buscando datos para:", y, m); 
     window.renderPrecursores(y, m);
+    window.renderAuxiliaresMes(y, m);
     
 
 };
@@ -2520,7 +3102,9 @@ window.renderPrecursores = function(yearIn, monthIn) {
     // 2. CONFIGURAR FECHAS
     let curY = parseInt(yearIn);
     let curM = parseInt(monthIn);
-    if (!curY || isNaN(curY)) { const d = new Date(); curY = d.getFullYear(); curM = d.getMonth(); }
+    if (!curY || isNaN(curY)) curY = parseInt($('#precAno')?.value) || getServiceYear();
+    if (isNaN(curM)) curM = parseInt($('#precMes')?.value);
+    if (isNaN(curM)) curM = new Date().getMonth();
 
     const selectedServiceIndex = (curM >= 8) ? (curM - 8) : (curM + 4);
     
@@ -2529,13 +3113,20 @@ window.renderPrecursores = function(yearIn, monthIn) {
     const valorMesHoy = (hoyReal.getFullYear() * 12) + hoyReal.getMonth();
     const anioDelMesSeleccionado = (curM >= 8) ? curY - 1 : curY;
     const valorMesSeleccionado = (anioDelMesSeleccionado * 12) + curM;
+    const selectedMonthKey = ymKey(anioDelMesSeleccionado, curM + 1);
     const esMesPasado = valorMesSeleccionado < valorMesHoy;
     const mesesACobrar = esMesPasado ? (selectedServiceIndex + 1) : selectedServiceIndex;
 
     // 3. OBTENER DATOS
     if (!state || !state.personas) return;
-    const list = state.personas.filter(p => (p.pr || p.pa) && !p.sacado).sort((a,b) => a.nombre.localeCompare(b.nombre));
+    const list = state.personas.filter(p =>
+        !p.sacado && (
+            wasRegularPioneer(p, anioDelMesSeleccionado, curM + 1) ||
+            state.activity[selectedMonthKey]?.[p.id]?.pa
+        )
+    ).sort((a,b) => a.nombre.localeCompare(b.nombre));
     const cEl = document.getElementById('cPre'); if (cEl) cEl.innerText = list.length;
+    window.renderAuxiliaresMes(curY, curM);
 
     if (list.length === 0) {
         tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#9ca3af;">No hay datos.</td></tr>';
@@ -2547,6 +3138,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
     const cicloMeses = [8,9,10,11,0,1,2,3,4,5,6,7]; 
 
     list.forEach(p => {
+        const isRegularSelected = wasRegularPioneer(p, anioDelMesSeleccionado, curM + 1);
         let totalSincronizado = 0;
         let detalleCampo = 0;
         let detalleLDC = 0;
@@ -2558,6 +3150,10 @@ window.renderPrecursores = function(yearIn, monthIn) {
 
                 if (state.activity[key] && state.activity[key][p.id]) {
                     const reg = state.activity[key][p.id];
+                    const countsForPioneer = isRegularSelected
+                        ? wasRegularPioneer(p, calculatedYear, m + 1)
+                        : Boolean(reg.pa);
+                    if (!countsForPioneer) return;
                     let h = parseFloat(reg.horas) || 0;
                     
                     // 🔥 CORRECCIÓN AQUÍ: Leemos 'nota' (singular) O 'notas' (plural)
@@ -2585,14 +3181,14 @@ window.renderPrecursores = function(yearIn, monthIn) {
         });
 
         // --- CÁLCULOS ---
-        const metaBase = (p.pr) ? 50 : 30; 
+        const metaBase = isRegularSelected ? 50 : 30; 
         const metaIdeal = mesesACobrar * metaBase;
         const diff = totalSincronizado - metaIdeal;
 
         // Semáforo
         let statusColor = '#dc2626'; let statusBg = '#fef2f2'; let statusIcon = '⚠️'; let statusText = `Atraso ${diff}`;
 
-        if (p.pr && totalSincronizado >= 600) {
+        if (isRegularSelected && totalSincronizado >= 600) {
             statusColor = '#16a34a'; statusBg = '#dcfce7'; statusIcon = '🏆'; statusText = 'LOGRADO';
         } else if (diff >= 0) {
             statusColor = '#2563eb'; statusBg = '#eff6ff'; statusIcon = '👍'; statusText = `Bien (+${diff})`;
@@ -2600,7 +3196,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
 
         // Meta Anual
         let htmlMetaAnual = '';
-        if (p.pr) { 
+        if (isRegularSelected) { 
             const faltan = 600 - totalSincronizado;
             if (faltan <= 0) {
                 htmlMetaAnual = `<span style="color:#16a34a; font-weight:800; font-size:0.8rem;">¡COMPLETADA!</span>`;
@@ -2617,15 +3213,15 @@ window.renderPrecursores = function(yearIn, monthIn) {
             htmlMetaAnual = `<span style="font-size:0.7rem; color:#cbd5e1;">-</span>`;
         }
 
-        const tipoBadge = p.pr ? 
+        const tipoBadge = isRegularSelected ? 
             `<span style="background:#dbeafe; color:#1e40af; font-size:0.65rem; padding:2px 6px; border-radius:4px;">REG</span>` : 
             `<span style="background:#fef3c7; color:#92400e; font-size:0.65rem; padding:2px 6px; border-radius:4px;">AUX</span>`;
 
         html += `
         <tr style="border-bottom:1px solid #f1f5f9;">
             <td style="padding:10px;">
-                <div style="font-weight:700; color:#334155; font-size:0.95rem;">${p.nombre}</div>
-                <div style="margin-top:2px;">${tipoBadge} <span style="font-size:0.75rem; color:#94a3b8;">G-${p.grupo}</span></div>
+                <div style="font-weight:700; color:#334155; font-size:0.95rem;">${escapeHTML(p.nombre)}</div>
+                <div style="margin-top:2px;">${tipoBadge} <span style="font-size:0.75rem; color:#94a3b8;">G-${escapeHTML(p.grupo)}</span></div>
             </td>
             
             <td style="text-align:center;">
@@ -2651,58 +3247,60 @@ window.renderPrecursores = function(yearIn, monthIn) {
 };
 
 
-window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].es[i]||0}" onchange="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${state.attendance[k].fs[i]||0}" onchange="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
-window.updAsist = async (t, i, v) => { 
-    if (!window.canWrite(false)) return;
-
-    const k = ymKey(asistY, asistM); 
-    if (!state.attendance[k]) {
-        state.attendance[k] = { es:[0,0,0,0,0,0], fs:[0,0,0,0,0,0] };
+window.renderAsistInputs=function(){const k=ymKey(asistY,asistM);if(!state.attendance[k])state.attendance[k]={es:[0,0,0,0,0,0],fs:[0,0,0,0,0,0]};const cES=$('#contES'),cFS=$('#contFS');cES.innerHTML='';cFS.innerHTML='';for(let i=0;i<5;i++){cES.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${escapeHTML(state.attendance[k].es[i]||0)}" onchange="updAsist('es',${i},this.value)" style="width:80px; text-align:center;"></div>`;cFS.innerHTML+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><label style="margin:0;">Semana ${i+1}</label><input type="number" value="${escapeHTML(state.attendance[k].fs[i]||0)}" onchange="updAsist('fs',${i},this.value)" style="width:80px; text-align:center;"></div>`;}}
+window.updAsist = (t, i, v) => { 
+    if (!window.isAdmin()) return;
+    if (!['es', 'fs'].includes(t) || !Number.isInteger(i) || i < 0 || i > 5) return;
+    if (ymKey(asistY, asistM) > ymKey(new Date().getFullYear(), new Date().getMonth() + 1)) {
+        alert("❌ No se puede guardar asistencia en meses futuros.");
+        renderAsistInputs();
+        return;
     }
 
+    const k = ymKey(asistY, asistM); 
     state.attendance[k][t][i] = parseInt(v || 0); 
-    await window.saveAttendanceAtomic(asistY, asistM);
+    save(); 
 }
-    window.renderEstadoEspiritual = function() { 
-        const tbIn=$('#tblInactivos tbody'), tbIrr=$('#tblIrregulares tbody'); 
+window.renderEstadoEspiritual = function() { 
+        const tbIn=$('#tblInactivos tbody'), tbFal=$('#tblFaltantes tbody'), tbIrr=$('#tblIrregulares tbody'); 
         if(!tbIn)return; 
-        tbIn.innerHTML=''; tbIrr.innerHTML=''; 
+        tbIn.innerHTML=''; tbFal.innerHTML=''; tbIrr.innerHTML=''; 
         
         // 1. AQUI LA MAGIA: Usamos el Año de Servicio (Septiembre)
         const serviceYear = getServiceYear(); 
         
-        let countIna = 0;
+        const today = new Date();
+        const graceOpen = today.getDate() <= 20;
+        const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const previousYear = previousMonth.getFullYear();
+        const previousMonthNumber = previousMonth.getMonth() + 1;
+        const previousKey = ymKey(previousYear, previousMonthNumber);
+        let countIna = 0, countFal = 0, countIrr = 0;
         
         state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{ 
             
             // --- A. CÁLCULO DE INACTIVOS (Regla: 6 meses sin reportar, sin importar el año) ---
-            let zeros=0, last='-'; 
-            // Miramos 36 meses atrás para encontrar el último reporte
-            for(let i=0;i<36;i++){ 
-                let ty=curY, tm=curM-i; 
-                while(tm<=0){tm+=12;ty--;} 
-
-                // Freno: Si es antes de que la persona llegara
-                const checkKey = `${ty}-${String(tm).padStart(2,'0')}`;
-                if (p.inicio && checkKey < p.inicio) break;
-
-                const act=state.activity[ymKey(ty,tm)]?.[p.id]; 
-                if(act&&(act.horas>0||act.part)){ last=`${MESES_NOM[tm-1]} ${ty}`; break; } 
-                else if(i<6) zeros++; 
-            } 
-            
-            if(zeros>=6){ 
+            const inactivity = getInactivityInfo(p, today);
+             
+            if(inactivity.inactive){ 
                 countIna++;
-                tbIn.innerHTML+=`<tr><td><b>${p.nombre}</b></td><td>G${p.grupo}</td><td>${last}</td><td><span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold;">Inactivo</span></td></tr>`; 
+                tbIn.innerHTML+=`<tr><td><b>${escapeHTML(p.nombre)}</b></td><td>G${escapeHTML(p.grupo)}</td><td>${escapeHTML(inactivity.lastActivity)}</td><td><span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold;">Inactivo</span></td></tr>`; 
             } 
             else { 
-                // --- B. CÁLCULO DE IRREGULARES (Regla: Fallas desde el 1 de Septiembre) ---
+                // --- B. INFORME PENDIENTE DURANTE LOS 20 DÍAS DE GRACIA ---
+                if (graceOpen && (!p.inicio || previousKey >= p.inicio)) {
+                    const pendingAct = state.activity[previousKey]?.[p.id];
+                    if (!pendingAct || (!pendingAct.horas && !pendingAct.part)) {
+                        countFal++;
+                        tbFal.innerHTML += `<tr><td>${escapeHTML(p.nombre)}</td><td>G${escapeHTML(p.grupo)}</td><td>${escapeHTML(MESES_NOM[previousMonthNumber - 1])} ${previousYear}</td><td><span style="color:var(--info); font-weight:600;">Hasta el día 20</span></td></tr>`;
+                    }
+                }
+
+                // --- C. CÁLCULO DE IRREGULARES (solo meses con plazo vencido) ---
                 let fail=[]; 
                 
                 // Calculamos cuándo empezó el ciclo actual (1 Sept del año anterior)
                 const startOfCycle = new Date(serviceYear - 1, 8, 1); 
-                const today = new Date();
-                
                 let pointer = new Date(startOfCycle);
                 
                 // Recorremos mes a mes hasta HOY
@@ -2720,7 +3318,9 @@ window.updAsist = async (t, i, v) => {
                     if (!p.inicio || currentCheckKey >= p.inicio) {
                          const act = state.activity[key]?.[p.id];
                          // Si NO tiene horas Y tampoco marcó participación -> ES FALLA
-                         if(!act || (!act.horas && !act.part)) {
+                         const isPreviousMonth = py === previousYear && pm === previousMonthNumber;
+                         const isStillInGrace = graceOpen && isPreviousMonth;
+                         if (!isStillInGrace && (!act || (!act.horas && !act.part))) {
                              fail.push(MESES_NOM[pm-1].substr(0,3)); 
                          }
                     }
@@ -2729,11 +3329,19 @@ window.updAsist = async (t, i, v) => {
                 }
                 
                 if(fail.length > 0){ 
-                    tbIrr.innerHTML+=`<tr><td>${p.nombre}</td><td>G${p.grupo}</td><td><span style="color:var(--warning); font-weight:600;">${fail.join(', ')}</span></td></tr>`; 
+                    countIrr++;
+                    tbIrr.innerHTML+=`<tr><td>${escapeHTML(p.nombre)}</td><td>G${escapeHTML(p.grupo)}</td><td><span style="color:var(--warning); font-weight:600;">${escapeHTML(fail.join(', '))}</span></td></tr>`; 
                 } 
             } 
         });
         const cEl = $('#cIna'); if(cEl) cEl.innerText = `(${countIna})`;
+        const cFal = $('#cFal'); if(cFal) cFal.innerText = `(${countFal})`;
+        const cIrr = $('#cIrr'); if(cIrr) cIrr.innerText = `(${countIrr})`;
+        if (!graceOpen && tbFal) {
+            tbFal.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">El plazo del mes anterior ya finalizó. Los informes pendientes aparecen en Irregulares.</td></tr>';
+        } else if (graceOpen && countFal === 0 && tbFal) {
+            tbFal.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay informes pendientes dentro del plazo de gracia.</td></tr>';
+        }
     }
     window.toggleS21Inputs = function() { const m=$('#s21Mode').value; $('#s21InputIndiv').style.display=(m==='individual')?'block':'none'; $('#s21InputGroup').style.display=(m==='group')?'block':'none'; $('#preview-viewport').innerHTML=''; }
 
@@ -2748,10 +3356,10 @@ window.updAsist = async (t, i, v) => {
         rows += `<tr>
             <td>${MESES_NOM[m - 1]}</td>
             <td>${(r.horas || r.part) ? '[X]' : ''}</td>
-            <td>${r.est || ''}</td>
+            <td>${escapeHTML(r.est || '')}</td>
             <td>${r.pa ? '[X]' : ''}</td>
-            <td>${r.horas || ''}</td>
-            <td style="font-size:0.75rem; color:#374151;">${r.nota || r.notas || ''}</td> </tr>`; 
+            <td>${escapeHTML(r.horas || '')}</td>
+            <td style="font-size:0.75rem; color:#374151;">${escapeHTML(r.nota || r.notas || '')}</td> </tr>`; 
     }); 
 
     const privs = [p.anciano ? 'Anciano' : '', p.sm ? 'SM' : '', p.pr ? 'PR' : '', p.pe ? 'PE' : ''].filter(Boolean).join(', '); 
@@ -2759,10 +3367,10 @@ window.updAsist = async (t, i, v) => {
     return `<div class="print-canvas">
         <div style="text-align:center; font-weight:800; font-size:12pt; margin-bottom:10px;">REGISTRO DE PUBLICADOR</div>
         <div class="s21-header-box">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Nombre:</b> ${p.nombre}</span><span><b>Grupo:</b> ${p.grupo}</span></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>F. Nacimiento:</b> ${p.nac || '-'}</span><span><b>F. Bautismo:</b> ${p.bau || '-'}</span></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Sexo:</b> ${p.sexo}</span><span><b>Esperanza:</b> ${p.esp}</span></div>
-            <div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;"><b>Privilegios:</b> ${privs || 'Publicador'}</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Nombre:</b> ${escapeHTML(p.nombre)}</span><span><b>Grupo:</b> ${escapeHTML(p.grupo)}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>F. Nacimiento:</b> ${escapeHTML(p.nac || '-')}</span><span><b>F. Bautismo:</b> ${escapeHTML(p.bau || '-')}</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span><b>Sexo:</b> ${escapeHTML(p.sexo)}</span><span><b>Esperanza:</b> ${escapeHTML(p.esp)}</span></div>
+            <div style="margin-top:5px; border-top:1px dashed #ccc; padding-top:5px;"><b>Privilegios:</b> ${escapeHTML(privs || 'Publicador')}</div>
         </div>
         <table class="official-table">
             <thead>
@@ -2775,10 +3383,108 @@ window.updAsist = async (t, i, v) => {
 };
 
     window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && !p.sacado);} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&!p.sacado);} else {l=state.personas.filter(p=>!p.sacado);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
+
+    async function downloadAllS21PageByPage(el) {
+        const cards = Array.from(el.querySelectorAll('.print-canvas'));
+        if (!cards.length) throw new Error('No hay tarjetas para exportar.');
+
+        if (!window.html2pdf) {
+            throw new Error('El generador de PDF no está disponible. Verifica la conexión e intenta nuevamente.');
+        }
+
+        const button = document.getElementById('btnPdfS21');
+        const originalText = button ? button.textContent : '';
+        if (button) button.disabled = true;
+
+        try {
+            if (document.fonts?.ready) await document.fonts.ready;
+            // Obtenemos la instancia de jsPDF desde html2pdf para no depender
+            // de variables globales internas de la librería.
+            const seed = document.createElement('div');
+            seed.style.cssText = 'position:fixed;left:-10000px;top:0;width:1px;height:1px;background:#fff;';
+            document.body.appendChild(seed);
+            const pdf = await html2pdf().set({
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
+            }).from(seed).toPdf().get('pdf');
+            seed.remove();
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 10;
+            const maxWidth = pageWidth - (margin * 2);
+            const maxHeight = pageHeight - (margin * 2);
+
+            for (let i = 0; i < cards.length; i++) {
+                if (button) button.textContent = `Generando ${i + 1}/${cards.length}`;
+                const card = cards[i];
+                const oldShadow = card.style.boxShadow;
+                card.style.boxShadow = 'none';
+                let canvas;
+                try {
+                    canvas = await html2pdf().set({
+                        html2canvas: {
+                            scale: 1.2,
+                            backgroundColor: '#ffffff',
+                            useCORS: true,
+                            logging: false
+                        }
+                    }).from(card).toCanvas().get('canvas');
+                } finally {
+                    card.style.boxShadow = oldShadow;
+                }
+
+                let imageWidth = maxWidth;
+                let imageHeight = imageWidth * canvas.height / canvas.width;
+                if (imageHeight > maxHeight) {
+                    imageHeight = maxHeight;
+                    imageWidth = imageHeight * canvas.width / canvas.height;
+                }
+                const x = (pageWidth - imageWidth) / 2;
+                const y = (pageHeight - imageHeight) / 2;
+                const imageData = canvas.toDataURL('image/jpeg', 0.85);
+
+                if (i > 0) pdf.addPage();
+                pdf.addImage(imageData, 'JPEG', x, y, imageWidth, imageHeight, undefined, 'FAST');
+
+                // Libera el lienzo antes de procesar la siguiente tarjeta.
+                canvas.width = 1;
+                canvas.height = 1;
+                if ((i + 1) % 5 === 0) await new Promise(resolve => setTimeout(resolve, 0));
+            }
+
+            const fileName = 'Tarjetas_S21_Todos.pdf';
+            if (window.hasOwnProperty('Capacitor')) {
+                const pdfBase64 = pdf.output('datauristring').split(',')[1];
+                const { Filesystem } = Capacitor.Plugins;
+                await Filesystem.writeFile({
+                    path: fileName,
+                    data: pdfBase64,
+                    directory: 'DOCUMENTS'
+                });
+                alert(`✅ PDF guardado en Documentos (${cards.length} tarjetas)`);
+            } else {
+                pdf.save(fileName);
+            }
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.textContent = originalText || '📥 PDF';
+            }
+        }
+    }
     
-    window.downloadPDFS21 = function() { 
+    window.downloadPDFS21 = async function() { 
     const el = document.getElementById('preview-viewport');
     if(!el.innerHTML) return alert("Ver primero");
+
+    if ($('#s21Mode').value === 'all') {
+        try {
+            await downloadAllS21PageByPage(el);
+        } catch (error) {
+            console.error('Error generando todas las tarjetas:', error);
+            alert('❌ No se pudo generar el PDF: ' + error.message);
+        }
+        return;
+    }
 
     // 1. Preparamos el estilo visual (Fondo blanco para imprimir)
     const oldBg = el.style.background;
@@ -2827,6 +3533,281 @@ window.updAsist = async (t, i, v) => {
         });
     }
 }
+
+    function isPendingExitExcluded(person, key) {
+        if (!person.salidaPendiente) return false;
+        const excludedSince = person.excluirS10Desde || `${getServiceYear() - 1}-09`;
+        return key >= excludedSince;
+    }
+
+    function isMemberInS10Month(person, key) {
+        if (isPendingExitExcluded(person, key)) return false;
+        const events = Array.isArray(person.eventos) ? person.eventos : [];
+        const initialCandidates = events
+            .filter(event => ['ingreso', 'registro_inicial'].includes(event.type))
+            .map(event => String(event.date).slice(0, 7))
+            .filter(Boolean)
+            .concat(Object.keys(state.activity || {}).filter(activityKey => state.activity[activityKey]?.[person.id]));
+        if (person.inicio) initialCandidates.push(person.inicio);
+        const initial = initialCandidates.sort()[0] || '';
+        if (initial && key < initial) return false;
+
+        let isMember = true;
+        events
+            .filter(event => String(event.date).slice(0, 7) <= key)
+            .sort((a,b) => String(a.date).localeCompare(String(b.date)))
+            .forEach(event => {
+                if (event.type === 'salida') isMember = false;
+                if (event.type === 'ingreso' || event.type === 'reactivacion') isMember = true;
+            });
+        const currentExit = String(person.fsac || person.sacado || '').slice(0, 7);
+        if (currentExit && currentExit <= key && !events.some(event => event.type === 'reactivacion' && String(event.date).slice(0, 7) >= currentExit && String(event.date).slice(0, 7) <= key)) {
+            isMember = false;
+        }
+        return isMember;
+    }
+
+    function getS10Attendance(serviceYear, type) {
+        let monthlyAverageSum = 0;
+        const missing = [];
+        CICLO_S88.forEach(month => {
+            const year = getYearForMonth(serviceYear, month - 1);
+            const values = state.attendance[ymKey(year, month)]?.[type] || [];
+            const meetings = values.filter(value => Number(value) > 0);
+            if (!meetings.length) {
+                missing.push(`${MESES_NOM[month - 1]} ${year}`);
+                return;
+            }
+            monthlyAverageSum += Math.round(meetings.reduce((sum, value) => sum + Number(value), 0) / meetings.length);
+        });
+        return { average: Math.round(monthlyAverageSum / 12), missing };
+    }
+
+    function buildS10Annual(serviceYear) {
+        rebuildCalculatedMemberEvents();
+        const startKey = `${serviceYear - 1}-09`;
+        const endKey = `${serviceYear}-08`;
+        const activeKeys = [3,4,5,6,7,8].map(month => ymKey(serviceYear, month));
+        const membersAtEnd = state.personas.filter(person => isMemberInS10Month(person, endKey));
+        const active = membersAtEnd.filter(person => activeKeys.some(key => {
+            const report = state.activity[key]?.[person.id];
+            return isMemberInS10Month(person, key) && Boolean(report && (Number(report.horas) > 0 || report.part));
+        }));
+        const newlyInactive = state.personas.filter(person => !isPendingExitExcluded(person, endKey) && (person.eventos || []).some(event =>
+            event.type === 'inactividad' && String(event.date).slice(0, 7) >= startKey && String(event.date).slice(0, 7) <= endKey
+        ));
+        const reactivated = state.personas.filter(person => !isPendingExitExcluded(person, endKey) && (person.eventos || []).some(event =>
+            event.type === 'reactivacion' && String(event.date).slice(0, 7) >= startKey && String(event.date).slice(0, 7) <= endKey
+        ));
+        return {
+            startKey,
+            endKey,
+            active,
+            newlyInactive,
+            reactivated,
+            deaf: membersAtEnd.filter(person => person.sordoSenas),
+            blind: membersAtEnd.filter(person => person.ciego),
+            confined: membersAtEnd.filter(person => person.confinado),
+            weekdayAttendance: getS10Attendance(serviceYear, 'es'),
+            weekendAttendance: getS10Attendance(serviceYear, 'fs')
+        };
+    }
+
+    function snapshotS10People(people) {
+        return people.map(person => ({ id: person.id, nombre: person.nombre, grupo: person.grupo }));
+    }
+
+    function createS10Snapshot(serviceYear) {
+        const result = buildS10Annual(serviceYear);
+        const congregation = state.config.congregacion || {};
+        const annualStored = state.config.s10Annual?.[serviceYear] || {};
+        return {
+            version: 1,
+            serviceYear,
+            periodStart: result.startKey,
+            periodEnd: result.endKey,
+            closedAt: new Date().toISOString(),
+            congregation: {
+                numero: congregation.numero || '',
+                nombre: congregation.nombre || '',
+                ciudad: congregation.ciudad || '',
+                region: congregation.region || '',
+                pais: congregation.pais || '',
+                totalTerritorios: Number.isInteger(congregation.totalTerritorios) ? congregation.totalTerritorios : null,
+                aceptaAyuda: congregation.aceptaAyuda || ''
+            },
+            territoriosSinAbarcar: Number.isInteger(annualStored.territoriosSinAbarcar) ? annualStored.territoriosSinAbarcar : 0,
+            weekdayAttendance: { average: result.weekdayAttendance.average, missing: [...result.weekdayAttendance.missing] },
+            weekendAttendance: { average: result.weekendAttendance.average, missing: [...result.weekendAttendance.missing] },
+            active: snapshotS10People(result.active),
+            newlyInactive: snapshotS10People(result.newlyInactive),
+            reactivated: snapshotS10People(result.reactivated),
+            deaf: snapshotS10People(result.deaf),
+            blind: snapshotS10People(result.blind),
+            confined: snapshotS10People(result.confined)
+        };
+    }
+
+    function getS10ReportForDisplay(serviceYear) {
+        return state.s10Reports?.[serviceYear] || createS10Snapshot(serviceYear);
+    }
+
+    function s10PeopleDetails(title, people) {
+        const sorted = [...people].sort((a,b) => a.nombre.localeCompare(b.nombre));
+        return `<details style="margin-top:8px;"><summary style="cursor:pointer; font-weight:600;">Ver ${escapeHTML(title)} (${sorted.length})</summary><div style="padding:8px 12px; color:var(--text-muted);">${sorted.length ? sorted.map(person => `${escapeHTML(person.nombre)} (G${escapeHTML(person.grupo)})`).join('<br>') : 'Ninguna persona'}</div></details>`;
+    }
+
+    window.saveS10AnnualInputs = function() {
+        if (!window.isAdmin()) return;
+        const serviceYear = Number($('#s10Year').value);
+        if (state.s10Reports?.[serviceYear]) return alert('Este informe ya está cerrado y no se puede modificar.');
+        const raw = $('#s10TerritoriosSinAbarcar').value.trim();
+        const uncovered = raw === '' ? 0 : Number(raw);
+        const total = state.config.congregacion?.totalTerritorios;
+        if (!Number.isInteger(uncovered) || uncovered < 0) return alert('Los territorios sin abarcar deben ser un número entero igual o mayor que cero.');
+        if (Number.isInteger(total) && uncovered > total) return alert('Los territorios sin abarcar no pueden superar el total de territorios.');
+        if (!state.config.s10Annual) state.config.s10Annual = {};
+        state.config.s10Annual[serviceYear] = { ...(state.config.s10Annual[serviceYear] || {}), territoriosSinAbarcar: uncovered };
+        save();
+        renderS10Annual();
+        showToast('Dato territorial del año guardado');
+    };
+
+    window.closeS10AnnualReport = async function() {
+        if (!window.isAdmin()) return;
+        const serviceYear = Number($('#s10Year').value);
+        if (state.s10Reports?.[serviceYear]) return alert('Este informe ya está cerrado y permanece conservado.');
+        const yearEnd = new Date(serviceYear, 7, 31, 23, 59, 59);
+        if (new Date() <= yearEnd) return alert(`El año de servicio ${serviceYear - 1}-${serviceYear} todavía no ha finalizado. Podrás cerrarlo después del 31 de agosto.`);
+
+        const rawUncovered = $('#s10TerritoriosSinAbarcar').value.trim();
+        const uncovered = rawUncovered === '' ? 0 : Number(rawUncovered);
+        const totalTerritories = state.config.congregacion?.totalTerritorios;
+        if (!Number.isInteger(uncovered) || uncovered < 0) return alert('Los territorios sin abarcar deben ser un número entero igual o mayor que cero.');
+        if (Number.isInteger(totalTerritories) && uncovered > totalTerritories) return alert('Los territorios sin abarcar no pueden superar el total de territorios.');
+        if (!state.config.s10Annual) state.config.s10Annual = {};
+        state.config.s10Annual[serviceYear] = { ...(state.config.s10Annual[serviceYear] || {}), territoriosSinAbarcar: uncovered };
+
+        const preview = createS10Snapshot(serviceYear);
+        const missing = [...new Set([...preview.weekdayAttendance.missing, ...preview.weekendAttendance.missing])];
+        if (missing.length) return alert(`No se puede cerrar el informe. Falta registrar asistencia en: ${missing.join(', ')}.`);
+        const congregation = preview.congregation;
+        if (!congregation.numero || !congregation.nombre || !congregation.ciudad || !congregation.pais || !Number.isInteger(congregation.totalTerritorios) || !congregation.aceptaAyuda) {
+            return alert('Completa en Ajustes el número, nombre, ciudad, país, total de territorios y la respuesta sobre ayuda antes de cerrar el informe.');
+        }
+        if (!confirm(`¿Cerrar definitivamente el informe S-10 ${serviceYear - 1}-${serviceYear}?\n\nLas cifras y las listas de personas quedarán guardadas y ya no cambiarán aunque después se editen los datos.`)) return;
+        if (!state.s10Reports) state.s10Reports = {};
+        state.s10Reports[serviceYear] = preview;
+        await save();
+        renderS10Annual();
+        showToast('Informe S-10 cerrado y conservado');
+    };
+
+    window.renderS10Annual = function() {
+        const serviceYear = Number($('#s10Year')?.value || getServiceYear());
+        const content = $('#s10Content');
+        if (!content || !Number.isInteger(serviceYear)) return;
+        const closedReport = state.s10Reports?.[serviceYear] || null;
+        const annualStored = state.config.s10Annual?.[serviceYear] || {};
+        const storedUncovered = closedReport ? closedReport.territoriosSinAbarcar : annualStored.territoriosSinAbarcar;
+        $('#s10TerritoriosSinAbarcar').value = Number.isInteger(storedUncovered) ? storedUncovered : 0;
+        $('#s10TerritoriosSinAbarcar').disabled = Boolean(closedReport);
+        $('#btnSaveS10Territory').disabled = Boolean(closedReport);
+        $('#btnCloseS10').disabled = Boolean(closedReport);
+        $('#btnCloseS10').textContent = closedReport ? 'Informe cerrado' : 'Cerrar informe anual';
+        const result = closedReport || buildS10Annual(serviceYear);
+        const congregation = closedReport?.congregation || state.config.congregacion || {};
+        const yearEnd = new Date(serviceYear, 7, 31, 23, 59, 59);
+        const preliminary = new Date() <= yearEnd;
+        const missingAttendance = [...new Set([...result.weekdayAttendance.missing, ...result.weekendAttendance.missing])];
+        const statusText = closedReport ? 'CERRADO Y CONSERVADO' : (preliminary ? 'PRELIMINAR' : 'AÑO FINALIZADO');
+        $('#s10Status').innerHTML = `<span class="status-badge ${closedReport || !preliminary ? 'sync' : 'offline'}">${statusText}</span> Período: septiembre ${serviceYear - 1} a agosto ${serviceYear}.${closedReport ? `<br><small>Cerrado el ${escapeHTML(new Date(closedReport.closedAt).toLocaleString('es-CO'))}. Sus cifras ya no se recalculan.</small>` : ''}${missingAttendance.length ? `<br><span style="color:var(--warning);">Falta asistencia en ${missingAttendance.length} mes(es); esos meses aportan cero hasta completarlos.</span>` : ''}`;
+
+        const card = (label, value, details = '') => `<div style="background:var(--bg-body); border:1px solid var(--border-light); border-radius:12px; padding:15px;"><div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">${label}</div><div style="font-size:2rem; font-weight:800; margin-top:5px;">${value}</div>${details}</div>`;
+        content.innerHTML = `
+            <div style="padding:12px; border:1px solid var(--border-light); border-radius:10px; margin-bottom:12px;"><b>${escapeHTML(congregation.numero || 'Sin número')} · ${escapeHTML(congregation.nombre || 'Congregación sin configurar')}</b><br><small>${escapeHTML([congregation.ciudad, congregation.region, congregation.pais].filter(Boolean).join(', ') || 'Ubicación sin configurar')}</small></div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px;">
+                ${card('Promedio reunión entre semana', result.weekdayAttendance.average)}
+                ${card('Promedio reunión fin de semana', result.weekendAttendance.average)}
+                ${card('Publicadores activos', result.active.length, s10PeopleDetails('publicadores activos', result.active))}
+                ${card('Se hicieron inactivos', result.newlyInactive.length, s10PeopleDetails('nuevos inactivos', result.newlyInactive))}
+                ${card('Publicadores reactivados', result.reactivated.length, s10PeopleDetails('reactivados', result.reactivated))}
+                ${card('Publicadores sordos', result.deaf.length, s10PeopleDetails('publicadores sordos', result.deaf))}
+                ${card('Publicadores ciegos', result.blind.length, s10PeopleDetails('publicadores ciegos', result.blind))}
+                ${card('Publicadores encarcelados o confinados', result.confined.length, s10PeopleDetails('publicadores confinados', result.confined))}
+                ${card('Total de territorios', Number.isInteger(congregation.totalTerritorios) ? congregation.totalTerritorios : '—')}
+                ${card('Territorios sin abarcar', Number.isInteger(storedUncovered) ? storedUncovered : 0)}
+                ${card('Aceptaría ayuda', ({si:'Sí', no:'No', na:'No aplica'})[congregation.aceptaAyuda] || 'No definido')}
+            </div>`;
+    };
+
+    function getS10PrintableHTML(serviceYear, report, isClosed) {
+        const congregation = report.congregation || {};
+        const help = ({si:'Sí', no:'No', na:'No aplica'})[congregation.aceptaAyuda] || 'No definido';
+        const row = (label, value) => `<tr><td style="padding:8px; border:1px solid #777;">${label}</td><td style="padding:8px; border:1px solid #777; text-align:center; font-weight:bold; width:90px;">${value}</td></tr>`;
+        const peopleSection = (title, people) => `<div style="margin-bottom:14px;"><b>${title} (${people.length})</b><div style="margin-top:5px; line-height:1.5;">${people.length ? people.map(person => `${escapeHTML(person.nombre)} — Grupo ${escapeHTML(person.grupo)}`).join('<br>') : 'Ninguno'}</div></div>`;
+        return `<div style="width:190mm; background:#fff; color:#111; font-family:Arial,sans-serif; font-size:11pt; padding:10mm; box-sizing:border-box;">
+            <div style="text-align:center; margin-bottom:14px;"><h2 style="margin:0;">INFORME ANUAL S-10</h2><div style="font-weight:bold; margin-top:5px;">ANÁLISIS DE LA CONGREGACIÓN</div><div>Año de servicio ${serviceYear - 1}-${serviceYear}</div>${isClosed ? '<div style="color:#166534; font-weight:bold; margin-top:4px;">INFORME CERRADO</div>' : '<div style="color:#b45309; font-weight:bold; margin-top:4px;">PRELIMINAR — NO CERRADO</div>'}</div>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:12px;"><tr><td style="padding:7px; border:1px solid #777;"><b>Número:</b> ${escapeHTML(congregation.numero || '—')}</td><td style="padding:7px; border:1px solid #777;"><b>Congregación:</b> ${escapeHTML(congregation.nombre || '—')}</td></tr><tr><td colspan="2" style="padding:7px; border:1px solid #777;"><b>Ubicación:</b> ${escapeHTML([congregation.ciudad, congregation.region, congregation.pais].filter(Boolean).join(', ') || '—')}</td></tr></table>
+            <table style="width:100%; border-collapse:collapse;">
+                ${row('Promedio de asistencia — reunión de entre semana', report.weekdayAttendance.average)}
+                ${row('Promedio de asistencia — reunión de fin de semana', report.weekendAttendance.average)}
+                ${row('Publicadores activos', report.active.length)}
+                ${row('Publicadores que se hicieron inactivos', report.newlyInactive.length)}
+                ${row('Publicadores reactivados', report.reactivated.length)}
+                ${row('Publicadores sordos dependientes de lengua de señas', report.deaf.length)}
+                ${row('Publicadores ciegos', report.blind.length)}
+                ${row('Publicadores encarcelados o confinados', report.confined.length)}
+                ${row('Número total de territorios', Number.isInteger(congregation.totalTerritorios) ? congregation.totalTerritorios : '—')}
+                ${row('Territorios que quedaron sin abarcar', Number.isInteger(report.territoriosSinAbarcar) ? report.territoriosSinAbarcar : 0)}
+                ${row('¿Aceptaría ayuda para abarcar los territorios?', help)}
+            </table>
+            <div style="margin-top:14px; font-size:9pt; color:#555;">Generado por CongPro el ${escapeHTML(new Date().toLocaleString('es-CO'))}.${isClosed ? ` Informe cerrado el ${escapeHTML(new Date(report.closedAt).toLocaleString('es-CO'))}.` : ''}</div>
+            <div style="page-break-before:always; padding-top:8mm;"><h3 style="text-align:center;">ANEXO DE VERIFICACIÓN</h3>${peopleSection('Publicadores activos', report.active)}${peopleSection('Se hicieron inactivos', report.newlyInactive)}${peopleSection('Publicadores reactivados', report.reactivated)}${peopleSection('Publicadores sordos', report.deaf)}${peopleSection('Publicadores ciegos', report.blind)}${peopleSection('Publicadores encarcelados o confinados', report.confined)}</div>
+        </div>`;
+    }
+
+    window.downloadS10PDF = async function() {
+        if (!window.isAdmin()) return;
+        const serviceYear = Number($('#s10Year').value);
+        if (!window.html2pdf) return alert('El generador de PDF no está disponible. Verifica la conexión e intenta nuevamente.');
+        const closedReport = state.s10Reports?.[serviceYear] || null;
+        const report = closedReport || createS10Snapshot(serviceYear);
+        const fileName = `Informe_S10_${serviceYear - 1}-${serviceYear}${closedReport ? '_CERRADO' : '_PRELIMINAR'}.pdf`;
+        const container = document.createElement('div');
+        container.style.cssText = 'position:fixed; left:-10000px; top:0; background:white;';
+        container.innerHTML = getS10PrintableHTML(serviceYear, report, Boolean(closedReport));
+        document.body.appendChild(container);
+        const button = $('#btnPdfS10');
+        const oldText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Generando PDF...';
+        try {
+            const worker = html2pdf().set({
+                margin: 5,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 1.5, backgroundColor: '#ffffff', useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+                pagebreak: { mode: ['css', 'legacy'] }
+            }).from(container.firstElementChild);
+            if (window.hasOwnProperty('Capacitor')) {
+                const dataUri = await worker.outputPdf('datauristring');
+                const { Filesystem } = Capacitor.Plugins;
+                await Filesystem.writeFile({ path: fileName, data: dataUri.split(',')[1], directory: 'DOCUMENTS' });
+                alert(`PDF guardado en Documentos como ${fileName}`);
+            } else {
+                await worker.save();
+            }
+        } catch (error) {
+            console.error('Error generando S-10:', error);
+            alert('No se pudo generar el PDF: ' + error.message);
+        } finally {
+            container.remove();
+            button.disabled = false;
+            button.textContent = oldText;
+        }
+    };
 
 window.renderS88Preview = function() { 
         const sy = parseInt($('#s88Year').value); 
@@ -2907,7 +3888,6 @@ window.renderS88Preview = function() {
     window.renderResumenMensual = function(y, m) {
         const k=ymKey(y,m), act=state.activity[k]||{}, att=state.attendance[k]||{es:[],fs:[]};
         let tM=0,activos=0,pubC=0,pubE=0,prC=0,prH=0,prE=0,paC=0,paH=0,paE=0;
-        const last6=[]; for(let i=0;i<6;i++){let tm=m-i,ty=y; if(tm<=0){tm+=12;ty-=1;} last6.push(ymKey(ty,tm));}
         
         // 1. CREAMOS LA FECHA DEL RESUMEN QUE ESTAMOS MIRANDO 📅
         const viewDate = `${y}-${String(m).padStart(2,'0')}`;
@@ -2918,9 +3898,9 @@ window.renderS88Preview = function() {
             // 2. SI LA FECHA DEL RESUMEN ES ANTERIOR A SU LLEGADA, NO CUENTA 🛑
             if(p.inicio && viewDate < p.inicio) return;
 
-            tM++; // Sumamos al total de publicadores 
-            let haInf=false; for(const lk of last6){ if(state.activity[lk]?.[p.id]?.horas>0 || state.activity[lk]?.[p.id]?.part){ haInf=true; break; } } if(haInf) activos++; 
-            const r=act[p.id]||{}; if(r.horas>0||r.part){ const h=parseFloat(r.horas||0), e=parseInt(r.est||0); if(p.pr){prC++;prH+=h;prE+=e;} else if(r.pa){paC++;paH+=h;paE+=e;} else{pubC++;pubE+=e;} } 
+            tM++; // Sumamos al total de publicadores
+            if (!getInactivityInfo(p).inactive) activos++;
+            const r=act[p.id]||{}; if(r.horas>0||r.part){ const h=parseFloat(r.horas||0), e=parseInt(r.est||0); if(wasRegularPioneer(p,y,m)){prC++;prH+=h;prE+=e;} else if(r.pa){paC++;paH+=h;paE+=e;} else{pubC++;pubE+=e;} } 
         }); 
         const avgES=att.es.filter(n=>n>0).length?Math.round(att.es.reduce((a,b)=>a+b,0)/att.es.filter(n=>n>0).length):0; 
         const avgFS=att.fs.filter(n=>n>0).length?Math.round(att.fs.reduce((a,b)=>a+b,0)/att.fs.filter(n=>n>0).length):0; 
@@ -3058,6 +4038,7 @@ window.importData = (input) => {
                                 }
 
                                 state.activity[keyMes][pid] = infImportada;
+                                if (currentSession.role === 'group') groupDirtyReports.add(`${keyMes}|${pid}`);
                                 actualizados++;
                             }
                         }
@@ -3069,7 +4050,12 @@ window.importData = (input) => {
                 } else {
                     // --- MODO RESTAURACIÓN TOTAL (SOLO ADMIN) ---
                     if(confirm("🚨 ADVERTENCIA FINAL\n\n¿Estás 100% seguro de que quieres BORRAR tu base de datos actual y reemplazarla por este archivo?")) {
-                        state = dataImportada; 
+                        // Los respaldos no contienen claves. Conservamos la
+                        // configuración segura del administrador actual.
+                        const currentConfig = state.config;
+                        state = dataImportada;
+                        state.config = currentConfig;
+                        window.state = state;
                         save(); 
                         alert("✅ Datos restaurados correctamente."); 
                         renderAll(); 
@@ -3151,27 +4137,21 @@ window.toggleConnection = async function() {
 // --- MOTOR DE ARRANQUE ASÍNCRONO ---
     window.addEventListener("DOMContentLoaded", async () => { 
         try {
-            // 1. Intentar cargar desde la nueva Base de Datos Rápida
-            const record = await localDb.settings.get("appState");
-            if (record && record.val) {
-                state = record.val;
-            } else {
-                // 2. MIGRACIÓN: Si es la primera vez, rescatar datos del localStorage antiguo
-                const savedOld = localStorage.getItem(DB_KEY);
-                if (savedOld) {
-                    state = JSON.parse(savedOld);
-                    await localDb.settings.put({ key: "appState", val: state }); // Mudar a Dexie
-                    console.log("🚀 Datos migrados a IndexedDB exitosamente.");
-                }
-            }
+            // 1. Cargar IndexedDB o, si falla, el respaldo de localStorage.
+            const localState = await loadLocalState();
+            if (localState) state = localState;
         } catch(e) { console.error("Error al cargar datos locales", e); }
 
         window.state = state;
         if(!state.personas) state.personas = [];
         if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
+        if(!state.activity) state.activity = {};
+        rebuildCalculatedMemberEvents();
+        await saveLocalState();
 
         // 3. Iniciar la interfaz gráfica
         init(); 
+        enforceVersionPolicy();
     });
    // --- PEGAR ESTO ANTES DEL  DE LA LÍNEA 1264 ---
 
@@ -3464,7 +4444,7 @@ setTimeout(window.renderizarHistorialRapido, 500);
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.3.1</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.4.0</span>
             </div>
         </div>
     </div>
