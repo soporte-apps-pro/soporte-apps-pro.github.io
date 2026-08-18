@@ -242,7 +242,9 @@
         .tab { display: none; }
         .tab.active { display: block; animation: fadeIn 0.3s ease; }
         body.role-restricted .admin-only { display: none !important; }
-        body.role-restricted .tabs button:not([data-tab="actividad"]):not([data-tab="inactivos"]) { display: none !important; }
+        body.role-restricted .tabs button:not([data-tab="lista_global"]):not([data-tab="actividad"]):not([data-tab="inactivos"]) { display: none !important; }
+        body.role-restricted #inactiveListCard, body.role-restricted #irregularListCard { display:none !important; }
+        body.role-restricted #missingReportsCard { margin-top:0 !important; }
         body.role-admin .restricted-only { display: none !important; }
 
         /* En computador, mantener visibles todas las secciones sin desplazamiento oculto. */
@@ -975,7 +977,7 @@
     <div class="tabs-container">
         <div class="tabs">
             <button data-tab="personas" class="active admin-only">1. Gestión</button>
-            <button data-tab="lista_global" class="admin-only">2. Lista General</button>
+            <button data-tab="lista_global">2. Lista General</button>
             <button data-tab="actividad" id="tabActividad">3. Informes</button>
             <button data-tab="asistencia" class="admin-only">4. Asistencia</button>
             <button data-tab="precursores" class="admin-only">5. Precursores</button>
@@ -984,7 +986,7 @@
             <button data-tab="s10" class="admin-only">8. S-10 anual</button>
             <button data-tab="resumen" class="admin-only">9. Resumen</button>
             <button data-tab="sacados" class="admin-only" style="color:var(--danger)">10. Sacados</button>
-            <button data-tab="inactivos" style="color:var(--warning)">11. Inactivos</button>
+            <button data-tab="inactivos" id="tabInactiveReports" style="color:var(--warning)">11. Inactivos</button>
             <button data-tab="s303" class="admin-only">12. Inf-Visita Circuito</button>
         </div>
     </div>
@@ -1064,11 +1066,11 @@
             </div>
         </section>
 
-        <section id="lista_global" class="tab admin-only">
+        <section id="lista_global" class="tab">
             <div class="card">
-                <h3><span>📖 Lista General</span> <span id="cGen" class="count-badge">0</span></h3>
+                <h3><span id="memberListTitle">📖 Lista General</span> <span id="cGen" class="count-badge">0</span></h3>
                 <div class="member-list-layout">
-                    <div class="member-toolbar">
+                    <div class="member-toolbar" id="memberAdminToolbar">
                         <div><label>Listado para descargar</label><select id="memberListGroup"></select></div>
                         <button class="btn success" onclick="downloadGroupMemberList()" style="width:100%;">Descargar listado Excel</button>
                         <p>Incluye activos, inactivos e irregulares. Solo se excluyen los sacados.</p>
@@ -1215,9 +1217,9 @@
         </section>
 
         <section id="inactivos" class="tab">
-            <div class="card"><h3><span style="color:var(--danger)">💤 Inactivos</span> <span id="cIna" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblInactivos"><thead><tr><th>Nombre</th><th>Grupo</th><th>Última Actividad</th><th>Tiempo Inactivo</th></tr></thead><tbody></tbody></table></div></div>
-            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--info)">📋 Informes faltantes</span> <span id="cFal" class="count-badge">0</span></h3><p style="color:var(--text-muted); margin-top:-5px;">Informes del mes anterior que todavía están dentro de los 20 días de gracia.</p><div class="table-container"><table class="table" id="tblFaltantes"><thead><tr><th>Nombre</th><th>Grupo</th><th>Informe pendiente</th><th>Plazo</th></tr></thead><tbody></tbody></table></div></div>
-            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--warning)">⚠️ Irregulares</span> <span id="cIrr" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblIrregulares"><thead><tr><th>Nombre</th><th>Grupo</th><th>Meses Fallados</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" id="inactiveListCard"><h3><span style="color:var(--danger)">💤 Inactivos</span> <span id="cIna" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblInactivos"><thead><tr><th>Nombre</th><th>Grupo</th><th>Última Actividad</th><th>Tiempo Inactivo</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" id="missingReportsCard" style="margin-top:20px;"><h3><span style="color:var(--info)">📋 Informes faltantes</span> <span id="cFal" class="count-badge">0</span></h3><p style="color:var(--text-muted); margin-top:-5px;">Informes del mes anterior que todavía están dentro de los 20 días de gracia.</p><div class="table-container"><table class="table" id="tblFaltantes"><thead><tr><th>Nombre</th><th>Grupo</th><th>Informe pendiente</th><th>Plazo</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" id="irregularListCard" style="margin-top:20px;"><h3><span style="color:var(--warning)">⚠️ Irregulares</span> <span id="cIrr" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblIrregulares"><thead><tr><th>Nombre</th><th>Grupo</th><th>Meses Fallados</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
         <section id="s303" class="tab admin-only">
@@ -2448,6 +2450,8 @@ function enterApp() {
     }
     
     const badge = $('#roleBadge');
+    const inactiveReportsTab = $('#tabInactiveReports');
+    if (inactiveReportsTab) inactiveReportsTab.innerText = currentSession && currentSession.role === 'group' ? '11. Informes faltantes' : '11. Inactivos';
     
     if (window.CURRENT_ROLE === 'ADMIN') {
         badge.innerText = 'Administrador';
@@ -2492,7 +2496,8 @@ function enterApp() {
 
    function renderAll() {
     renderGroupOptions();
-    if(window.CURRENT_ROLE === 'ADMIN') { renderMiembros(); renderSacados(); renderPrecursores(); renderAsistInputs(); }
+    if(currentSession && ['admin', 'group'].includes(currentSession.role)) renderMiembros();
+    if(window.CURRENT_ROLE === 'ADMIN') { renderSacados(); renderPrecursores(); renderAsistInputs(); }
     if(currentSession && ['admin', 'group'].includes(currentSession.role)) renderEstadoEspiritual();
     if(window.CURRENT_ROLE === 'ADMIN') renderS303Observations();
     renderActividad();
@@ -2830,8 +2835,12 @@ window.resetPForm = function() {
         renderMemberEventHistory();
     }    
     window.renderMiembros = function() { 
-        const list = state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+        const isGroup = currentSession && currentSession.role === 'group';
+        const list = state.personas.filter(p => !p.sacado && (!isGroup || String(p.grupo) === String(currentSession.group))).sort((a,b)=>a.nombre.localeCompare(b.nombre));
         const cEl = $('#cGen'); if(cEl) cEl.innerText = `(${list.length})`;
+        const title = $('#memberListTitle'); if (title) title.innerText = isGroup ? `📖 Resumen del Grupo ${currentSession.group}` : '📖 Lista General';
+        const toolbar = $('#memberAdminToolbar'); if (toolbar) toolbar.style.display = isGroup ? 'none' : '';
+        const detail = $('#memberStatsDetail'); if (detail) detail.style.display = 'none';
         renderMemberStats();
     }
     
@@ -2862,13 +2871,15 @@ window.resetPForm = function() {
         const totalsBox = $('#memberStatsTotals');
         if (!totalsBox) return;
         const today = new Date();
-        const members = state.personas.filter(person => !person.sacado);
+        const isGroup = currentSession && currentSession.role === 'group';
+        const group = isGroup ? currentSession.group : null;
+        const members = state.personas.filter(person => !person.sacado && (!isGroup || String(person.grupo) === String(group)));
         const totalPioneers = members.filter(person => person.pr).length;
         const totalInactive = members.filter(person => getInactivityInfo(person, today).inactive).length;
         const totalIrregular = members.filter(person => getIrregularMonths(person, today).length > 0).length;
-        const card = (type, label, value, color) => `<button type="button" class="member-stat-card" style="border-left:4px solid ${color};" onclick="renderMemberStatsDetail('${type}')" title="Ver nombres"><span class="dash-label">${label}</span><span class="dash-value">${value}</span></button>`;
+        const card = (type, label, value, color) => `<button type="button" class="member-stat-card" style="border-left:4px solid ${color};" onclick="${isGroup ? `renderGroupMemberDetail(${Number(group)}, '${type}')` : `renderMemberStatsDetail('${type}')`}" title="Ver nombres"><span class="dash-label">${label}</span><span class="dash-value">${value}</span></button>`;
         const totalGroups = state.config.totalGroups || 5;
-        totalsBox.innerHTML = card('publishers', 'Publicadores', members.length, 'var(--primary)') + card('pioneers', 'Precursores regulares', totalPioneers, 'var(--success)') + card('inactive', 'Inactivos', totalInactive, 'var(--danger)') + card('irregular', 'Irregulares', totalIrregular, 'var(--warning)') + card('groups', 'Resumen por grupo', totalGroups, '#7c3aed');
+        totalsBox.innerHTML = card('publishers', 'Publicadores', members.length, 'var(--primary)') + card('pioneers', 'Precursores regulares', totalPioneers, 'var(--success)') + card('inactive', 'Inactivos', totalInactive, 'var(--danger)') + card('irregular', 'Irregulares', totalIrregular, 'var(--warning)') + (isGroup ? '' : card('groups', 'Resumen por grupo', totalGroups, '#7c3aed'));
     };
     window.renderMemberStatsDetail = function(type) {
         const box = $('#memberStatsDetail');
@@ -2911,6 +2922,7 @@ window.resetPForm = function() {
     window.renderGroupMemberDetail = function(group, type) {
         const box = $('#memberStatsDetail');
         if (!box) return;
+        if (currentSession && currentSession.role === 'group') group = currentSession.group;
         const today = new Date();
         const titles = { publishers:'Publicadores', pioneers:'Precursores regulares', inactive:'Inactivos', irregular:'Irregulares' };
         let selected = state.personas.filter(person => !person.sacado && String(person.grupo) === String(group));
@@ -2923,9 +2935,11 @@ window.resetPForm = function() {
             if (type === 'inactive') detail = ` · Última actividad: ${getInactivityInfo(person, today).lastActivity}`;
             if (type === 'irregular') detail = ` · Meses: ${getIrregularMonths(person, today).join(', ')}`;
             const safeId = safeInlineId(person.id);
-            return `<li style="padding:7px 0; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; gap:10px;"><span><b>${escapeHTML(person.nombre)}</b>${escapeHTML(detail)}</span><button class="btn ghost" style="padding:4px 8px; font-size:0.78rem; flex:none;" onclick="editP(decodeURIComponent('${safeId}'))">✏️ Editar</button></li>`;
+            const action = window.isAdmin(false) ? `<button class="btn ghost" style="padding:4px 8px; font-size:0.78rem; flex:none;" onclick="editP(decodeURIComponent('${safeId}'))">✏️ Editar</button>` : '';
+            return `<li style="padding:7px 0; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; gap:10px;"><span><b>${escapeHTML(person.nombre)}</b>${escapeHTML(detail)}</span>${action}</li>`;
         }).join('');
-        box.innerHTML = `<div class="card" style="margin:0; padding:14px 16px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;"><b>${titles[type] || 'Publicadores'} · Grupo ${group} (${selected.length})</b><div style="display:flex; gap:6px;"><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="renderMemberStatsDetail('groups')">← Volver</button><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="document.getElementById('memberStatsDetail').style.display='none'">Cerrar</button></div></div><ul style="list-style:none; margin:8px 0 0; padding:0; max-height:300px; overflow:auto;">${rows || '<li style="padding:10px 0; color:var(--text-muted);">No hay registros.</li>'}</ul></div>`;
+        const backAction = currentSession && currentSession.role === 'group' ? "renderMiembros()" : "renderMemberStatsDetail('groups')";
+        box.innerHTML = `<div class="card" style="margin:0; padding:14px 16px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;"><b>${titles[type] || 'Publicadores'} · Grupo ${group} (${selected.length})</b><div style="display:flex; gap:6px;"><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="${backAction}">← Volver</button><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="document.getElementById('memberStatsDetail').style.display='none'">Cerrar</button></div></div><ul style="list-style:none; margin:8px 0 0; padding:0; max-height:300px; overflow:auto;">${rows || '<li style="padding:10px 0; color:var(--text-muted);">No hay registros.</li>'}</ul></div>`;
         box.style.display = 'block';
         box.scrollIntoView({ behavior:'smooth', block:'nearest' });
     };
