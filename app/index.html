@@ -192,6 +192,21 @@
         .dash-stat { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .dash-num { font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 4px; color: var(--text-main); }
         .dash-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+        .member-stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+        .member-stat-card { background:var(--surface); border:1px solid var(--border-light); border-radius:10px; padding:9px 12px; box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:52px; }
+        button.member-stat-card { width:100%; font:inherit; text-align:left; cursor:pointer; color:inherit; transition:transform .15s, box-shadow .15s; }
+        button.member-stat-card:hover { transform:translateY(-2px); box-shadow:0 5px 12px rgba(0,0,0,.1); }
+        .member-count-link { border:0; background:transparent; color:var(--primary); font:inherit; font-weight:800; padding:6px 10px; border-radius:8px; cursor:pointer; min-width:38px; }
+        .member-count-link:hover { background:var(--primary-soft); text-decoration:underline; }
+        .member-stat-card .dash-label { line-height:1.15; }
+        .member-stat-card .dash-value { font-size:1.35rem; line-height:1; font-weight:800; color:var(--text-main); }
+        .member-list-layout { display:grid; gap:14px; }
+        .member-toolbar { display:grid; grid-template-columns:minmax(190px, 280px) minmax(190px, 230px); gap:10px 16px; align-items:end; padding:12px 14px; background:var(--bg-body); border:1px solid var(--border-light); border-radius:12px; }
+        .member-toolbar p { grid-column:1/-1; margin:0; color:var(--text-muted); font-size:.8rem; }
+        .member-block { border:1px solid var(--border-light); border-radius:12px; overflow:hidden; background:var(--surface); }
+        .member-block-title { padding:10px 14px; background:var(--bg-body); border-bottom:1px solid var(--border-light); color:var(--text-main); font-size:.82rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+        .member-block .table-container { border:0; border-radius:0; }
+        #lista_global .table th { background:var(--surface); }
         .num-blue { color: var(--primary); } .num-green { color: var(--success); } .num-orange { color: var(--warning); } .num-purple { color: #8b5cf6; }
         .asist-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 15px; }
         
@@ -247,6 +262,10 @@
             .tabs { width: max-content; }
             .tabs button { white-space: nowrap; }
             .admin-tools-grid, .asist-grid-layout, .stat-grid, .dash-grid { grid-template-columns: 1fr; } 
+            .member-stats-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+            .member-stat-card { padding:8px 10px; min-height:48px; }
+            .member-toolbar { grid-template-columns:1fr; padding:11px; }
+            .member-toolbar p { grid-column:1; }
         }
         /* === PARCHE FINAL: TEXTOS VISIBLES === */
     body.dark-mode label, 
@@ -276,12 +295,6 @@
 /* === ÚLTIMO PARCHE: ETIQUETAS PEQUEÑAS === */
 
     /* 1. SECCIÓN 2: Los grupos (G1, G2...) */
-    body.dark-mode #tblMiembros span {
-        background-color: #334155 !important;
-        color: #fff !important;
-        border: 1px solid #475569;
-    }
-
     /* 2. SECCIÓN 5: Las horas LDC */
     body.dark-mode #tblPrecursores div[style*="background:#eff6ff"],
     body.dark-mode #tblPrecursores div[style*="background: #eff6ff"] {
@@ -1044,13 +1057,21 @@
         <section id="lista_global" class="tab admin-only">
             <div class="card">
                 <h3><span>📖 Lista General</span> <span id="cGen" class="count-badge">0</span></h3>
-                <div class="table-container"><table class="table" id="tblMiembros"><thead><tr><th>Nombre</th><th>Grupo</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                <div class="member-list-layout">
+                    <div class="member-toolbar">
+                        <div><label>Listado para descargar</label><select id="memberListGroup"></select></div>
+                        <button class="btn success" onclick="downloadGroupMemberList()" style="width:100%;">Descargar listado Excel</button>
+                        <p>Incluye activos, inactivos e irregulares. Solo se excluyen los sacados.</p>
+                    </div>
+                    <div id="memberStatsTotals" class="member-stats-grid"></div>
+                    <div id="memberStatsDetail" style="display:none;"></div>
+                </div>
             </div>
         </section>
 
         <section id="actividad" class="tab">
             <div class="card">
-                <h3><span>📝 Registro de Informes</span> <span id="cAct" class="count-badge">0</span></h3>
+                <h3><span>📝 Registro de Informes</span><span style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;"><span id="cAct" class="count-badge">Publicadores: 0</span><span id="cActPR" class="count-badge">Precursores regulares: 0</span></span></h3>
                 <div class="admin-tools-grid">
                     <div><label>Mes del Informe</label><select id="actMonthSelect"></select></div>
                     <div><label>Año</label><input type="number" id="actYearInput"></div>
@@ -1198,9 +1219,15 @@
                     <div><label>Nombre del superintendente</label><input type="text" id="s303Nombre" placeholder="Nombre completo"></div>
                 </div>
                 <div style="margin-top:12px;"><label>Sugerencias y observaciones</label><textarea id="s303Observaciones" rows="6" placeholder="Anote las sugerencias dejadas durante la visita..."></textarea></div>
-                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;"><button class="btn primary" onclick="saveS303Observation()">Guardar observación</button><button class="btn" onclick="clearS303Form()">Limpiar</button></div>
+                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                    <button class="btn primary" onclick="saveS303Observation()">Guardar observación</button>
+                    <button class="btn" onclick="clearS303Form()">Limpiar</button>
+                </div>
             </div>
-            <div class="card" style="margin-top:20px;"><h3>Historial de observaciones <span id="cS303" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblS303"><thead><tr><th>Fecha</th><th>Superintendente</th><th>Observaciones</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" style="margin-top:20px;">
+                <h3>Historial de observaciones <span id="cS303" class="count-badge">0</span></h3>
+                <div class="table-container"><table class="table" id="tblS303"><thead><tr><th>Fecha</th><th>Superintendente</th><th>Observaciones</th><th>Acción</th></tr></thead><tbody></tbody></table></div>
+            </div>
         </section>
     </div>
 </div>
@@ -1467,8 +1494,12 @@
 
     let currentSession = { role: null, group: null };
     const groupDirtyReports = new Set();
-    window.prepareZeroInput = function(input) { if (String(input.value) === '0') input.value = ''; };
-    window.normalizeLeadingZero = function(input) { input.value = String(input.value).replace(/^0+(?=\d)/, ''); };
+    window.prepareZeroInput = function(input) {
+        if (String(input.value) === '0') input.value = '';
+    };
+    window.normalizeLeadingZero = function(input) {
+        input.value = String(input.value).replace(/^0+(?=\d)/, '');
+    };
     let state = { personas: [], activity: {}, attendance: {}, s303Observaciones: [], config: { pwd: '12345', totalGroups: 5, groups: {} } };
     window.CURRENT_ROLE = 'LOCKED';
     let curY = new Date().getFullYear(), curM = new Date().getMonth()+1;
@@ -1720,9 +1751,15 @@
         const total = state.config.totalGroups || 5;
         const selects = document.querySelectorAll('.dynamic-group-select'); 
         const pwdSelect = $('#groupSelector');
+        const memberListSelect = $('#memberListGroup');
         let opts = ''; for(let i=1; i<=total; i++) { opts += `<option value="${i}">Grupo ${i}</option>`; }
         selects.forEach(sel => { const v = sel.value; sel.innerHTML = opts; if(v && v <= total) sel.value = v; });
         if(pwdSelect) { const v = pwdSelect.value; pwdSelect.innerHTML = opts; if(v && v <= total) pwdSelect.value = v; }
+        if(memberListSelect) {
+            const value = memberListSelect.value;
+            memberListSelect.innerHTML = '<option value="all">Todos los publicadores</option><option value="pioneers">Solo precursores regulares</option>' + opts;
+            if (value && Array.from(memberListSelect.options).some(option => option.value === value)) memberListSelect.value = value;
+        }
     }
 
     window.updateTotalGroups = function() {
@@ -2537,7 +2574,9 @@ window.renderActividad = function() {
     const k = ymKey(actY, actM);
     const list = state.personas.filter(p => p.grupo == g && !p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
     
-    const cEl = document.getElementById('cAct'); if(cEl) cEl.innerText = `(${list.length})`;
+    const cEl = document.getElementById('cAct'); if(cEl) cEl.innerText = `Publicadores: ${list.length}`;
+    const regularPioneers = list.filter(person => person.pr).length;
+    const cPrEl = document.getElementById('cActPR'); if(cPrEl) cPrEl.innerText = `Precursores regulares: ${regularPioneers}`;
     
     if(list.length === 0) { 
         tb.innerHTML = `<tr><td colspan="6" style="padding:25px; text-align:center; color:#6b7280;">No hay miembros en el Grupo ${escapeHTML(g)}.</td></tr>`; 
@@ -2781,18 +2820,147 @@ window.resetPForm = function() {
         renderMemberEventHistory();
     }    
     window.renderMiembros = function() { 
-        const tb=$('#tblMiembros tbody'); if(!tb)return; tb.innerHTML=''; 
         const list = state.personas.filter(p=>!p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
         const cEl = $('#cGen'); if(cEl) cEl.innerText = `(${list.length})`;
-        list.forEach(p=>{ 
-            const tr=document.createElement('tr'); 
-            const safeId = safeInlineId(p.id);
-            tr.innerHTML=`<td><div style="font-weight:700;">${escapeHTML(p.nombre)}</div><div style="font-size:0.75rem; color:var(--text-muted);">${escapeHTML(getPrivilegesString(p))}</div></td><td><span style="background:#f3f4f6; padding:2px 8px; border-radius:4px; font-weight:600;">G${escapeHTML(p.grupo)}</span></td><td><button class="btn ghost" style="padding:4px 8px; font-size:0.8rem;" onclick="editP(decodeURIComponent('${safeId}'))">✏️ Editar</button></td>`; 
-            tb.appendChild(tr); 
-        }); 
+        renderMemberStats();
     }
     
     window.getPrivilegesString = function(p) { return [p.anciano?'Anciano':'', p.sm?'SM':'', p.pr?'PR':'', p.pe?'PE':''].filter(Boolean).join(', '); }
+    window.getIrregularMonths = function(person, today = new Date()) {
+        if (getInactivityInfo(person, today).inactive) return [];
+        const serviceYear = getServiceYear(today);
+        const graceOpen = today.getDate() <= 20;
+        const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const failures = [];
+        const pointer = new Date(serviceYear - 1, 8, 1);
+        while (pointer < today) {
+            if (pointer.getMonth() === today.getMonth() && pointer.getFullYear() === today.getFullYear()) break;
+            const year = pointer.getFullYear();
+            const month = pointer.getMonth() + 1;
+            const key = ymKey(year, month);
+            const checkKey = `${year}-${String(month).padStart(2, '0')}`;
+            if (!person.inicio || checkKey >= person.inicio) {
+                const report = state.activity[key]?.[person.id];
+                const stillInGrace = graceOpen && year === previousMonth.getFullYear() && month === previousMonth.getMonth() + 1;
+                if (!stillInGrace && (!report || (!report.horas && !report.part))) failures.push(MESES_NOM[month - 1].substr(0, 3));
+            }
+            pointer.setMonth(pointer.getMonth() + 1);
+        }
+        return failures;
+    };
+    window.renderMemberStats = function() {
+        const totalsBox = $('#memberStatsTotals');
+        if (!totalsBox) return;
+        const today = new Date();
+        const members = state.personas.filter(person => !person.sacado);
+        const totalPioneers = members.filter(person => person.pr).length;
+        const totalInactive = members.filter(person => getInactivityInfo(person, today).inactive).length;
+        const totalIrregular = members.filter(person => getIrregularMonths(person, today).length > 0).length;
+        const card = (type, label, value, color) => `<button type="button" class="member-stat-card" style="border-left:4px solid ${color};" onclick="renderMemberStatsDetail('${type}')" title="Ver nombres"><span class="dash-label">${label}</span><span class="dash-value">${value}</span></button>`;
+        const totalGroups = state.config.totalGroups || 5;
+        totalsBox.innerHTML = card('publishers', 'Publicadores', members.length, 'var(--primary)') + card('pioneers', 'Precursores regulares', totalPioneers, 'var(--success)') + card('inactive', 'Inactivos', totalInactive, 'var(--danger)') + card('irregular', 'Irregulares', totalIrregular, 'var(--warning)') + card('groups', 'Resumen por grupo', totalGroups, '#7c3aed');
+    };
+    window.renderMemberStatsDetail = function(type) {
+        const box = $('#memberStatsDetail');
+        if (!box) return;
+        const today = new Date();
+        const members = state.personas.filter(person => !person.sacado);
+        const titles = { publishers:'Publicadores', pioneers:'Precursores regulares', inactive:'Inactivos', irregular:'Irregulares', groups:'Resumen por grupo' };
+        if (type === 'groups') {
+            const totalGroups = state.config.totalGroups || 5;
+            const rows = Array.from({ length: totalGroups }, (_, index) => {
+                const group = index + 1;
+                const groupMembers = members.filter(person => String(person.grupo) === String(group));
+                const pioneers = groupMembers.filter(person => person.pr).length;
+                const inactive = groupMembers.filter(person => getInactivityInfo(person, today).inactive).length;
+                const irregular = groupMembers.filter(person => getIrregularMonths(person, today).length > 0).length;
+                const countButton = (value, category, label) => `<button type="button" class="member-count-link" onclick="renderGroupMemberDetail(${group}, '${category}')" title="Ver ${escapeHTML(label)} del grupo ${group}">${value}</button>`;
+                return `<tr><td><b>Grupo ${group}</b></td><td>${countButton(groupMembers.length, 'publishers', 'publicadores')}</td><td>${countButton(pioneers, 'pioneers', 'precursores regulares')}</td><td>${countButton(inactive, 'inactive', 'inactivos')}</td><td>${countButton(irregular, 'irregular', 'irregulares')}</td></tr>`;
+            }).join('');
+            box.innerHTML = `<div class="card" style="margin:0; padding:14px 16px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px;"><b>Resumen por grupo</b><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="document.getElementById('memberStatsDetail').style.display='none'">Cerrar</button></div><div class="table-container" style="margin-top:8px;"><table class="table"><thead><tr><th>Grupo</th><th>Publicadores</th><th>Precursores regulares</th><th>Inactivos</th><th>Irregulares</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+            box.style.display = 'block';
+            box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+            return;
+        }
+        let selected = members;
+        if (type === 'pioneers') selected = members.filter(person => person.pr);
+        if (type === 'inactive') selected = members.filter(person => getInactivityInfo(person, today).inactive);
+        if (type === 'irregular') selected = members.filter(person => getIrregularMonths(person, today).length > 0);
+        selected.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        const rows = selected.map(person => {
+            let detail = '';
+            if (type === 'inactive') detail = ` · Última actividad: ${getInactivityInfo(person, today).lastActivity}`;
+            if (type === 'irregular') detail = ` · Meses: ${getIrregularMonths(person, today).join(', ')}`;
+            const safeId = safeInlineId(person.id);
+            return `<li style="padding:7px 0; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; gap:10px;"><span><b>${escapeHTML(person.nombre)}</b> <span style="color:var(--text-muted);">· G${escapeHTML(person.grupo)}${escapeHTML(detail)}</span></span><button class="btn ghost" style="padding:4px 8px; font-size:0.78rem; flex:none;" onclick="editP(decodeURIComponent('${safeId}'))">✏️ Editar</button></li>`;
+        }).join('');
+        box.innerHTML = `<div class="card" style="margin:0; padding:14px 16px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px;"><b>${titles[type] || 'Detalle'} (${selected.length})</b><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="document.getElementById('memberStatsDetail').style.display='none'">Cerrar</button></div><ul style="list-style:none; margin:8px 0 0; padding:0; max-height:300px; overflow:auto;">${rows || '<li style="padding:10px 0; color:var(--text-muted);">No hay registros.</li>'}</ul></div>`;
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    };
+    window.renderGroupMemberDetail = function(group, type) {
+        const box = $('#memberStatsDetail');
+        if (!box) return;
+        const today = new Date();
+        const titles = { publishers:'Publicadores', pioneers:'Precursores regulares', inactive:'Inactivos', irregular:'Irregulares' };
+        let selected = state.personas.filter(person => !person.sacado && String(person.grupo) === String(group));
+        if (type === 'pioneers') selected = selected.filter(person => person.pr);
+        if (type === 'inactive') selected = selected.filter(person => getInactivityInfo(person, today).inactive);
+        if (type === 'irregular') selected = selected.filter(person => getIrregularMonths(person, today).length > 0);
+        selected.sort((a,b) => a.nombre.localeCompare(b.nombre));
+        const rows = selected.map(person => {
+            let detail = '';
+            if (type === 'inactive') detail = ` · Última actividad: ${getInactivityInfo(person, today).lastActivity}`;
+            if (type === 'irregular') detail = ` · Meses: ${getIrregularMonths(person, today).join(', ')}`;
+            const safeId = safeInlineId(person.id);
+            return `<li style="padding:7px 0; border-bottom:1px solid var(--border-light); display:flex; align-items:center; justify-content:space-between; gap:10px;"><span><b>${escapeHTML(person.nombre)}</b>${escapeHTML(detail)}</span><button class="btn ghost" style="padding:4px 8px; font-size:0.78rem; flex:none;" onclick="editP(decodeURIComponent('${safeId}'))">✏️ Editar</button></li>`;
+        }).join('');
+        box.innerHTML = `<div class="card" style="margin:0; padding:14px 16px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;"><b>${titles[type] || 'Publicadores'} · Grupo ${group} (${selected.length})</b><div style="display:flex; gap:6px;"><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="renderMemberStatsDetail('groups')">← Volver</button><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="document.getElementById('memberStatsDetail').style.display='none'">Cerrar</button></div></div><ul style="list-style:none; margin:8px 0 0; padding:0; max-height:300px; overflow:auto;">${rows || '<li style="padding:10px 0; color:var(--text-muted);">No hay registros.</li>'}</ul></div>`;
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    };
+    window.downloadGroupMemberList = async function() {
+        if (!window.isAdmin()) return;
+        if (typeof XLSX === 'undefined') return alert('No se pudo cargar el generador de Excel. Verifica la conexión e inténtalo nuevamente.');
+        const selection = $('#memberListGroup').value;
+        const activeMembers = state.personas.filter(person => !person.sacado);
+        const members = activeMembers
+            .filter(person => selection === 'all' || (selection === 'pioneers' ? person.pr : String(person.grupo) === String(selection)))
+            .sort((a, b) => a.nombre.localeCompare(b.nombre));
+        const title = selection === 'all' ? 'Todos los miembros' : selection === 'pioneers' ? 'Precursores' : `Grupo ${selection}`;
+        if (!members.length) return alert(`No hay registros activos en ${title}.`);
+
+        const rows = members.map((person, index) => ({
+            'N.º': index + 1,
+            'Nombre': person.nombre || '',
+            'Grupo': person.grupo || '',
+            'Sexo': person.sexo || '',
+            'Privilegios': getPrivilegesString(person) || ''
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        worksheet['!cols'] = [{wch:6}, {wch:34}, {wch:9}, {wch:10}, {wch:28}];
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, title.slice(0, 31));
+        const fileLabel = selection === 'all' ? 'Todos_los_miembros' : selection === 'pioneers' ? 'Precursores' : `Grupo_${selection}`;
+        const fileName = `Listado_${fileLabel}_${new Date().toISOString().slice(0,10)}.xlsx`;
+
+        if (window.Capacitor?.Plugins?.Filesystem) {
+            try {
+                const data = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
+                const result = await Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data, directory: 'DOCUMENTS' });
+                if (Capacitor.Plugins.Share && result?.uri) {
+                    await Capacitor.Plugins.Share.share({ title: `Listado ${title}`, url: result.uri, dialogTitle: 'Compartir listado' });
+                } else {
+                    alert(`Listado guardado en Documentos: ${fileName}`);
+                }
+            } catch (error) {
+                alert('No se pudo guardar el listado: ' + error.message);
+            }
+        } else {
+            XLSX.writeFile(workbook, fileName);
+            showToast(`Listado ${title} descargado`);
+        }
+    };
 // ==========================================
 // FUNCIÓN EDITAR (CON CAMBIO DE PESTAÑA AUTOMÁTICO)
 // ==========================================
@@ -3380,11 +3548,58 @@ window.renderEstadoEspiritual = function() {
             tbFal.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay informes pendientes dentro del plazo de gracia.</td></tr>';
         }
     }
-    window.clearS303Form = function() { $('#s303Id').value=''; $('#s303Fecha').value=''; $('#s303Nombre').value=''; $('#s303Observaciones').value=''; };
-    window.renderS303Observations = function() { const tbody=$('#tblS303 tbody'); if(!tbody)return; const records=Array.isArray(state.s303Observaciones)?[...state.s303Observaciones]:[]; records.sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||''))); tbody.innerHTML=records.length?records.map(record=>`<tr><td>${escapeHTML(record.fecha||'')}</td><td>${escapeHTML(record.nombre||'')}</td><td style="white-space:pre-wrap; min-width:260px;">${escapeHTML(record.observaciones||'')}</td><td><button class="btn small" onclick="editS303Observation('${escapeHTML(record.id)}')">Editar</button> <button class="btn danger small" onclick="deleteS303Observation('${escapeHTML(record.id)}')">Eliminar</button></td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Todavía no hay observaciones registradas.</td></tr>'; $('#cS303').innerText=`(${records.length})`; };
-    window.saveS303Observation = async function() { if(!window.isAdmin())return; const fecha=$('#s303Fecha').value,nombre=$('#s303Nombre').value.trim(),observaciones=$('#s303Observaciones').value.trim(); if(!fecha||!observaciones)return alert('Complete la fecha y las observaciones.'); if(!Array.isArray(state.s303Observaciones))state.s303Observaciones=[]; const id=$('#s303Id').value; const record={id:id||`s303-${Date.now()}`,fecha,nombre,observaciones}; const index=state.s303Observaciones.findIndex(item=>String(item.id)===String(id)); if(index>=0)state.s303Observaciones[index]=record; else state.s303Observaciones.push(record); await window.save(); clearS303Form(); renderS303Observations(); showToast('Observación S-303 guardada'); };
-    window.editS303Observation = function(id) { if(!window.isAdmin())return; const record=(state.s303Observaciones||[]).find(item=>String(item.id)===String(id)); if(!record)return; $('#s303Id').value=record.id; $('#s303Fecha').value=record.fecha||''; $('#s303Nombre').value=record.nombre||''; $('#s303Observaciones').value=record.observaciones||''; window.scrollTo({top:0,behavior:'smooth'}); };
-    window.deleteS303Observation = async function(id) { if(!window.isAdmin()||!confirm('¿Eliminar esta observación S-303?'))return; state.s303Observaciones=(state.s303Observaciones||[]).filter(item=>String(item.id)!==String(id)); await window.save(); renderS303Observations(); };
+    window.clearS303Form = function() {
+        $('#s303Id').value = '';
+        $('#s303Fecha').value = '';
+        $('#s303Nombre').value = '';
+        $('#s303Observaciones').value = '';
+    };
+    window.renderS303Observations = function() {
+        const tbody = $('#tblS303 tbody');
+        if (!tbody) return;
+        const records = Array.isArray(state.s303Observaciones) ? [...state.s303Observaciones] : [];
+        records.sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')));
+        tbody.innerHTML = records.length ? records.map(record => `<tr>
+            <td>${escapeHTML(record.fecha || '')}</td>
+            <td>${escapeHTML(record.nombre || '')}</td>
+            <td style="white-space:pre-wrap; min-width:260px;">${escapeHTML(record.observaciones || '')}</td>
+            <td><button class="btn small" onclick="editS303Observation('${escapeHTML(record.id)}')">Editar</button> <button class="btn danger small" onclick="deleteS303Observation('${escapeHTML(record.id)}')">Eliminar</button></td>
+        </tr>`).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Todavía no hay observaciones registradas.</td></tr>';
+        $('#cS303').innerText = `(${records.length})`;
+    };
+    window.saveS303Observation = async function() {
+        if (!window.isAdmin()) return;
+        const fecha = $('#s303Fecha').value;
+        const nombre = $('#s303Nombre').value.trim();
+        const observaciones = $('#s303Observaciones').value.trim();
+        if (!fecha || !observaciones) return alert('Complete la fecha y las observaciones.');
+        if (!Array.isArray(state.s303Observaciones)) state.s303Observaciones = [];
+        const id = $('#s303Id').value;
+        const record = { id: id || `s303-${Date.now()}`, fecha, nombre, observaciones };
+        const index = state.s303Observaciones.findIndex(item => String(item.id) === String(id));
+        if (index >= 0) state.s303Observaciones[index] = record;
+        else state.s303Observaciones.push(record);
+        await window.save();
+        clearS303Form();
+        renderS303Observations();
+        showToast('Observación S-303 guardada');
+    };
+    window.editS303Observation = function(id) {
+        if (!window.isAdmin()) return;
+        const record = (state.s303Observaciones || []).find(item => String(item.id) === String(id));
+        if (!record) return;
+        $('#s303Id').value = record.id;
+        $('#s303Fecha').value = record.fecha || '';
+        $('#s303Nombre').value = record.nombre || '';
+        $('#s303Observaciones').value = record.observaciones || '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    window.deleteS303Observation = async function(id) {
+        if (!window.isAdmin() || !confirm('¿Eliminar esta observación S-303?')) return;
+        state.s303Observaciones = (state.s303Observaciones || []).filter(item => String(item.id) !== String(id));
+        await window.save();
+        renderS303Observations();
+    };
     window.toggleS21Inputs = function() { const m=$('#s21Mode').value; $('#s21InputIndiv').style.display=(m==='individual')?'block':'none'; $('#s21InputGroup').style.display=(m==='group')?'block':'none'; $('#preview-viewport').innerHTML=''; }
 
     window.getS21HTML = function(p, sy) { 
