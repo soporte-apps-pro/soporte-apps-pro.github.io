@@ -266,6 +266,14 @@
             .member-stat-card { padding:8px 10px; min-height:48px; }
             .member-toolbar { grid-template-columns:1fr; padding:11px; }
             .member-toolbar p { grid-column:1; }
+            .group-summary-table thead { display:none; }
+            .group-summary-table, .group-summary-table tbody { display:block; width:100%; }
+            .group-summary-table tr { display:block; margin:0 0 10px; padding:8px 10px; border:1px solid var(--border-light); border-radius:10px; background:var(--surface); }
+            .group-summary-table td { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:7px 2px; border:0; border-bottom:1px solid var(--border-light); text-align:right; }
+            .group-summary-table td:last-child { border-bottom:0; }
+            .group-summary-table td::before { content:attr(data-label); color:var(--text-muted); font-size:.78rem; font-weight:700; text-align:left; }
+            .group-summary-table td:first-child { font-size:1rem; text-align:left; }
+            .group-summary-table td:first-child::before { content:none; }
         }
         /* === PARCHE FINAL: TEXTOS VISIBLES === */
     body.dark-mode label, 
@@ -2875,9 +2883,9 @@ window.resetPForm = function() {
                 const inactive = groupMembers.filter(person => getInactivityInfo(person, today).inactive).length;
                 const irregular = groupMembers.filter(person => getIrregularMonths(person, today).length > 0).length;
                 const countButton = (value, category, label) => `<button type="button" class="member-count-link" onclick="renderGroupMemberDetail(${group}, '${category}')" title="Ver ${escapeHTML(label)} del grupo ${group}">${value}</button>`;
-                return `<tr><td><b>Grupo ${group}</b></td><td>${countButton(groupMembers.length, 'publishers', 'publicadores')}</td><td>${countButton(pioneers, 'pioneers', 'precursores regulares')}</td><td>${countButton(inactive, 'inactive', 'inactivos')}</td><td>${countButton(irregular, 'irregular', 'irregulares')}</td></tr>`;
+                return `<tr><td data-label="Grupo"><b>Grupo ${group}</b></td><td data-label="Publicadores">${countButton(groupMembers.length, 'publishers', 'publicadores')}</td><td data-label="Precursores regulares">${countButton(pioneers, 'pioneers', 'precursores regulares')}</td><td data-label="Inactivos">${countButton(inactive, 'inactive', 'inactivos')}</td><td data-label="Irregulares">${countButton(irregular, 'irregular', 'irregulares')}</td></tr>`;
             }).join('');
-            box.innerHTML = `<div class="card" style="margin:0; padding:14px 16px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px;"><b>Resumen por grupo</b><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="document.getElementById('memberStatsDetail').style.display='none'">Cerrar</button></div><div class="table-container" style="margin-top:8px;"><table class="table"><thead><tr><th>Grupo</th><th>Publicadores</th><th>Precursores regulares</th><th>Inactivos</th><th>Irregulares</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+            box.innerHTML = `<div class="card" style="margin:0; padding:14px 16px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px;"><b>Resumen por grupo</b><button type="button" class="btn ghost" style="padding:5px 9px;" onclick="document.getElementById('memberStatsDetail').style.display='none'">Cerrar</button></div><div class="table-container" style="margin-top:8px;"><table class="table group-summary-table"><thead><tr><th>Grupo</th><th>Publicadores</th><th>Precursores regulares</th><th>Inactivos</th><th>Irregulares</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
             box.style.display = 'block';
             box.scrollIntoView({ behavior:'smooth', block:'nearest' });
             return;
