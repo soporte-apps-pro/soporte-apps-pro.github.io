@@ -1252,8 +1252,10 @@
     window.fbUpdateDoc = null;
     window.fbFieldPath = null;
     window.fbOnSnapshot = null;
+    window.fbRunTransaction = null;
     const DB_KEY = 'cong_pro_v108_master';
     const CRED_KEY = 'cong_pro_firebase_creds';
+    const PENDING_REPORTS_KEY = 'cong_pro_pending_report_fields';
     const $ = s => document.querySelector(s);
     // Escapa cualquier dato antes de insertarlo en plantillas HTML. Los respaldos
     // y Firestore son entradas no confiables, aunque hayan sido creados por la app.
@@ -1582,6 +1584,52 @@
             }
         }
         localStorage.setItem(DB_KEY, JSON.stringify(state));
+    }
+
+    // Los cambios de los encargados se guardan aparte del estado general. De ese
+    // modo sobreviven al cierre de la app y una descarga desde Firebase no los
+    // borra antes de que puedan sincronizarse.
+    let pendingReportChanges = {};
+    let groupSyncRunning = false;
+
+    async function loadPendingReportChanges() {
+        if (localDb) {
+            try {
+                const record = await localDb.settings.get("pendingReportChanges");
+                if (record && record.val && typeof record.val === 'object') return record.val;
+            } catch (error) {
+                console.error("No se pudieron cargar los cambios pendientes.", error);
+            }
+        }
+        try {
+            return JSON.parse(localStorage.getItem(PENDING_REPORTS_KEY) || '{}');
+        } catch (_) {
+            return {};
+        }
+    }
+
+    async function savePendingReportChanges() {
+        const snapshot = JSON.parse(JSON.stringify(pendingReportChanges));
+        localStorage.setItem(PENDING_REPORTS_KEY, JSON.stringify(snapshot));
+        if (localDb) {
+            try {
+                await localDb.settings.put({ key: "pendingReportChanges", val: snapshot });
+            } catch (error) {
+                console.error("No se pudieron guardar los cambios pendientes en IndexedDB.", error);
+            }
+        }
+    }
+
+    function mergePendingChangesIntoState(targetState) {
+        if (!targetState.activity) targetState.activity = {};
+        Object.values(pendingReportChanges).forEach(change => {
+            if (!change || change.status === 'conflict') return;
+            if (!targetState.activity[change.monthKey]) targetState.activity[change.monthKey] = {};
+            const report = targetState.activity[change.monthKey][change.personId] || {};
+            Object.assign(report, change.fields || {});
+            targetState.activity[change.monthKey][change.personId] = report;
+        });
+        return targetState;
     }
 
 // --- FUNCIÓN PARA LLENAR AÑOS (2025 - 2026) ---
@@ -2151,10 +2199,11 @@ function parseDate(val) {
         try {
             // 🚀 MAGIA: Descargamos Firebase oficial solo en este instante
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js");
-            const { getFirestore, doc, setDoc, updateDoc, onSnapshot, FieldPath } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+            const { getFirestore, doc, setDoc, updateDoc, onSnapshot, FieldPath, runTransaction } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
             
             // Guardamos las herramientas globalmente para que la app las use
             window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbUpdateDoc = updateDoc; window.fbFieldPath = FieldPath; window.fbOnSnapshot = onSnapshot;
+            window.fbRunTransaction = runTransaction;
 
             const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
             
@@ -2176,13 +2225,137 @@ function parseDate(val) {
             return false;
         }
     };
+    function reportChangeKey(monthKey, personId) {
+        return `${monthKey}|${personId}`;
+    }
+
+    function safeReportFieldValue(field, value) {
+        if (field === 'part' || field === 'pa') return Boolean(value);
+        if (field === 'horas') return Math.max(0, Math.min(1000, Number(value) || 0));
+        if (field === 'est') return Math.max(0, Math.min(100, Math.trunc(Number(value) || 0)));
+        if (field === 'nota') return String(value || '').slice(0, 500);
+        throw new Error('Campo de informe no permitido');
+    }
+
+    function currentReportFieldValue(report, field) {
+        const defaults = { part: false, horas: 0, est: 0, pa: false, nota: '' };
+        return safeReportFieldValue(field, report && Object.prototype.hasOwnProperty.call(report, field) ? report[field] : defaults[field]);
+    }
+
+    async function registerPendingReportField(monthKey, personId, field, value, previousValue) {
+        const key = reportChangeKey(monthKey, personId);
+        const report = state.activity[monthKey]?.[personId] || {};
+        if (!pendingReportChanges[key]) {
+            pendingReportChanges[key] = {
+                monthKey,
+                personId: String(personId),
+                group: String(currentSession.group),
+                baseVersion: Number(report._syncVersion) || 0,
+                baseFields: {},
+                fields: {},
+                status: 'pending'
+            };
+        }
+        if (!Object.prototype.hasOwnProperty.call(pendingReportChanges[key].baseFields, field)) {
+            pendingReportChanges[key].baseFields[field] = safeReportFieldValue(field, previousValue);
+        }
+        pendingReportChanges[key].fields[field] = safeReportFieldValue(field, value);
+        pendingReportChanges[key].status = 'pending';
+        groupDirtyReports.add(key);
+        await savePendingReportChanges();
+    }
+
+    async function syncGroupPendingReports() {
+        if (groupSyncRunning || currentSession.role !== 'group' || !window.cloudConnected || !db || !window.fbRunTransaction) return;
+        groupSyncRunning = true;
+        let conflicts = 0;
+        try {
+            while (true) {
+                const pair = Object.entries(pendingReportChanges).find(([, change]) =>
+                    change && change.status === 'pending' && String(change.group) === String(currentSession.group));
+                if (!pair) break;
+                const [key, change] = pair;
+                const uploadedFields = JSON.parse(JSON.stringify(change.fields || {}));
+                if (!Object.keys(uploadedFields).length) {
+                    delete pendingReportChanges[key];
+                    await savePendingReportChanges();
+                    continue;
+                }
+                try {
+                    const result = await window.fbRunTransaction(db, async transaction => {
+                        const reference = window.fbDoc(db, "congregacion", "datos_generales");
+                        const snapshot = await transaction.get(reference);
+                        const remoteReport = snapshot.data()?.activity?.[change.monthKey]?.[change.personId] || {};
+                        const remoteVersion = Number(remoteReport._syncVersion) || 0;
+                        const fieldChangedRemotely = Object.keys(uploadedFields).some(field =>
+                            JSON.stringify(currentReportFieldValue(remoteReport, field)) !== JSON.stringify(change.baseFields?.[field]));
+                        if (remoteVersion !== Number(change.baseVersion || 0) || fieldChangedRemotely) {
+                            const conflict = new Error('REPORT_VERSION_CONFLICT');
+                            conflict.remoteReport = remoteReport;
+                            throw conflict;
+                        }
+                        const nextVersion = remoteVersion + 1;
+                        const args = [];
+                        Object.entries(uploadedFields).forEach(([field, value]) => {
+                            args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, field), safeReportFieldValue(field, value));
+                        });
+                        args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_syncVersion'), nextVersion);
+                        args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_updatedAt'), new Date().toISOString());
+                        args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_updatedBy'), `grupo-${currentSession.group}`);
+                        transaction.update(reference, ...args);
+                        return { nextVersion };
+                    });
+                    const current = pendingReportChanges[key];
+                    if (current) {
+                        Object.entries(uploadedFields).forEach(([field, value]) => {
+                            if (JSON.stringify(current.fields[field]) === JSON.stringify(value)) {
+                                delete current.fields[field];
+                                delete current.baseFields[field];
+                            } else {
+                                // Hubo otra edición mientras la transacción estaba en curso;
+                                // la nueva base es el valor que acabamos de confirmar.
+                                current.baseFields[field] = value;
+                            }
+                        });
+                        current.baseVersion = result.nextVersion;
+                        if (!Object.keys(current.fields).length) {
+                            delete pendingReportChanges[key];
+                            groupDirtyReports.delete(key);
+                        }
+                    }
+                    const localReport = state.activity[change.monthKey]?.[change.personId];
+                    if (localReport) localReport._syncVersion = result.nextVersion;
+                    await Promise.all([savePendingReportChanges(), saveLocalState()]);
+                } catch (error) {
+                    if (error && error.message === 'REPORT_VERSION_CONFLICT') {
+                        conflicts++;
+                        if (!state.activity[change.monthKey]) state.activity[change.monthKey] = {};
+                        state.activity[change.monthKey][change.personId] = error.remoteReport || {};
+                        delete pendingReportChanges[key];
+                        groupDirtyReports.delete(key);
+                        await Promise.all([savePendingReportChanges(), saveLocalState()]);
+                        renderActividad();
+                        continue;
+                    }
+                    console.error('No se pudo sincronizar el informe pendiente:', error);
+                    break;
+                }
+            }
+        } finally {
+            groupSyncRunning = false;
+        }
+        if (conflicts) {
+            alert(`⚠️ NO SE GUARDÓ TU CAMBIO\n\nOtra persona actualizó ${conflicts === 1 ? 'este informe' : 'estos informes'} antes que tú. Para no borrar su información, la aplicación detuvo el guardado.\n\nLa pantalla ya muestra los datos más recientes. Revísalos y vuelve a escribir tu cambio si todavía hace falta.`);
+        }
+    }
+
     function startRealtimeSync() {
         if(!db || !window.fbOnSnapshot) return;
         
         window.unsubscribeSync = window.fbOnSnapshot(window.fbDoc(db, "congregacion", "datos_generales"), async (docSnap) => {
             if(docSnap.exists()) {
-                const cloudData = docSnap.data(); 
-                state = cloudData;
+                const cloudData = docSnap.data();
+                state = mergePendingChangesIntoState(cloudData);
                 window.state = state;
                 
                 if(!state.personas) state.personas = [];
@@ -2195,7 +2368,8 @@ function parseDate(val) {
                 enforceVersionPolicy();
                 
                 try { await saveLocalState(); } catch(e){}
-                renderAll(); 
+                renderAll();
+                if (currentSession.role === 'group') syncGroupPendingReports();
             } else { 
                 save(); 
             }
@@ -2221,30 +2395,7 @@ function parseDate(val) {
             if (window.cloudConnected && db && window.fbSetDoc) {
                 try {
                     if (currentSession.role === 'group') {
-                        if (!window.fbUpdateDoc || !window.fbFieldPath) throw new Error('Actualización segura no disponible');
-                        const updateArgs = [];
-                        const uploadedKeys = [];
-                        for (const dirtyKey of groupDirtyReports) {
-                            const separator = dirtyKey.indexOf('|');
-                            const monthKey = dirtyKey.slice(0, separator);
-                            const personId = dirtyKey.slice(separator + 1);
-                            const person = state.personas.find(item => String(item.id) === String(personId));
-                            if (!person || String(person.grupo) !== String(currentSession.group)) continue;
-                            const report = state.activity[monthKey]?.[personId] || {};
-                            const safeReport = {
-                                part: Boolean(report.part),
-                                horas: Math.max(0, Math.min(1000, Number(report.horas) || 0)),
-                                est: Math.max(0, Math.min(100, Math.trunc(Number(report.est) || 0))),
-                                pa: Boolean(report.pa),
-                                nota: String(report.nota || '').slice(0, 500)
-                            };
-                            updateArgs.push(new window.fbFieldPath('activity', monthKey, String(personId)), safeReport);
-                            uploadedKeys.push(dirtyKey);
-                        }
-                        if (updateArgs.length) {
-                            await window.fbUpdateDoc(window.fbDoc(db, "congregacion", "datos_generales"), ...updateArgs);
-                            uploadedKeys.forEach(key => groupDirtyReports.delete(key));
-                        }
+                        await syncGroupPendingReports();
                     } else if (currentSession.role === 'admin') {
                         await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state);
                     } else {
@@ -2490,6 +2641,7 @@ function enterApp() {
     }
     
     renderAll();
+    if (currentSession.role === 'group') syncGroupPendingReports();
 }
 
 
@@ -2641,7 +2793,7 @@ window.renderActividad = function() {
     });
 };
 
-    window.updAct = (pid, f, v) => { 
+    window.updAct = async (pid, f, v) => {
         if (!window.canEditActivity(pid)) return;
         if (!['part', 'horas', 'est', 'pa', 'nota'].includes(f)) return;
         const hoy = new Date();
@@ -2665,9 +2817,18 @@ window.renderActividad = function() {
         const k = ymKey(actY, actM); 
         if(!state.activity[k]) state.activity[k] = {}; 
         if(!state.activity[k][pid]) state.activity[k][pid] = {part:false, horas:0, est:0, pa:false}; 
-        state.activity[k][pid][f] = (f==='pa'||f==='part'||f==='nota') ? v : parseFloat(v||0); 
-        if (currentSession.role === 'group') groupDirtyReports.add(`${k}|${pid}`);
-        save(); 
+        const previousValue = currentReportFieldValue(state.activity[k][pid], f);
+        const normalizedValue = safeReportFieldValue(f, v);
+        state.activity[k][pid][f] = normalizedValue;
+        if (currentSession.role === 'group') {
+            await registerPendingReportField(k, pid, f, normalizedValue, previousValue);
+        } else if (currentSession.role === 'admin') {
+            const report = state.activity[k][pid];
+            report._syncVersion = (Number(report._syncVersion) || 0) + 1;
+            report._updatedAt = new Date().toISOString();
+            report._updatedBy = 'administrador';
+        }
+        await save();
     }
 
    window.savePersona = function() {
@@ -4421,6 +4582,8 @@ window.toggleConnection = async function() {
             // 1. Cargar IndexedDB o, si falla, el respaldo de localStorage.
             const localState = await loadLocalState();
             if (localState) state = localState;
+            pendingReportChanges = await loadPendingReportChanges();
+            mergePendingChangesIntoState(state);
         } catch(e) { console.error("Error al cargar datos locales", e); }
 
         window.state = state;
