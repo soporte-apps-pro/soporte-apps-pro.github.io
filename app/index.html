@@ -1271,6 +1271,10 @@
         .replace(/\s+/g, ' ');
     const safeInlineId = value => encodeURIComponent(String(value ?? ''));
     const ymKey = (y,m) => `${y}-${String(m).padStart(2,'0')}`;
+    const getPreviousMonthKey = (date = new Date()) => {
+        const previous = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+        return ymKey(previous.getFullYear(), previous.getMonth() + 1);
+    };
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
     const APP_VERSION = "1.4.0";
@@ -3241,26 +3245,33 @@ window.exportBackup = async function() {
     // 3. 🎯 LÓGICA DE ROLES: Filtrar si es un Encargado
     if (currentSession && currentSession.role === 'group') {
         const miGrupo = currentSession.group;
-        fileName = `Respaldo_Grupo${miGrupo}_${new Date().toISOString().slice(0,10)}.json`;
+        const reportMonth = getPreviousMonthKey();
+        fileName = `Informes_Grupo${miGrupo}_${reportMonth}.json`;
         
         // A. Dejar solo a las personas de su grupo
         const miembrosDeMiGrupo = exportData.personas.filter(p => String(p.grupo) === String(miGrupo));
-        const idsPermitidos = miembrosDeMiGrupo.map(p => p.id);
+        const idsPermitidos = new Set(miembrosDeMiGrupo.map(p => String(p.id)));
         exportData.personas = miembrosDeMiGrupo;
         
         // B. Borrar la asistencia (no le compete al encargado)
         delete exportData.attendance; 
         
-        // C. Limpiar los informes de personas que NO son de su grupo
-        if(exportData.activity) {
-            for (let mes in exportData.activity) {
-                for (let pid in exportData.activity[mes]) {
-                    if (!idsPermitidos.includes(pid)) {
-                        delete exportData.activity[mes][pid]; // Eliminamos el rastro
-                    }
-                }
-            }
-        }
+        // C. El archivo del encargado contiene exclusivamente el mes que debe
+        // entregar. El historial continúa visible en la app, pero nunca viaja.
+        const monthlyReports = {};
+        const sourceMonth = exportData.activity?.[reportMonth] || {};
+        Object.entries(sourceMonth).forEach(([pid, report]) => {
+            if (idsPermitidos.has(String(pid))) monthlyReports[pid] = report;
+        });
+        exportData.activity = { [reportMonth]: monthlyReports };
+        exportData.backupMeta = {
+            type: 'group_reports',
+            formatVersion: 2,
+            group: String(miGrupo),
+            reportMonth,
+            createdAt: new Date().toISOString(),
+            appVersion: APP_VERSION
+        };
     } else {
         // Si es el Administrador, exporta toda la base (sin el config)
         fileName = `CongPro_Respaldo_TOTAL_${new Date().toISOString().slice(0,10)}.json`;
@@ -4410,35 +4421,64 @@ window.importData = (input) => {
 
                 let modoFusion = true;
                 let grupoFiltro = "";
+                const backupMeta = dataImportada.backupMeta || {};
+                const expectedReportMonth = getPreviousMonthKey();
+                let ignoredReports = 0;
 
                 // 2. COMPORTAMIENTO SEGÚN EL ROL
                 if (esAdmin) {
-                    // El Admin decide qué hacer
-                    modoFusion = confirm(
-                        "📂 RESPALDO DETECTADO\n\n" +
-                        "¿Qué deseas hacer?\n\n" +
-                        "[ACEPTAR] = 🧬 FUSIONAR (Añadir informes del Encargado sin borrar lo tuyo).\n" +
-                        "[CANCELAR] = ⚠️ RESTAURAR TOTAL (CUIDADO: Borra tu base y pone este archivo)."
-                    );
-
-                    if (modoFusion) {
-                        grupoFiltro = prompt(
-                            "🛡️ MODO SEGURO ACTIVO\n\n" +
-                            "Si este archivo te lo envió un Encargado, escribe su número de grupo (ej: 1, 2, 3).\n\n" +
-                            "Si es tu propio respaldo general, déjalo en blanco y presiona Aceptar:"
-                        );
-                        if (grupoFiltro === null) {
-                            alert("❌ Operación cancelada.");
+                    if (backupMeta.type === 'group_reports') {
+                        modoFusion = true;
+                        grupoFiltro = String(backupMeta.group || '').trim();
+                        if (!grupoFiltro) throw new Error('El archivo no indica a qué grupo pertenece.');
+                        if (String(backupMeta.reportMonth || '') !== expectedReportMonth) {
+                            alert(`❌ MES NO PERMITIDO\n\nEste archivo corresponde a ${backupMeta.reportMonth || 'un mes desconocido'}, pero actualmente solo se puede importar ${expectedReportMonth}.`);
                             input.value = '';
                             return;
                         }
-                        grupoFiltro = grupoFiltro.trim();
+                        if (!confirm(`📂 INFORMES DEL GRUPO ${grupoFiltro}\n\nMes: ${expectedReportMonth}\n\nSe importará únicamente este mes. ¿Continuar?`)) {
+                            input.value = '';
+                            return;
+                        }
+                    } else {
+                        // Compatibilidad con respaldos generales y archivos de
+                        // encargados creados por versiones anteriores.
+                        modoFusion = confirm(
+                            "📂 RESPALDO DETECTADO\n\n" +
+                            "¿Qué deseas hacer?\n\n" +
+                            "[ACEPTAR] = 🧬 FUSIONAR.\n" +
+                            "[CANCELAR] = ⚠️ RESTAURAR TOTAL."
+                        );
+
+                        if (modoFusion) {
+                            grupoFiltro = prompt(
+                                "🛡️ MODO SEGURO ACTIVO\n\n" +
+                                "Si este archivo te lo envió un encargado, escribe su número de grupo. Solo se importará el mes " + expectedReportMonth + ".\n\n" +
+                                "Si es tu respaldo general, déjalo en blanco:"
+                            );
+                            if (grupoFiltro === null) {
+                                alert("❌ Operación cancelada.");
+                                input.value = '';
+                                return;
+                            }
+                            grupoFiltro = grupoFiltro.trim();
+                        }
                     }
                 } else if (miGrupo) {
                     // Si es Encargado: Fusión OBLIGATORIA y filtrada solo a su grupo
                     modoFusion = true;
                     grupoFiltro = String(miGrupo);
-                    if(!confirm(`📂 ARCHIVO DETECTADO\n\nSe van a cargar los informes de tu Grupo ${miGrupo}. ¿Continuar?`)) {
+                    if (backupMeta.type === 'group_reports' && String(backupMeta.group) !== String(miGrupo)) {
+                        alert(`❌ Este archivo pertenece al Grupo ${backupMeta.group}, no al Grupo ${miGrupo}.`);
+                        input.value = '';
+                        return;
+                    }
+                    if (backupMeta.type === 'group_reports' && String(backupMeta.reportMonth || '') !== expectedReportMonth) {
+                        alert(`❌ Este archivo no corresponde al mes permitido (${expectedReportMonth}).`);
+                        input.value = '';
+                        return;
+                    }
+                    if(!confirm(`📂 ARCHIVO DETECTADO\n\nSe cargarán únicamente los informes de ${expectedReportMonth} del Grupo ${miGrupo}. ¿Continuar?`)) {
                         input.value = '';
                         return;
                     }
@@ -4467,26 +4507,45 @@ window.importData = (input) => {
                     // B. Fusionar actividad
                     if(dataImportada.activity) {
                         for (const [keyMes, grupoActividad] of Object.entries(dataImportada.activity)) {
+                            // Los archivos de grupo, incluso los creados por
+                            // versiones antiguas, jamás pueden tocar otro mes.
+                            if (grupoFiltro !== "" && keyMes !== expectedReportMonth) {
+                                ignoredReports += Object.keys(grupoActividad || {}).length;
+                                continue;
+                            }
                             if(!state.activity[keyMes]) state.activity[keyMes] = {};
                             
                             for (const [pid, infImportada] of Object.entries(grupoActividad)) {
                                 
                                 // Buscamos en la base local, o en la importada si es nuevo
-                                const personaLocal = state.personas.find(p => p.id === pid) || dataImportada.personas.find(p => p.id === pid);
+                                const personaLocal = state.personas.find(p => String(p.id) === String(pid)) || dataImportada.personas.find(p => String(p.id) === String(pid));
                                 
                                 // Blindaje: Ignoramos la actividad de personas que no sean del grupo autorizado
                                 if (grupoFiltro !== "" && personaLocal && String(personaLocal.grupo) !== String(grupoFiltro)) {
                                     continue; 
                                 }
 
+                                const previousReport = state.activity[keyMes][pid] || {};
                                 state.activity[keyMes][pid] = infImportada;
-                                if (currentSession.role === 'group') groupDirtyReports.add(`${keyMes}|${pid}`);
+                                if (currentSession.role === 'group') {
+                                    for (const field of ['part', 'horas', 'est', 'pa', 'nota']) {
+                                        if (Object.prototype.hasOwnProperty.call(infImportada, field)) {
+                                            await registerPendingReportField(
+                                                keyMes,
+                                                pid,
+                                                field,
+                                                infImportada[field],
+                                                currentReportFieldValue(previousReport, field)
+                                            );
+                                        }
+                                    }
+                                }
                                 actualizados++;
                             }
                         }
                     }
                     save(); 
-                    alert(`✅ FUSIÓN COMPLETADA\n\nSe agregaron ${nuevos} personas y se actualizaron ${actualizados} registros.`);
+                    alert(`✅ FUSIÓN COMPLETADA\n\n${grupoFiltro !== "" ? `Mes importado: ${expectedReportMonth}\n` : ''}Se agregaron ${nuevos} personas y se actualizaron ${actualizados} informes.${ignoredReports ? `\nInformes de otros meses ignorados: ${ignoredReports}` : ''}`);
                     renderAll(); 
 
                 } else {
@@ -4744,10 +4803,10 @@ setTimeout(window.renderizarHistorialRapido, 500);
                                 <p style="font-size:0.9em; margin-top:0; margin-bottom:10px;">Si trabajan fuera de línea (Offline), la información se puede pasar manualmente mediante un archivo seguro:</p>
                                 
                                 <ol style="font-size:0.9em; padding-left:20px; margin-top:5px; margin-bottom:0; color:#475569;">
-                                    <li style="margin-bottom:8px;"><b>Generar el archivo:</b> El encargado anota los informes en su celular. Luego va a <b>⚙️ Ajustes > 💾 Respaldo Local</b> y toca <b>"📥 Descargar"</b>.</li>
+                                    <li style="margin-bottom:8px;"><b>Generar el archivo:</b> El encargado anota los informes en su celular. Luego va a <b>⚙️ Ajustes > 💾 Respaldo Local</b> y toca <b>"📥 Descargar"</b>. El archivo incluye únicamente el mes anterior.</li>
                                     <li style="margin-bottom:8px;"><b>Enviar los datos:</b> El encargado comparte ese archivo recién descargado con el secretario (por ejemplo, vía WhatsApp).</li>
                                     <li style="margin-bottom:8px;"><b>Cargar al sistema:</b> El secretario guarda el archivo en su dispositivo, abre la App y va a <b>⚙️ Ajustes > 💾 Respaldo Local</b>. Allí toca <b>"📤 Restaurar"</b> y selecciona el archivo recibido.</li>
-                                    <li><b>Fusión Inteligente:</b> La App detectará que vienen datos nuevos y preguntará si se desea <b>FUSIONAR</b>. Al aceptar, los informes del grupo se sumarán a la base general sin borrar la información anterior.</li>
+                                    <li><b>Importación protegida:</b> La app detecta automáticamente el grupo y el mes. Nunca importa meses anteriores ni modifica otros grupos.</li>
                                 </ol>
                             </div>
                         </div>
@@ -4766,9 +4825,9 @@ setTimeout(window.renderizarHistorialRapido, 500);
                             <br><br>
                             <b>🔒 Seguridad (Candado):</b>
                             <br>• El sistema protege tu historial. Los meses de "Diciembre hacia atrás" aparecen siempre bloqueados con un banner azul.
-                            <br>• <b>Periodo de Gracia:</b> El mes anterior (Enero) permanecerá abierto y editable automáticamente durante los primeros <b>15 días</b> del mes actual (Febrero). 
-                            <br>• El día 16, el mes anterior se cerrará solo. 
-                            <br>• <b>¿Cómo editar si está bloqueado?</b> Solo pulsa el botón naranja <b>"🔓 Desbloquear"</b> para habilitar la edición manual.
+                            <br>• <b>Periodo de Gracia:</b> El mes anterior (Enero) permanecerá abierto y editable automáticamente durante los primeros <b>20 días</b> del mes actual (Febrero).
+                            <br>• El día 21, el mes anterior se cerrará solo.
+                            <br>• <b>¿Cómo editar si está bloqueado?</b> Solo el administrador puede usar el botón naranja <b>"🔓 Desbloquear"</b> para corregir el historial.
                         </div>
                     </details>
 
