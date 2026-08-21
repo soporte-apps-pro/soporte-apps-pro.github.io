@@ -2630,7 +2630,8 @@ function parseDate(val) {
         if (window.cloudAccess?.active) {
             const role = window.cloudAccess.role === 'admin' ? 'Administrador autorizado' :
                 window.cloudAccess.role === 'group' ? `Encargado autorizado · Grupo ${window.cloudAccess.group}` : 'Acceso autorizado';
-            box.textContent = `✅ ${role} · Dispositivo ${shortId}`;
+            const deviceName = window.cloudAccess.deviceName ? ` · ${window.cloudAccess.deviceName}` : '';
+            box.textContent = `✅ ${role}${deviceName} · Dispositivo ${shortId}`;
             box.style.color = '#166534';
             box.style.background = '#f0fdf4';
         } else {
@@ -2691,16 +2692,23 @@ function parseDate(val) {
     async function registerSecureDeviceRequest(role, group = null) {
         if (!window.cloudConnected || !db || !window.firebaseUserUid || window.cloudAccess?.active) return;
         const deviceCode = window.firebaseUserUid.slice(-6).toUpperCase();
+        const savedDeviceName = localStorage.getItem('cong_pro_device_name') || '';
+        const requestedDeviceName = prompt('Escribe un nombre para reconocer este dispositivo.\n\nEjemplo: Juan - Samsung A15', savedDeviceName);
+        if (requestedDeviceName === null) return;
+        const deviceName = requestedDeviceName.trim().slice(0,60);
+        if (!deviceName) return alert('Escribe un nombre breve para identificar el dispositivo.');
+        localStorage.setItem('cong_pro_device_name',deviceName);
         try {
             await window.fbSetDoc(window.fbDoc(db,'solicitudes_acceso',window.firebaseUserUid),{
                 uid:window.firebaseUserUid,
                 requestedRole:role,
                 group:group == null ? null : String(group),
+                deviceName,
                 deviceCode,
                 status:'pending',
                 requestedAt:new Date().toISOString()
             });
-            alert(`🔐 DISPOSITIVO PENDIENTE\n\nCódigo: ${deviceCode}\n\nEl administrador debe abrir Ajustes > Revisar dispositivos pendientes y aprobar este código antes de activar las reglas seguras.`);
+            alert(`🔐 DISPOSITIVO PENDIENTE\n\nNombre: ${deviceName}\nCódigo: ${deviceCode}\n\nEl administrador debe abrir Ajustes > Revisar dispositivos pendientes y aprobar este dispositivo antes de activar las reglas seguras.`);
         } catch (error) {
             console.error('Solicitud de acceso seguro:',error);
         }
@@ -2719,7 +2727,8 @@ function parseDate(val) {
             }
             container.innerHTML = pending.map(request => {
                 const role = request.requestedRole === 'group' ? `Encargado · Grupo ${escapeHTML(request.group)}` : escapeHTML(request.requestedRole);
-                return `<div style="background:#fff; padding:9px; border-radius:8px; margin-top:6px; border:1px solid #c7d2fe;"><b>${role}</b><br>Código: <b>${escapeHTML(request.deviceCode)}</b><button class="btn success" style="width:100%; margin-top:7px;" onclick="approveSecureAccess('${safeInlineId(request.uid)}')">Aprobar dispositivo</button></div>`;
+                const deviceName = request.deviceName ? `<b>${escapeHTML(request.deviceName)}</b><br>` : '';
+                return `<div style="background:#fff; padding:9px; border-radius:8px; margin-top:6px; border:1px solid #c7d2fe;">${deviceName}${role}<br>Código: <b>${escapeHTML(request.deviceCode)}</b><button class="btn success" style="width:100%; margin-top:7px;" onclick="approveSecureAccess('${safeInlineId(request.uid)}')">Aprobar dispositivo</button></div>`;
             }).join('');
         } catch (error) {
             console.error('Listado de solicitudes:',error);
@@ -2734,12 +2743,14 @@ function parseDate(val) {
         const request = snapshot.docs.find(item => item.id === uid)?.data();
         if (!request || request.status !== 'pending') return alert('La solicitud ya no está disponible.');
         const description = request.requestedRole === 'group' ? `encargado del Grupo ${request.group}` : request.requestedRole;
-        if (!confirm(`¿Autorizar el dispositivo ${request.deviceCode} como ${description}?`)) return;
+        const recognizableName = request.deviceName || request.deviceCode;
+        if (!confirm(`¿Autorizar "${recognizableName}" como ${description}?\n\nCódigo: ${request.deviceCode}`)) return;
         try {
             await window.fbSetDoc(window.fbDoc(db,'accesos',uid),{
                 role:request.requestedRole,
                 group:request.group,
                 groupNumber:request.group == null ? null : Number(request.group),
+                deviceName:request.deviceName || '',
                 deviceCode:request.deviceCode || uid.slice(-6).toUpperCase(),
                 active:true,
                 approvedAt:new Date().toISOString(),
@@ -2770,11 +2781,34 @@ function parseDate(val) {
                 const role = device.role === 'admin' ? 'Administrador' : device.role === 'group' ? `Encargado · Grupo ${escapeHTML(device.group)}` : 'Invitado';
                 const code = device.deviceCode || device.uid.slice(-6).toUpperCase();
                 const action = isSelf ? '<small style="color:#166534;">Este dispositivo</small>' : `<button class="btn danger" style="width:100%; margin-top:7px;" onclick="revokeSecureAccess('${safeInlineId(device.uid)}')">Revocar acceso</button>`;
-                return `<div style="background:#fff; padding:9px; border-radius:8px; margin-top:6px; border:1px solid #c7d2fe;"><b>${role}</b><br>Código: <b>${escapeHTML(code)}</b><br>${action}</div>`;
+                const deviceName = device.deviceName ? escapeHTML(device.deviceName) : 'Sin nombre asignado';
+                return `<div style="background:#fff; padding:9px; border-radius:8px; margin-top:6px; border:1px solid #c7d2fe;"><b>${deviceName}</b><br>${role}<br>Código: <b>${escapeHTML(code)}</b><br><button class="btn ghost" style="width:100%; margin-top:7px;" onclick="renameSecureDevice('${safeInlineId(device.uid)}','${safeInlineId(device.deviceName || '')}')">${device.deviceName ? 'Cambiar nombre' : 'Asignar nombre'}</button>${action}</div>`;
             }).join('');
         } catch (error) {
             console.error('Dispositivos autorizados:',error);
             container.textContent = 'No se pudo cargar la lista.';
+        }
+    };
+
+    window.renameSecureDevice = async function(encodedUid, encodedCurrentName) {
+        if (!window.isAdmin() || !db) return;
+        const uid = decodeURIComponent(encodedUid);
+        const currentName = decodeURIComponent(encodedCurrentName || '');
+        const requestedName = prompt('Nombre para reconocer este dispositivo:',currentName);
+        if (requestedName === null) return;
+        const deviceName = requestedName.trim().slice(0,60);
+        if (!deviceName) return alert('El nombre no puede quedar vacío.');
+        try {
+            await window.fbSetDoc(window.fbDoc(db,'accesos',uid),{ deviceName },{ merge:true });
+            if (uid === window.firebaseUserUid) {
+                localStorage.setItem('cong_pro_device_name',deviceName);
+                window.cloudAccess = { ...(window.cloudAccess || {}), deviceName };
+            }
+            showToast('✅ Nombre del dispositivo guardado');
+            await window.loadAuthorizedDevices();
+        } catch (error) {
+            console.error('Nombre del dispositivo:',error);
+            alert(`No se pudo guardar el nombre.\n\n${error.message || ''}`);
         }
     };
 
