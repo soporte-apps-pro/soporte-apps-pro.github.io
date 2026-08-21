@@ -906,8 +906,8 @@
                     <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px;">Control obligatorio de versiones</div>
                     <p style="font-size:0.8rem; color:var(--text-muted);">Versi&oacute;n instalada: <b id="cfgInstalledVersion"></b></p>
                     <div class="admin-tools-grid">
-                        <div><label>Versi&oacute;n m&aacute;s reciente</label><input type="text" id="cfgLatestVersion" placeholder="1.4.0"></div>
-                        <div><label>Versi&oacute;n m&iacute;nima permitida</label><input type="text" id="cfgMinimumVersion" placeholder="1.4.0"></div>
+                        <div><label>Versi&oacute;n m&aacute;s reciente</label><input type="text" id="cfgLatestVersion" placeholder="1.5.0"></div>
+                        <div><label>Versi&oacute;n m&iacute;nima permitida</label><input type="text" id="cfgMinimumVersion" placeholder="1.5.0"></div>
                     </div>
                     <button class="btn warning" onclick="saveVersionPolicy()" style="width:100%;">Guardar pol&iacute;tica de versiones</button>
                 </div>
@@ -951,7 +951,7 @@
                 </div>
             </div>
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.4.0 • Web/App</span>
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.5.0 • Web/App</span>
                 
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
@@ -1438,7 +1438,7 @@
     };
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
-    const APP_VERSION = "1.4.0";
+    const APP_VERSION = "1.5.0";
     window.versionBlocked = false;
     // ... debajo de const CICLO_S88 ...
 
@@ -3070,25 +3070,104 @@ function parseDate(val) {
         return true;
     }
 
-    function startAdminSplitReportSync() {
+    function startAdminDividedSync() {
         if (!db || !window.fbOnSnapshot || !window.fbCollection) return;
-        if (window.unsubscribeAdminSplitReports) window.unsubscribeAdminSplitReports();
-        window.unsubscribeAdminSplitReports = window.fbOnSnapshot(window.fbCollection(db,'informes'),async snapshot => {
-            const nextActivity = {};
-            snapshot.docs.forEach(item => {
-                const report = item.data();
-                if (!report.month || !report.personId) return;
-                if (!nextActivity[report.month]) nextActivity[report.month] = {};
-                nextActivity[report.month][String(report.personId)] = report;
-            });
-            adminSplitActivity = nextActivity;
-            adminSplitReportsLoaded = true;
-            state.activity = JSON.parse(JSON.stringify(adminSplitActivity));
+        (window.unsubscribeAdminDivided || []).forEach(unsubscribe => unsubscribe());
+        window.unsubscribeAdminDivided = [];
+        const fragments = { ready:new Set(), personas:[], activity:{}, attendance:{}, observations:[], config:null, extra:{} };
+        let integrityValidated = false;
+        let integrityChecking = false;
+
+        const applyCompleteState = async () => {
+            if (fragments.ready.size < 6) return;
+            if (!integrityValidated) {
+                if (integrityChecking) return;
+                integrityChecking = true;
+                try {
+                    const legacySnapshot = await window.fbGetDoc(window.fbDoc(db,'congregacion','datos_generales'));
+                    if (!legacySnapshot.exists()) throw new Error('No se encontró el respaldo general para comparar.');
+                    const legacy = legacySnapshot.data();
+                    const dividedCounts = {
+                        personas:fragments.personas.length,
+                        informes:Object.values(fragments.activity).reduce((sum,reports) => sum + Object.keys(reports || {}).length,0),
+                        asistencia:Object.keys(fragments.attendance).length,
+                        observaciones:fragments.observations.length
+                    };
+                    const legacyCounts = {
+                        personas:(legacy.personas || []).length,
+                        informes:Object.values(legacy.activity || {}).reduce((sum,reports) => sum + Object.keys(reports || {}).length,0),
+                        asistencia:Object.keys(legacy.attendance || {}).length,
+                        observaciones:(legacy.s303Observaciones || []).length
+                    };
+                    const mismatch = Object.keys(dividedCounts).filter(key => dividedCounts[key] !== legacyCounts[key]);
+                    if (mismatch.length) throw new Error(`No coinciden: ${mismatch.join(', ')}. Nueva: ${JSON.stringify(dividedCounts)}. Respaldo: ${JSON.stringify(legacyCounts)}.`);
+                    integrityValidated = true;
+                    const status = $('#secureStorageStatus');
+                    if (status) status.textContent = `✅ Estructura dividida activa y verificada: ${dividedCounts.personas} publicadores, ${dividedCounts.informes} informes, ${dividedCounts.asistencia} meses de asistencia y ${dividedCounts.observaciones} observaciones.`;
+                } catch (error) {
+                    console.error('Verificación antes de activar estructura dividida:',error);
+                    alert(`⛔ TRANSICIÓN DETENIDA\n\n${error.message}\n\nEl documento antiguo permanece intacto.`);
+                    return;
+                } finally {
+                    integrityChecking = false;
+                }
+            }
+            state = {
+                ...JSON.parse(JSON.stringify(fragments.extra || {})),
+                personas:JSON.parse(JSON.stringify(fragments.personas)),
+                activity:JSON.parse(JSON.stringify(fragments.activity)),
+                attendance:JSON.parse(JSON.stringify(fragments.attendance)),
+                s303Observaciones:JSON.parse(JSON.stringify(fragments.observations)),
+                config:JSON.parse(JSON.stringify(fragments.config || { pwd:'12345', totalGroups:5, groups:{} }))
+            };
             window.state = state;
+            splitShadowBaseline = JSON.parse(JSON.stringify(state));
+            splitShadowNeedsRetry = false;
             rebuildCalculatedMemberEvents();
+            enforceVersionPolicy();
             try { await saveLocalState(); } catch (_) {}
             renderAll();
-        },error => console.error('Sincronización dividida para administrador:',error));
+        };
+
+        const listenCollection = (name,onData) => {
+            const unsubscribe = window.fbOnSnapshot(window.fbCollection(db,name),snapshot => {
+                onData(snapshot.docs.map(item => item.data()));
+                fragments.ready.add(name);
+                applyCompleteState();
+            },error => {
+                console.error(`Sincronización dividida (${name}):`,error);
+                updateCloudUI(false,null,true);
+            });
+            window.unsubscribeAdminDivided.push(unsubscribe);
+        };
+        const listenDocument = (id,onData) => {
+            const unsubscribe = window.fbOnSnapshot(window.fbDoc(db,'configuracion',id),snapshot => {
+                onData(snapshot.exists() ? (snapshot.data().values || {}) : {});
+                fragments.ready.add(`configuracion/${id}`);
+                applyCompleteState();
+            },error => {
+                console.error(`Sincronización dividida (configuracion/${id}):`,error);
+                updateCloudUI(false,null,true);
+            });
+            window.unsubscribeAdminDivided.push(unsubscribe);
+        };
+
+        listenCollection('publicadores',documents => { fragments.personas = documents; });
+        listenCollection('informes',documents => {
+            const activity = {};
+            documents.forEach(report => {
+                if (!report.month || !report.personId) return;
+                if (!activity[report.month]) activity[report.month] = {};
+                activity[report.month][String(report.personId)] = report;
+            });
+            fragments.activity = activity;
+        });
+        listenCollection('asistencia',documents => {
+            fragments.attendance = Object.fromEntries(documents.filter(item => item.month).map(item => [item.month,item.values || {}]));
+        });
+        listenCollection('observaciones_visita',documents => { fragments.observations = documents; });
+        listenDocument('general',values => { fragments.config = values; });
+        listenDocument('estado',values => { fragments.extra = values; });
     }
 
     function startAuthorizedGroupSync(groupValue) {
@@ -3157,7 +3236,8 @@ function parseDate(val) {
             return;
         }
         if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'admin') {
-            startAdminSplitReportSync();
+            startAdminDividedSync();
+            return;
         }
         
         window.unsubscribeSync = window.fbOnSnapshot(window.fbDoc(db, "congregacion", "datos_generales"), async (docSnap) => {
@@ -3207,25 +3287,21 @@ function parseDate(val) {
             // 2. Subir a la Nube
             if (window.cloudConnected && db && window.fbSetDoc) {
                 try {
-                    let splitShadowWarning = false;
                     if (currentSession.role === 'group') {
                         await syncGroupPendingReports();
                     } else if (currentSession.role === 'admin') {
-                        let shadowError = null;
                         try {
                             await syncSplitShadowState(state);
                         } catch (error) {
-                            shadowError = error;
-                            splitShadowWarning = true;
                             splitShadowNeedsRetry = true;
-                            console.error('No se pudo actualizar la copia dividida:',error);
+                            console.error('No se pudo actualizar la estructura dividida:',error);
+                            throw error;
                         }
-                        await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state);
                     } else {
                         throw new Error('Rol sin permiso de escritura');
                     }
                     console.log("✅ ÉXITO: Datos guardados en la Nube.");
-                    if (!silent) showToast(splitShadowWarning ? '⚠️ Nube guardada; copia segura pendiente' : "☁️ Guardado en la Nube");
+                    if (!silent) showToast("☁️ Guardado en la Nube");
                 } catch (errorNube) {
                     console.error("❌ Error al subir a la Nube:", errorNube);
                     if (!silent) showToast("💾 Guardado local (Fallo en Nube)");
@@ -5755,7 +5831,7 @@ window.toggleConnection = async function() {
                 <details><summary>12. Inf-Visita Circuito · Guardar observaciones</summary><div>Registra fecha, nombre del superintendente y observaciones; pulsa <b>Guardar</b>. Usa <b>Editar</b> para corregir o <b>Eliminar</b> para borrar una observación.</div></details>
             </div>
             <div style="margin-top:16px; padding:12px; border-radius:10px; background:var(--bg-body); color:var(--text-muted); font-size:.88rem;"><b>Ajustes:</b> administra nube, accesos, grupos y respaldos. Al importar un respaldo total, usa <b>Restaurar copia completa</b> para recuperar también la asistencia; <b>Fusionar publicadores e informes</b> conserva la base actual y no incorpora asistencia. Consulta también <b>Uso independiente y privacidad</b>: la app no es oficial, el desarrollador no recibe los datos y el usuario debe estar autorizado para tratar información de terceros. Para migrar, carga cualquier Excel, relaciona sus columnas, revisa la vista previa y confirma. La plantilla es opcional y la app omite informes del mes en curso o futuros. En Android, al crear un respaldo elige dónde guardarlo o compartirlo y verifica el archivo.</div>
-            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.4.0</small></div>
+            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.5.0</small></div>
         </div>
 
         <div style="display:none; padding:0; overflow-y:auto; flex:1; background:var(--surface);">
@@ -5983,7 +6059,7 @@ window.toggleConnection = async function() {
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.4.0</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.5.0</span>
             </div>
         </div>
     </div>
