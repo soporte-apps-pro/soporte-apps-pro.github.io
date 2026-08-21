@@ -156,6 +156,22 @@
         .tabs button { padding: 14px 4px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
         .tabs button:hover { color: var(--primary); }
         .tabs button.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .s10-reminder { display:none; margin:14px auto 0; max-width:1400px; padding:0 1.5rem; }
+        .s10-reminder.visible { display:block; }
+        .s10-reminder-panel { width:100%; border:1px solid #f59e0b; border-radius:12px; background:#fffbeb; color:#78350f; padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:14px; box-shadow:var(--shadow-sm); }
+        .s10-reminder-title { display:block; font-weight:800; margin-bottom:3px; }
+        .s10-reminder-detail { display:block; font-size:.88rem; line-height:1.35; }
+        .s10-reminder-actions { flex:0 0 auto; display:flex; align-items:center; gap:8px; }
+        .s10-reminder-action { border:1px solid #d97706; padding:7px 10px; border-radius:8px; background:#f59e0b; color:#451a03; font-size:.8rem; font-weight:800; cursor:pointer; }
+        .s10-reminder-action.secondary { background:#fff; }
+        body.dark-mode .s10-reminder-panel { background:#422006; border-color:#d97706; color:#fef3c7; }
+        body.dark-mode .s10-reminder-action { background:#f59e0b; color:#451a03; }
+        body.dark-mode .s10-reminder-action.secondary { background:#292524; color:#fef3c7; }
+        @media (max-width: 640px) {
+            .s10-reminder-panel { align-items:stretch; flex-direction:column; }
+            .s10-reminder-actions { width:100%; }
+            .s10-reminder-action { flex:1; }
+        }
 
         /* UI ELEMENTS */
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; animation: fadeIn 0.4s ease-out; }
@@ -614,6 +630,37 @@
 
 <div id="toast"></div>
 
+<div id="modalBackupImportChoice" style="display:none; position:fixed; inset:0; z-index:11020; background:rgba(15,23,42,.9); padding:18px; align-items:center; justify-content:center;">
+    <div class="card" style="width:min(520px,94vw); margin:0; background:#fff; color:#111827;">
+        <h2 style="margin:0 0 8px; color:#4f46e5;">📂 Importar respaldo</h2>
+        <p style="margin:0 0 12px; color:#475569;">Revisa el contenido y elige exactamente qué deseas hacer.</p>
+        <div id="backupImportSummary" style="padding:12px; border-radius:10px; background:#f8fafc; color:#334155; font-size:.86rem; line-height:1.55;"></div>
+        <div style="display:grid; gap:9px; margin-top:14px;">
+            <button type="button" class="btn primary" onclick="resolveBackupImportChoice('restore')">🔄 Restaurar copia completa</button>
+            <button type="button" class="btn info" onclick="resolveBackupImportChoice('merge')">🧬 Fusionar publicadores e informes</button>
+            <button type="button" class="btn ghost" onclick="resolveBackupImportChoice('cancel')">No importar</button>
+        </div>
+        <small style="display:block; margin-top:10px; color:#64748b;"><b>Restaurar</b> reemplaza los datos actuales e incluye asistencia. <b>Fusionar</b> conserva la base actual y no incorpora asistencia.</small>
+    </div>
+</div>
+
+<div id="modalIndependentNotice" style="display:none; position:fixed; inset:0; z-index:11000; background:rgba(15,23,42,.92); padding:18px; align-items:center; justify-content:center;">
+    <div class="card" style="width:min(480px,94vw); max-height:90vh; overflow:auto; margin:0; background:#fff; color:#111827;">
+        <div style="font-size:2rem; text-align:center; margin-bottom:8px;">🛡️</div>
+        <h2 style="margin:0 0 12px; text-align:center; color:#4f46e5;">Uso independiente y responsable</h2>
+        <div style="font-size:.9rem; line-height:1.55; color:#334155;">
+            <p><b>Congregación Pro es una herramienta independiente.</b> No es una aplicación oficial ni representa a ninguna congregación u organización religiosa.</p>
+            <p>El desarrollador no recibe, consulta ni almacena la información registrada. Los datos permanecen en este dispositivo o, si el usuario activa la nube, en el proyecto Firebase que él mismo administra.</p>
+            <p>Quien utiliza la aplicación debe estar autorizado para registrar y compartir datos de otras personas y es responsable de proteger el dispositivo, las claves, los respaldos y el acceso a su nube.</p>
+        </div>
+        <label style="display:flex; align-items:flex-start; gap:9px; margin:14px 0; color:#334155; font-size:.88rem;">
+            <input type="checkbox" id="independentNoticeCheck" style="margin-top:3px;">
+            <span>He leído y entiendo estas condiciones de uso.</span>
+        </label>
+        <button type="button" class="btn primary" style="width:100%;" onclick="acceptIndependentNotice()">Continuar</button>
+    </div>
+</div>
+
     <div id="modalAuth" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; justify-content: center; align-items: flex-start; overflow-y:auto; background: #374151;">
     <div class="card" style="width:min(360px, 92vw); max-width:90%; text-align:center; margin-bottom:0; padding: 40px 20px; max-height: 90vh; overflow-y: auto; max-height: 90vh; overflow-y: auto; padding-bottom: 18px;">
         <div style="background:var(--primary); width:60px; height:60px; border-radius:16px; margin:0 auto 20px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:1.8rem;">🔐</div>
@@ -621,7 +668,7 @@
         
         <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; text-align: left;">
             
-            <div style="background: #e2e8f0; border: 1px solid #94a3b8; border-radius: 12px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
+            <div class="info-card offline-info" style="background: #e2e8f0; border: 1px solid #94a3b8; border-radius: 12px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
                 <span style="font-size: 1.5rem;">✈️</span>
                 <div style="line-height: 1.4;">
                     <strong style="color: #0f172a; display: block; margin-bottom: 4px; font-size: 0.9rem;">100% Funcional sin Internet</strong>
@@ -629,7 +676,7 @@
                 </div>
             </div>
 
-            <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 12px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
+            <div class="info-card access-info" style="background: #dcfce7; border: 1px solid #86efac; border-radius: 12px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
                 <span style="font-size: 1.4rem;">🔑</span>
                 <div style="line-height: 1.4;">
                     <strong style="color: #064e3b; display: block; margin-bottom: 4px; font-size: 0.9rem;">Acceso al Sistema</strong>
@@ -644,6 +691,14 @@
 
         <input type="password" id="mPwd" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:12px; margin-bottom:30px; font-weight:700; border-radius: 12px; padding: 15px;">
         <button class="btn primary" id="mEnter" onclick="window.attemptLogin()" style="width:100%; padding:16px; font-size:1rem;">ENTRAR AL SISTEMA</button>
+        <details style="margin-top:14px; text-align:left; font-size:.82rem;">
+            <summary style="cursor:pointer; color:var(--primary); font-weight:700;">Autorizar este celular o preparar respaldo</summary>
+            <p style="color:var(--text-muted); margin:9px 0;">Pega la llave de conexión y solicita autorización al administrador actual.</p>
+            <input id="authSmartTokenInput" type="text" placeholder="Llave de conexión" style="font-size:.85rem; letter-spacing:normal; margin-bottom:8px;">
+            <button class="btn ghost" type="button" onclick="connectFromLoginToken()" style="width:100%;">Conectar este celular</button>
+            <button class="btn warning" type="button" onclick="requestBackupAdminAccess()" style="width:100%; margin-top:7px;">Solicitar como administrador de respaldo</button>
+            <div id="authSecureRequestStatus" style="margin-top:7px; color:var(--text-muted);"></div>
+        </details>
         <p onclick="handleForgotPwd()" style="margin-top:20px; font-size:0.85rem; color:var(--primary); cursor:pointer; text-decoration:underline; font-weight:600;">
     ¿Olvidaste tu clave?
 </p>
@@ -755,6 +810,20 @@
                             <button class="btn ghost" onclick="saveCloudCredentials()" style="width:100%;">Guardar Manualmente</button>
                         </div>
                     </details>
+
+                    <div class="admin-only" style="margin-top:15px; padding:14px; border:1px solid #a5b4fc; border-radius:10px; background:#eef2ff;">
+                        <b style="display:block; color:#3730a3; margin-bottom:5px;">🛡️ Almacenamiento seguro (preparación)</b>
+                        <p style="font-size:.78rem; color:#4338ca; margin:0 0 10px;">Crea la estructura dividida sin borrar ni reemplazar la base actual. Requiere activar primero el acceso anónimo en Firebase Authentication.</p>
+                        <details style="margin-bottom:10px;"><summary style="cursor:pointer; color:#3730a3; font-size:.78rem; font-weight:700;">Cómo activar el acceso anónimo</summary><ol style="font-size:.76rem; color:#4338ca; padding-left:20px; line-height:1.5;"><li>Abre tu proyecto en Firebase.</li><li>Ve a <b>Authentication</b> y pulsa <b>Comenzar</b>.</li><li>En <b>Método de acceso</b>, abre <b>Anónimo</b>, actívalo y guarda.</li><li>Regresa aquí y pulsa el botón inferior.</li></ol></details>
+                        <button id="btnPrepareSecureStorage" class="btn primary" type="button" onclick="prepareSecureStorageMigration()" style="width:100%;">Preparar y verificar almacenamiento</button>
+                        <div id="secureStorageStatus" style="font-size:.76rem; margin-top:8px; color:#3730a3;"></div>
+                        <button class="btn ghost admin-only" type="button" onclick="loadSecureAccessRequests()" style="width:100%; margin-top:8px;">Revisar dispositivos pendientes</button>
+                        <button class="btn ghost admin-only" type="button" onclick="loadAuthorizedDevices()" style="width:100%; margin-top:8px;">Administrar dispositivos autorizados</button>
+                        <div id="secureAccessRequests" class="admin-only" style="font-size:.76rem; margin-top:8px;"></div>
+                        <div id="authorizedDevicesList" class="admin-only" style="font-size:.76rem; margin-top:8px;"></div>
+                    </div>
+                    <div id="secureDeviceStatus" style="font-size:.76rem; margin-top:10px; padding:9px; border:1px solid #c7d2fe; border-radius:8px; background:#fff; color:#3730a3;">Identidad segura: pendiente de conexión.</div>
+                    <button id="btnTestSecureWrite" class="btn ghost" type="button" onclick="testSecureWritePermission()" style="width:100%; margin-top:8px;">🧪 Probar permiso de escritura</button>
                 </div>
             </div>
 
@@ -785,23 +854,34 @@
                         📗 Migración Masiva (Excel)
                     </div>
                     <p style="font-size:0.8rem; color:#14532d; margin-bottom:15px;">
-                        ¿Traes datos de otra parte? Descarga nuestra plantilla, llénala y súbela.
+                        Importa cualquier Excel y relaciona sus columnas antes de guardar. La plantilla es opcional.
                     </p>
                     
                     <div class="action-row">
                         <button class="icon-btn" onclick="downloadExcelTemplate()" style="border:1px solid #86efac; background:white;">
                             <span style="font-size:1.5rem;">📥</span>
-                            <small style="color:#166534; font-weight:bold;">1. Bajar Plantilla</small>
+                            <small style="color:#166534; font-weight:bold;">Plantilla opcional</small>
                         </button>
 
                         <div class="icon-btn" style="position:relative; background:#16a34a; border:none; color:white;">
                             <span style="font-size:1.5rem;">📂</span>
-                            <small style="font-weight:bold;">2. Cargar Excel</small>
+                            <small style="font-weight:bold;">Importar cualquier Excel</small>
                             <input type="file" accept=".xlsx, .xls" onchange="importFromExcel(this)" 
                                 style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="settings-group" style="margin-top:15px;">
+                <details>
+                    <summary>🛡️ Uso independiente y privacidad</summary>
+                    <div class="settings-content" style="font-size:.84rem; line-height:1.55; color:var(--text-muted);">
+                        <p><b>Congregación Pro es una herramienta independiente.</b> No es una aplicación oficial ni representa a ninguna congregación u organización religiosa.</p>
+                        <p>El desarrollador no recibe, consulta ni almacena los datos. La información permanece en el dispositivo o en el Firebase configurado y administrado por el propio usuario.</p>
+                        <p style="margin-bottom:0;">El usuario debe estar autorizado para registrar o compartir datos de terceros y proteger sus claves, dispositivos, respaldos y acceso a la nube.</p>
+                    </div>
+                </details>
             </div>
 
             <div id="secCongregacion" class="settings-group admin-only" style="margin-top:15px;">
@@ -945,6 +1025,33 @@
         </div>
     </div>
 </div>
+<div id="modalTransferHistory" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:10020; align-items:center; justify-content:center; padding:20px;">
+    <div class="card" style="max-width:760px; width:94%; max-height:90vh; overflow:auto; padding:0;">
+        <div class="settings-header">
+            <div><h3 style="margin:0;">Informes anteriores del traslado</h3><small id="transferHistoryPersonName"></small></div>
+            <button class="btn ghost" type="button" onclick="closeTransferHistory()">✕</button>
+        </div>
+        <div style="padding:20px;">
+            <p style="margin-top:0; color:var(--text-muted);">Registra los datos de la tarjeta recibida de la congregación anterior. Solo se aceptan meses anteriores al traslado.</p>
+            <input type="hidden" id="transferHistoryPersonId">
+            <div class="admin-tools-grid">
+                <div><label>Mes del informe</label><input type="month" id="transferReportMonth"></div>
+                <div><label>Horas</label><input type="number" id="transferReportHours" min="0" max="1000" step="0.1" value="0"></div>
+                <div><label>Cursos bíblicos</label><input type="number" id="transferReportStudies" min="0" max="100" step="1" value="0"></div>
+                <div style="display:flex; align-items:flex-end; padding-bottom:10px;"><label style="margin:0;"><input type="checkbox" id="transferReportParticipated" checked> Participó</label></div>
+                <div style="display:flex; align-items:flex-end; padding-bottom:10px;"><label style="margin:0;"><input type="checkbox" id="transferReportAuxiliary"> Precursor auxiliar</label></div>
+                <div><label>Notas</label><input type="text" id="transferReportNote" maxlength="500" placeholder="Opcional"></div>
+            </div>
+            <div style="display:flex; gap:10px; margin:12px 0 18px; flex-wrap:wrap;">
+                <button class="btn primary" type="button" onclick="saveTransferPreviousReport()">Guardar informe</button>
+                <button class="btn ghost" type="button" onclick="openTransferPublisherCard()">Ver tarjeta</button>
+                <button class="btn success" type="button" onclick="closeTransferHistory()">Finalizar</button>
+            </div>
+            <div id="transferHistoryList"></div>
+        </div>
+    </div>
+</div>
+
 <div id="app-content">
     <header class="top">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -991,6 +1098,19 @@
         </div>
     </div>
 
+    <div id="s10AnnualReminder" class="s10-reminder admin-only" role="status" aria-live="polite">
+        <div class="s10-reminder-panel">
+            <span>
+                <span class="s10-reminder-title">📅 Recordatorio: informe anual S-10</span>
+                <span id="s10AnnualReminderText" class="s10-reminder-detail">Enviar por JW Hub a más tardar el 20 de septiembre.</span>
+            </span>
+            <span class="s10-reminder-actions">
+                <button type="button" class="s10-reminder-action secondary" onclick="markS10AsSent()">Ya lo envié</button>
+                <button type="button" class="s10-reminder-action" onclick="openS10FromReminder()">Ver S-10</button>
+            </span>
+        </div>
+    </div>
+
     <div class="container">
         <section id="personas" class="tab active admin-only">
             <div class="card">
@@ -998,7 +1118,12 @@
                 <div class="admin-tools-grid">
                     <input type="hidden" id="pId">
                     <input type="hidden" id="pOriginalGrupo">
-                    <div><label>Nombre Completo</label><input type="text" id="pNombre" placeholder="Ej: Juan Pérez"></div>
+                    <div><label>Nombres</label><input type="text" id="pNombres" placeholder="Ej: Juan Carlos" autocomplete="given-name"></div>
+                    <div><label>Primer apellido</label><input type="text" id="pApellido1" placeholder="Ej: Pérez" autocomplete="family-name"></div>
+                    <div><label>Segundo apellido <small>(opcional)</small></label><input type="text" id="pApellido2" placeholder="Ej: Gómez"></div>
+                    <div id="legacyNameNotice" style="display:none; padding:8px 10px; border-radius:8px; background:#eff6ff; color:#1d4ed8; font-size:0.78rem;">
+                        Registro anterior: el nombre completo está en “Nombres”. Distribúyelo en los apellidos al actualizar la ficha.
+                    </div>
                     <div><label>Grupo Predicación</label><select id="pGrupo" class="dynamic-group-select"></select></div>
                     <div><label>Sexo</label><select id="pSexo"><option value="Hombre">Hombre</option><option value="Mujer">Mujer</option></select></div>
                     <div><label>Esperanza</label><select id="pEsp"><option value="Otras ovejas">Otras ovejas</option><option value="Ungido">Ungido</option></select></div>
@@ -1008,29 +1133,28 @@
                     <div><label>Fecha Bautismo</label><input type="date" id="pBau"></div>
                     
                     <div>
-                        <label>Inicio/Reactivación</label>
-                        <input type="month" id="pInicio" title="Mes en que llegó o se reactivó. Antes de esta fecha no contará fallas.">
+                        <label>Mes de ingreso/reactivación</label>
+                        <input type="month" id="pInicio" title="Mes en que comenzó a informar, llegó trasladado o se reactivó. Antes de esta fecha no contará fallas.">
                     </div>
-                    <div><label>Fecha Sacado</label><input type="date" id="pFSac"></div>
-                    <div style="display:flex; align-items:flex-end; padding-bottom:8px;"><label style="display:flex; align-items:center; gap:7px; margin:0;"><input type="checkbox" id="pSalidaPendiente"> Fecha de salida pendiente</label></div>
+                    <div>
+                        <label>Tipo de ingreso</label>
+                        <select id="pTipoIngreso" onchange="updateTransferHistoryButton()" title="Indica si comenzó a informar por primera vez o llegó trasladado.">
+                            <option value="">Registro anterior / por clasificar</option>
+                            <option value="nuevo_publicador">Nuevo publicador (primera vez)</option>
+                            <option value="traslado">Traslado de otra congregación</option>
+                        </select>
+                        <button type="button" id="btnTransferHistory" class="btn ghost" style="display:none; margin-top:7px; width:100%;" onclick="openTransferHistory(document.getElementById('pId').value)">Registrar informes anteriores</button>
+                    </div>
+                    <div><label>Fecha sacado</label><input type="date" id="pFSac"></div>
+                    <div><label>Fecha de fallecimiento</label><input type="date" id="pFallecimiento"></div>
                     <div id="boxHistorial" style="margin-top: 15px; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px;"></div>
-                    <label style="font-weight: bold; color: #0d6efd; display: block; margin-bottom: 5px;">
-        <i class="bi bi-clock-history"></i> Historial Rápido (Evitar "Irregular")
-    </label>
-    <small style="color: #666; display: block; margin-bottom: 10px;">
-        Marque los meses que predicó antes de hoy:
-    </small>
-    
-    <div id="contenedor-historial-rapido" style="display: flex; flex-wrap: wrap; gap: 10px;">
-        </div>
-</div>
-
                     <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
                         <button class="btn primary" id="btnSaveP">💾 Guardar Miembro</button>
                         <div style="display:flex; gap:8px; width:100%;">
                             <button class="btn danger" id="btnDeleteP" style="display:none; flex:1;">🗑️</button>
-                            <button class="btn ghost" id="btnCancelEdit" onclick="resetPForm()" style="display:none; flex:1;">✕</button>
+                            <button class="btn ghost" id="btnCancelEdit" onclick="resetPForm()" style="display:none; flex:1;">Cancelar edición</button>
                         </div>
+                        <button class="btn warning" type="button" id="btnTransferOut" onclick="transferOutPerson()" style="display:none; width:100%;">Traslado a otra congregación</button>
                     </div>
                 </div>
                 <div class="admin-tools-grid" style="background:var(--bg-body);">
@@ -1213,7 +1337,8 @@
         </section>
 
         <section id="sacados" class="tab admin-only">
-            <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha Salida</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha sacado</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--text-muted)">🕊️ Fallecidos</span> <span id="cFallecidos" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblFallecidos"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha de fallecimiento</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
         <section id="inactivos" class="tab">
@@ -1244,19 +1369,55 @@
     </div>
 </div>
 
+<div id="excelImportModal" class="modal" style="display:none; z-index:10020;">
+    <div class="modal-content card" style="width:min(920px,94vw); max-height:90vh; overflow:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <div><h3 style="margin:0;">📊 Asistente de migración</h3><small id="excelImportFileName" style="color:var(--text-muted);"></small></div>
+            <button type="button" class="btn ghost" onclick="closeExcelImportAssistant()">Cerrar</button>
+        </div>
+        <p style="color:var(--text-muted);">Relaciona las columnas de tu archivo. Nada se guardará hasta confirmar.</p>
+        <div id="excelMappingGrid" class="admin-tools-grid"></div>
+        <div style="margin-top:12px;"><label>Año de servicio de los informes</label><input id="excelServiceYear" type="number" min="2000" max="2100" style="max-width:180px;"></div>
+        <div id="excelImportPreview" style="margin-top:15px; padding:12px; background:var(--bg-body); border-radius:10px;"></div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+            <button type="button" class="btn ghost" onclick="closeExcelImportAssistant()">Cancelar</button>
+            <button type="button" class="btn success" onclick="confirmExcelImport()">✅ Confirmar migración</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
  // 🚀 Firebase se cargará dinámicamente desde Google solo al estar Online
-    let app, db;
+    let app, db, firebaseAuth;
+    window.firebaseUserUid = '';
+    window.cloudAccess = null;
     window.fbDoc = null;
     window.fbSetDoc = null;
     window.fbUpdateDoc = null;
     window.fbFieldPath = null;
     window.fbOnSnapshot = null;
     window.fbRunTransaction = null;
+    window.fbWriteBatch = null;
+    window.fbCollection = null;
+    window.fbGetDocs = null;
+    window.fbGetDoc = null;
+    window.fbDeleteDoc = null;
+    window.fbQuery = null;
+    window.fbWhere = null;
+    let splitShadowBaseline = null;
+    let splitShadowNeedsRetry = false;
+    let adminSplitReportsLoaded = false;
+    let adminSplitActivity = {};
     const DB_KEY = 'cong_pro_v108_master';
     const CRED_KEY = 'cong_pro_firebase_creds';
     const PENDING_REPORTS_KEY = 'cong_pro_pending_report_fields';
+    const INDEPENDENT_NOTICE_KEY = 'cong_pro_independent_notice_v1';
     const $ = s => document.querySelector(s);
+    window.acceptIndependentNotice = function() {
+        if (!$('#independentNoticeCheck')?.checked) return alert('Marca la casilla para confirmar que leíste el aviso.');
+        localStorage.setItem(INDEPENDENT_NOTICE_KEY, new Date().toISOString());
+        $('#modalIndependentNotice').style.display = 'none';
+    };
     // Escapa cualquier dato antes de insertarlo en plantillas HTML. Los respaldos
     // y Firestore son entradas no confiables, aunque hayan sido creados por la app.
     const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -1375,11 +1536,17 @@
 
     const EVENT_LABELS = {
         ingreso: 'Ingreso a la congregación',
-        salida: 'Salida de la congregación',
+        nuevo_publicador: 'Se hizo publicador por primera vez',
+        traslado: 'Llegó trasladado de otra congregación',
+        salida: 'Fue sacado de la congregación',
+        fallecimiento: 'Fallecimiento',
         inactividad: 'Se hizo inactivo',
         reactivacion: 'Reactivación',
         registro_inicial: 'Inicio/Reactivación registrado anteriormente'
     };
+
+    const INITIAL_ENTRY_EVENT_TYPES = ['ingreso', 'registro_inicial', 'nuevo_publicador', 'traslado'];
+    const isEntryEventType = type => INITIAL_ENTRY_EVENT_TYPES.includes(type);
 
     function addMemberEvent(person, type, date, origin = 'registrado', note = '') {
         if (!person || !EVENT_LABELS[type] || !/^\d{4}-\d{2}(?:-\d{2})?$/.test(String(date || ''))) return false;
@@ -1415,16 +1582,17 @@
                 : [];
             person.eventos = keptEvents;
 
-            const hasInitialEvent = person.eventos.some(event => ['ingreso', 'registro_inicial'].includes(event.type));
+            const hasInitialEvent = person.eventos.some(event => isEntryEventType(event.type));
             if (!hasInitialEvent && /^\d{4}-(0[1-9]|1[0-2])$/.test(person.inicio || '')) {
                 addMemberEvent(person, 'registro_inicial', person.inicio, 'migrado', 'Procede del antiguo campo Inicio/Reactivación');
             }
             const participatedKeys = activityKeys.filter(key => {
+                if (person.inicio && key < person.inicio) return false;
                 const report = state.activity[key]?.[person.id];
                 return Boolean(report && (Number(report.horas) > 0 || report.part));
             });
             const explicitStartCandidates = person.eventos
-                .filter(event => ['ingreso', 'registro_inicial'].includes(event.type))
+                .filter(event => isEntryEventType(event.type))
                 .map(event => String(event.date).slice(0, 7))
                 .filter(key => /^\d{4}-(0[1-9]|1[0-2])$/.test(key));
             if (/^\d{4}-(0[1-9]|1[0-2])$/.test(person.inicio || '')) explicitStartCandidates.push(person.inicio);
@@ -1447,8 +1615,8 @@
                 .filter(event => event.origin !== 'calculado' && String(event.date).slice(0, 7) < key)
                 .sort((a,b) => String(a.date).localeCompare(String(b.date)))
                 .forEach(event => {
-                    if (event.type === 'salida') isMember = false;
-                    if (event.type === 'ingreso' || event.type === 'reactivacion') isMember = true;
+                    if (event.type === 'salida' || event.type === 'fallecimiento') isMember = false;
+                    if (isEntryEventType(event.type) || event.type === 'reactivacion') isMember = true;
                 });
             if (/^\d{4}-(0[1-9]|1[0-2])$/.test(exitKey) && exitKey < key && ![...returnMonths].some(month => month > exitKey && month < key)) {
                 isMember = false;
@@ -1497,6 +1665,102 @@
             ? events.map(event => `<div style="padding:5px 0; border-top:1px solid var(--border-light);"><b>${escapeHTML(event.date)}</b> · ${escapeHTML(EVENT_LABELS[event.type] || event.type)}${event.origin === 'calculado' ? ' <small>(calculado)</small>' : ''}</div>`).join('')
             : '<small>Todavía no hay eventos registrados.</small>'}`;
     }
+
+    window.updateTransferHistoryButton = function() {
+        const button = $('#btnTransferHistory');
+        if (!button) return;
+        button.style.display = $('#pTipoIngreso')?.value === 'traslado' && Boolean($('#pId')?.value) ? 'block' : 'none';
+    };
+
+    function defaultPreviousTransferMonth(person) {
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(person?.inicio || '')) return '';
+        const [year, month] = person.inicio.split('-').map(Number);
+        const previous = new Date(year, month - 2, 1);
+        return ymKey(previous.getFullYear(), previous.getMonth() + 1);
+    }
+
+    window.openTransferHistory = function(personId) {
+        if (!window.isAdmin(false)) return;
+        const person = state.personas.find(item => String(item.id) === String(personId));
+        if (!person || person.tipoIngreso !== 'traslado') return alert('Primero guarda la ficha como traslado.');
+        $('#transferHistoryPersonId').value = person.id;
+        $('#transferHistoryPersonName').textContent = `${person.nombre} · Traslado: ${person.inicio}`;
+        $('#transferReportMonth').value = defaultPreviousTransferMonth(person);
+        $('#transferReportHours').value = 0;
+        $('#transferReportStudies').value = 0;
+        $('#transferReportParticipated').checked = true;
+        $('#transferReportAuxiliary').checked = false;
+        $('#transferReportNote').value = '';
+        renderTransferHistoryList();
+        $('#modalTransferHistory').style.display = 'flex';
+    };
+
+    window.closeTransferHistory = function() {
+        $('#modalTransferHistory').style.display = 'none';
+    };
+
+    window.renderTransferHistoryList = function() {
+        const personId = $('#transferHistoryPersonId').value;
+        const person = state.personas.find(item => String(item.id) === String(personId));
+        const box = $('#transferHistoryList');
+        if (!person || !box) return;
+        const rows = Object.keys(state.activity || {})
+            .filter(key => key < person.inicio && state.activity[key]?.[person.id])
+            .sort().reverse();
+        box.innerHTML = rows.length ? `<div class="table-container"><table class="table"><thead><tr><th>Mes</th><th>Part.</th><th>Horas</th><th>Cursos</th><th>P. Aux.</th><th>Notas</th><th></th></tr></thead><tbody>${rows.map(key => {
+            const report = state.activity[key][person.id];
+            return `<tr><td>${escapeHTML(key)}</td><td>${report.part || Number(report.horas) > 0 ? 'Sí' : 'No'}</td><td>${escapeHTML(report.horas || 0)}</td><td>${escapeHTML(report.est || 0)}</td><td>${report.pa ? 'Sí' : 'No'}</td><td>${escapeHTML(report.nota || '')}</td><td><button class="btn danger" style="padding:5px 8px;" onclick="deleteTransferPreviousReport('${escapeHTML(key)}')">Eliminar</button></td></tr>`;
+        }).join('')}</tbody></table></div>` : '<p style="color:var(--text-muted);">Todavía no se han registrado informes anteriores.</p>';
+    };
+
+    window.saveTransferPreviousReport = async function() {
+        if (!window.isAdmin()) return;
+        const personId = $('#transferHistoryPersonId').value;
+        const person = state.personas.find(item => String(item.id) === String(personId));
+        const monthKey = $('#transferReportMonth').value;
+        if (!person || !/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey)) return alert('Selecciona un mes válido.');
+        if (monthKey >= person.inicio) return alert(`El informe debe ser anterior al traslado (${person.inicio}).`);
+        const hours = Math.max(0, Math.min(1000, Number($('#transferReportHours').value) || 0));
+        const studies = Math.max(0, Math.min(100, Math.trunc(Number($('#transferReportStudies').value) || 0)));
+        const participated = $('#transferReportParticipated').checked || hours > 0;
+        if (!participated) return alert('Marca Participó o registra las horas que aparecen en la tarjeta.');
+        if (!state.activity[monthKey]) state.activity[monthKey] = {};
+        state.activity[monthKey][person.id] = {
+            part: participated,
+            horas: hours,
+            est: studies,
+            pa: $('#transferReportAuxiliary').checked,
+            nota: $('#transferReportNote').value.trim().slice(0, 500)
+        };
+        await save();
+        renderTransferHistoryList();
+        showToast('✅ Informe anterior registrado');
+    };
+
+    window.deleteTransferPreviousReport = async function(monthKey) {
+        if (!window.isAdmin() || !confirm(`¿Eliminar el informe anterior de ${monthKey}?`)) return;
+        const personId = $('#transferHistoryPersonId').value;
+        if (state.activity[monthKey]) delete state.activity[monthKey][personId];
+        await save();
+        renderTransferHistoryList();
+    };
+
+    window.openTransferPublisherCard = function() {
+        const person = state.personas.find(item => String(item.id) === String($('#transferHistoryPersonId').value));
+        const monthKey = $('#transferReportMonth').value || defaultPreviousTransferMonth(person);
+        if (!person || !monthKey) return;
+        const [year, month] = monthKey.split('-').map(Number);
+        document.querySelectorAll('.tabs button, .tab').forEach(el => el.classList.remove('active'));
+        document.querySelector('button[data-tab="tarjeta"]')?.classList.add('active');
+        $('#tarjeta')?.classList.add('active');
+        $('#s21Mode').value = 'individual';
+        toggleS21Inputs();
+        $('#s21Search').value = person.nombre;
+        $('#s21Year').value = month >= 9 ? year + 1 : year;
+        previewS21();
+        closeTransferHistory();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     function wasRegularPioneer(person, year, month) {
         const key = ymKey(year, month);
@@ -1716,8 +1980,37 @@
         } catch(e) { alert("Error: La llave no es válida."); }
     }
 
+    window.connectFromLoginToken = async function() {
+        const input = $('#authSmartTokenInput');
+        const status = $('#authSecureRequestStatus');
+        const token = input?.value.trim();
+        if (!token) return alert('Pega primero la llave de conexión.');
+        try {
+            const data = JSON.parse(atob(token));
+            if (!data.k || !data.p) throw new Error('Llave incompleta');
+            localStorage.setItem(CRED_KEY,JSON.stringify({ apiKey:data.k, projectId:data.p }));
+            status.textContent = 'Conectando…';
+            const connected = await window.connectFirebase(data.k,data.p);
+            status.textContent = connected ? '✅ Celular conectado. Ya puedes solicitar autorización.' : '❌ No se pudo conectar.';
+            if (connected) input.value = '';
+        } catch (error) {
+            status.textContent = '❌ La llave no es válida.';
+        }
+    };
+
+    window.requestBackupAdminAccess = async function() {
+        const status = $('#authSecureRequestStatus');
+        if (!window.cloudConnected) return alert('Primero conecta este celular con la llave.');
+        await refreshSecureDeviceAccess();
+        if (window.cloudAccess?.active) return alert('Este dispositivo ya está autorizado.');
+        await registerSecureDeviceRequest('admin');
+        status.textContent = `Solicitud enviada. Código: ${window.firebaseUserUid.slice(-6).toUpperCase()}`;
+    };
+
     window.openSettings = function() {
         $('#modalSettings').style.display = 'flex';
+        updateSecureDeviceStatus();
+        refreshSecureDeviceAccess();
         
         const stored = localStorage.getItem(CRED_KEY);
         const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
@@ -1739,6 +2032,13 @@
         }
         
         if (window.isAdmin(false)) loadGroupPassword();
+        const splitReady = localStorage.getItem('cong_pro_split_storage_ready');
+        if ($('#secureStorageStatus') && splitReady) {
+            try {
+                const prepared = JSON.parse(splitReady);
+                $('#secureStorageStatus').textContent = `✅ Estructura dividida verificada el ${new Date(prepared.verifiedAt).toLocaleString('es-CO')}. El sistema actual continúa activo.`;
+            } catch (_) {}
+        }
         if($('#totalGroupsInput')) $('#totalGroupsInput').value = state.config.totalGroups || 5;
         const cong = state.config.congregacion || {};
         $('#cfgCongNumero').value = cong.numero || '';
@@ -1863,10 +2163,11 @@
 // ==========================================
 window.downloadExcelTemplate = function() {
     if (!window.isAdmin()) return;
-    // Encabezados de Datos Personales
     const headersDatos = [
-        "NOMBRE COMPLETO", "GRUPO (1-5)", "SEXO (H/M)", "F. NACIMIENTO", "F. BAUTISMO", 
-        "PRIVILEGIOS (Anciano, SM, PR)", "ESPERANZA (Otras/Ungido)", "NOTAS (Opcional)"
+        "NOMBRES", "PRIMER APELLIDO", "SEGUNDO APELLIDO (Opcional)", "GRUPO", "SEXO (H/M)",
+        "F. NACIMIENTO", "F. BAUTISMO", "MES DE INGRESO (AAAA-MM)",
+        "TIPO DE INGRESO (Nuevo/Traslado)", "PRIVILEGIOS (Anciano, SM, PR)",
+        "ESPERANZA (Otras/Ungido)", "NOTAS (Opcional)"
     ];
 
     // Encabezados de Meses (SEPARADOS PARA QUE SEA OBVIO)
@@ -1889,7 +2190,8 @@ window.downloadExcelTemplate = function() {
 
     // EJEMPLOS CLARÍSIMOS
     const example1 = [
-        "Ej: Juan Pérez", 1, "H", "1980-05-20", "2000-11-15", "Anciano", "Otras", "Viene de otra congre",
+        "Ej: Juan Carlos", "Pérez", "Gómez", 1, "H", "1980-05-20", "2000-11-15",
+        `${new Date().getFullYear()}-01`, "Nuevo", "Anciano", "Otras", "",
         10, 0,  // Sep: 10 horas
         8,  1,  // Oct: 8 horas, 1 estudio
         12, 0,  // Nov
@@ -1903,7 +2205,7 @@ window.downloadExcelTemplate = function() {
     // Ancho de columnas
     const wDatos = {wch:15}; 
     const wMes = {wch:12}; 
-    let colWidths = [{wch:25}, {wch:8}, {wch:8}, {wch:12}, {wch:12}, {wch:20}, {wch:15}, {wch:20}];
+    let colWidths = [{wch:22}, {wch:18}, {wch:20}, {wch:8}, {wch:10}, {wch:14}, {wch:14}, {wch:22}, {wch:28}, {wch:24}, {wch:18}, {wch:22}];
     for(let k=0; k<24; k++) colWidths.push(wMes);
     ws['!cols'] = colWidths;
 
@@ -1915,7 +2217,90 @@ window.downloadExcelTemplate = function() {
 // ==========================================
 // 2. IMPORTADOR MAESTRO (SIN SALIRSE DE LA APP)
 // ==========================================
+let pendingExcelImport = null;
+const excelMappingFields = [
+    ['nombreCompleto','Nombre completo'], ['nombres','Nombres'], ['apellido1','Primer apellido'], ['apellido2','Segundo apellido'],
+    ['grupo','Grupo'], ['sexo','Sexo'], ['nac','Fecha de nacimiento'], ['bau','Fecha de bautismo'],
+    ['inicio','Mes de ingreso'], ['tipo','Tipo de ingreso'], ['privilegios','Privilegios'], ['esperanza','Esperanza'], ['notas','Notas']
+];
+const suggestExcelColumn = (headers, key) => {
+    const patterns = {
+        nombreCompleto:['NOMBRE COMPLETO','PUBLICADOR','NOMBRE Y APELLIDO'], nombres:['NOMBRES'], apellido1:['PRIMER APELLIDO','APELLIDO 1'], apellido2:['SEGUNDO APELLIDO','APELLIDO 2'],
+        grupo:['GRUPO'], sexo:['SEXO','GENERO'], nac:['NACIMIENTO','FECHA NAC'], bau:['BAUTISMO','FECHA BAU'], inicio:['MES DE INGRESO','INGRESO','LLEGADA'],
+        tipo:['TIPO DE INGRESO','TIPO INGRESO'], privilegios:['PRIVILEGIOS','NOMBRAMIENTO'], esperanza:['ESPERANZA'], notas:['NOTAS','OBSERVACIONES']
+    };
+    const normalized = headers.map(value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim());
+    return normalized.findIndex(header => (patterns[key] || []).some(pattern => header.includes(pattern)));
+};
 window.importFromExcel = function(input) {
+    if (!window.isAdmin()) { input.value = ''; return; }
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = event => {
+        try {
+            const workbook = XLSX.read(new Uint8Array(event.target.result), {type:'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+            if (rows.length < 2) throw new Error('El archivo no contiene filas para importar.');
+            const headers = rows[0].map((value,index) => String(value || `Columna ${index + 1}`).trim());
+            pendingExcelImport = { fileName:file.name, headers, rows:rows.slice(1) };
+            $('#excelImportFileName').textContent = file.name;
+            $('#excelServiceYear').value = getServiceYear();
+            $('#excelMappingGrid').innerHTML = excelMappingFields.map(([key,label]) => {
+                const suggested = suggestExcelColumn(headers,key);
+                const options = [`<option value="">No importar</option>`, ...headers.map((header,index) => `<option value="${index}" ${index === suggested ? 'selected' : ''}>${escapeHTML(header)}</option>`)].join('');
+                return `<div><label>${label}</label><select id="excelMap_${key}" onchange="updateExcelImportPreview()">${options}</select></div>`;
+            }).join('');
+            $('#excelImportModal').style.display = 'flex';
+            updateExcelImportPreview();
+        } catch (error) { alert(`❌ No se pudo leer el Excel.\n\n${error.message}`); }
+    };
+    reader.readAsArrayBuffer(file);
+    input.value = '';
+};
+window.closeExcelImportAssistant = function() { $('#excelImportModal').style.display='none'; pendingExcelImport=null; };
+window.updateExcelImportPreview = function() {
+    if (!pendingExcelImport) return;
+    const map = Object.fromEntries(excelMappingFields.map(([key]) => [key, $('#excelMap_'+key).value === '' ? -1 : Number($('#excelMap_'+key).value)]));
+    const get = (row,key) => map[key] >= 0 ? String(row[map[key]] || '').trim() : '';
+    const preview = pendingExcelImport.rows.filter(row => row.some(value => String(value).trim())).slice(0,5).map(row => {
+        const name = get(row,'nombreCompleto') || [get(row,'nombres'),get(row,'apellido1'),get(row,'apellido2')].filter(Boolean).join(' ');
+        return `${escapeHTML(name || 'Sin nombre')} · Grupo ${escapeHTML(get(row,'grupo') || '?')}`;
+    });
+    const hasName = map.nombreCompleto >= 0 || (map.nombres >= 0 && map.apellido1 >= 0);
+    const missing = [!hasName ? 'nombre' : '', map.grupo < 0 ? 'grupo' : ''].filter(Boolean);
+    $('#excelImportPreview').innerHTML = `<b>Vista previa</b><br>${preview.join('<br>') || 'No hay datos.'}<br><small style="color:${missing.length?'var(--danger)':'var(--success)'};">${missing.length ? 'Falta relacionar: '+missing.join(', ') : 'Columnas mínimas listas.'}</small>`;
+};
+window.confirmExcelImport = function() {
+    if (!pendingExcelImport) return;
+    const map = Object.fromEntries(excelMappingFields.map(([key]) => [key, $('#excelMap_'+key).value === '' ? -1 : Number($('#excelMap_'+key).value)]));
+    if (map.nombreCompleto < 0 && (map.nombres < 0 || map.apellido1 < 0)) return alert('Relaciona Nombre completo o Nombres y Primer apellido.');
+    if (map.grupo < 0) return alert('Relaciona la columna Grupo.');
+    const serviceYear = Number($('#excelServiceYear').value);
+    if (!Number.isInteger(serviceYear) || serviceYear < 2000 || serviceYear > 2100) return alert('Indica un año de servicio válido.');
+    const canonicalHeaders = ['NOMBRE COMPLETO','NOMBRES','PRIMER APELLIDO','SEGUNDO APELLIDO (Opcional)','GRUPO','SEXO (H/M)','F. NACIMIENTO','F. BAUTISMO','MES DE INGRESO (AAAA-MM)','TIPO DE INGRESO (Nuevo/Traslado)','PRIVILEGIOS (Anciano, SM, PR)','ESPERANZA (Otras/Ungido)','NOTAS (Opcional)'];
+    const monthLabels = ['SEP','OCT','NOV','DIC','ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO'];
+    monthLabels.forEach(label => canonicalHeaders.push(`${label} (Horas)`,`${label} (Estudios)`));
+    const normalizedHeaders = pendingExcelImport.headers.map(value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase());
+    const sourceMonthColumns = monthLabels.flatMap(label => [
+        normalizedHeaders.findIndex(header => header.includes(label) && (header.includes('HORA') || header.includes('PART'))),
+        normalizedHeaders.findIndex(header => header.includes(label) && (header.includes('ESTUDIO') || header.includes('CURSO')))
+    ]);
+    const canonicalRows = pendingExcelImport.rows.map(row => {
+        const get = key => map[key] >= 0 ? row[map[key]] : '';
+        return [get('nombreCompleto'),get('nombres'),get('apellido1'),get('apellido2'),get('grupo'),get('sexo'),get('nac'),get('bau'),get('inicio'),get('tipo'),get('privilegios'),get('esperanza'),get('notas'),...sourceMonthColumns.map(index => index >= 0 ? row[index] : '')];
+    });
+    const sheet = XLSX.utils.aoa_to_sheet([canonicalHeaders,...canonicalRows]);
+    const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook,sheet,'Importacion');
+    const bytes = XLSX.write(workbook,{bookType:'xlsx',type:'array'});
+    const canonicalFile = new File([bytes],'Importacion_preparada.xlsx',{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    window.excelImportServiceYearOverride = serviceYear;
+    closeExcelImportAssistant();
+    processCanonicalExcelInput({files:[canonicalFile],value:''});
+};
+
+window.processCanonicalExcelInput = function(input) {
     if (!window.isAdmin()) { input.value = ''; return; }
     const file = input.files[0];
     if(!file) return;
@@ -1927,86 +2312,130 @@ window.importFromExcel = function(input) {
             const workbook = XLSX.read(data, {type: 'array'});
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+            if (!rows.length) throw new Error('La hoja está vacía.');
 
-            let countNuevos = 0;
-            let countEditados = 0;
+            const normalizeHeader = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+            const headers = rows[0].map(normalizeHeader);
+            const findColumn = (...texts) => headers.findIndex(header => texts.some(text => header.includes(text)));
+            const modernFormat = findColumn('PRIMER APELLIDO') >= 0;
+            if (!modernFormat && !headers[0]?.includes('NOMBRE COMPLETO')) throw new Error('El archivo no corresponde a una plantilla de Congregación Pro.');
+            const columns = modernFormat ? {
+                nombreCompleto: findColumn('NOMBRE COMPLETO'), nombres: findColumn('NOMBRES'), apellido1: findColumn('PRIMER APELLIDO'), apellido2: findColumn('SEGUNDO APELLIDO'),
+                grupo: findColumn('GRUPO'), sexo: findColumn('SEXO'), nac: findColumn('F. NACIMIENTO'), bau: findColumn('F. BAUTISMO'),
+                inicio: findColumn('MES DE INGRESO'), tipo: findColumn('TIPO DE INGRESO'), privilegios: findColumn('PRIVILEGIOS'),
+                esperanza: findColumn('ESPERANZA'), notas: findColumn('NOTAS')
+            } : {
+                nombreCompleto: 0, grupo: 1, sexo: 2, nac: 3, bau: 4, privilegios: 5, esperanza: 6, notas: 7
+            };
+
+            let countNuevos = 0, countEditados = 0, countInformes = 0, countMesesOmitidos = 0;
+            const errores = [];
+            const totalGroups = Number(state.config?.totalGroups) || 5;
+            const todayKey = new Date().toISOString().slice(0, 10);
+            const currentMonthKey = todayKey.slice(0, 7);
 
             const hoy = new Date();
-            let yearInicio = hoy.getFullYear();
-            if (hoy.getMonth() < 8) yearInicio = yearInicio - 1;
-
-            const mapMeses = [
-                {colH:8,  colE:9,  m:9,  y:yearInicio},   // Sep
-                {colH:10, colE:11, m:10, y:yearInicio},   // Oct
-                {colH:12, colE:13, m:11, y:yearInicio},   // Nov
-                {colH:14, colE:15, m:12, y:yearInicio},   // Dic
-                {colH:16, colE:17, m:1,  y:yearInicio+1}, // Ene
-                {colH:18, colE:19, m:2,  y:yearInicio+1}, // Feb
-                {colH:20, colE:21, m:3,  y:yearInicio+1}, // Mar
-                {colH:22, colE:23, m:4,  y:yearInicio+1}, // Abr
-                {colH:24, colE:25, m:5,  y:yearInicio+1}, // May
-                {colH:26, colE:27, m:6,  y:yearInicio+1}, // Jun
-                {colH:28, colE:29, m:7,  y:yearInicio+1}, // Jul
-                {colH:30, colE:31, m:8,  y:yearInicio+1}  // Ago
-            ];
+            let yearInicio = Number(window.excelImportServiceYearOverride) ? Number(window.excelImportServiceYearOverride) - 1 : hoy.getFullYear();
+            if (!Number(window.excelImportServiceYearOverride) && hoy.getMonth() < 8) yearInicio = yearInicio - 1;
+            const monthDefs = [['SEP',9,yearInicio],['OCT',10,yearInicio],['NOV',11,yearInicio],['DIC',12,yearInicio],['ENE',1,yearInicio+1],['FEB',2,yearInicio+1],['MAR',3,yearInicio+1],['ABR',4,yearInicio+1],['MAY',5,yearInicio+1],['JUN',6,yearInicio+1],['JUL',7,yearInicio+1],['AGO',8,yearInicio+1]];
+            const mapMeses = monthDefs.map(([label,m,y]) => ({
+                colH: headers.findIndex(header => header.startsWith(label) && header.includes('HORAS')),
+                colE: headers.findIndex(header => header.startsWith(label) && header.includes('ESTUDIOS')),
+                m, y
+            }));
 
             for(let i=1; i<rows.length; i++) {
                 const row = rows[i];
                 if (!row) continue;
+                const valueAt = column => column >= 0 && row[column] !== undefined ? String(row[column]).trim() : '';
+                const nombres = modernFormat ? valueAt(columns.nombres).replace(/^Ej:\s*/i, '') : '';
+                const apellido1 = modernFormat ? valueAt(columns.apellido1) : '';
+                const apellido2 = modernFormat ? valueAt(columns.apellido2) : '';
+                const suppliedFullName = modernFormat ? valueAt(columns.nombreCompleto) : valueAt(columns.nombreCompleto);
+                const nombre = [nombres, apellido1, apellido2].filter(Boolean).join(' ') || suppliedFullName;
+                if (!nombre || String(row[0] || '').trim().startsWith('Ej:')) continue;
 
-                const nombre = row[0] ? String(row[0]).trim() : "";
-                if(!nombre || nombre === "NOMBRE COMPLETO" || nombre.startsWith("Ej:")) continue;
+                const rowNumber = i + 1;
+                const grupoRaw = valueAt(columns.grupo).replace(/^Grupo\s*/i, '');
+                const grupo = Number(grupoRaw);
+                if (!Number.isInteger(grupo) || grupo < 1 || grupo > totalGroups) {
+                    errores.push(`Fila ${rowNumber} (${nombre}): grupo inválido; debe ser de 1 a ${totalGroups}.`); continue;
+                }
 
-                let persona = state.personas.find(p => p.nombre.toLowerCase() === nombre.toLowerCase());
-                let esNuevo = false;
+                let persona = state.personas.find(p => normalizePersonName(p.nombre) === normalizePersonName(nombre));
+                const esNuevo = !persona;
+                const inicio = modernFormat ? valueAt(columns.inicio) : '';
+                const tipoText = modernFormat ? valueAt(columns.tipo).toUpperCase() : '';
+                const tipoIngreso = tipoText.includes('TRAS') ? 'traslado' : (tipoText.includes('NUEV') ? 'nuevo_publicador' : '');
+                if (modernFormat && !apellido1 && !suppliedFullName) {
+                    errores.push(`Fila ${rowNumber} (${nombre}): falta el primer apellido.`); continue;
+                }
+                if (esNuevo && (!/^\d{4}-(0[1-9]|1[0-2])$/.test(inicio) || inicio > currentMonthKey)) {
+                    errores.push(`Fila ${rowNumber} (${nombre}): falta un mes de ingreso válido o es futuro.`); continue;
+                }
+                if (esNuevo && !tipoIngreso) {
+                    errores.push(`Fila ${rowNumber} (${nombre}): indica Nuevo o Traslado.`); continue;
+                }
+
+                const nac = columns.nac >= 0 && row[columns.nac] ? parseDate(row[columns.nac]) : '';
+                const bau = columns.bau >= 0 && row[columns.bau] ? parseDate(row[columns.bau]) : '';
+                if ((nac && nac > todayKey) || (bau && bau > todayKey) || (nac && bau && bau < nac)) {
+                    errores.push(`Fila ${rowNumber} (${nombre}): revisa las fechas de nacimiento y bautismo.`); continue;
+                }
 
                 if (!persona) {
-                    persona = { 
-                        id: 'p' + Date.now() + Math.floor(Math.random()*100000),
-                        nombre: nombre,
-                        grupo: 1, sexo: 'Hombre', esp: 'Otras ovejas', inicio: '', fsac: ''
-                    };
-                    esNuevo = true;
-                    countNuevos++;
+                    persona = { id: 'p' + Date.now() + Math.floor(Math.random()*100000), nombre, grupo: String(grupo), sexo: 'Hombre', esp: 'Otras ovejas', inicio, tipoIngreso, fsac: '', sacado: '', fallecimiento: '', fallecido: false };
+                    if (modernFormat && nombres) Object.assign(persona, { nombres, primerApellido: apellido1, segundoApellido: apellido2 });
+                    addMemberEvent(persona, tipoIngreso, inicio, 'importado', 'Migración desde Excel');
+                    state.personas.push(persona); countNuevos++;
                 } else {
+                    persona.grupo = String(grupo);
+                    if (modernFormat && nombres) {
+                        persona.nombre = nombre; persona.nombres = nombres; persona.primerApellido = apellido1; persona.segundoApellido = apellido2;
+                        if (inicio) persona.inicio = inicio;
+                        if (tipoIngreso) persona.tipoIngreso = tipoIngreso;
+                    }
                     countEditados++;
                 }
 
-                const privs = row[5] ? String(row[5]).toUpperCase() : "";
-                if(row[1]) persona.grupo = row[1];
-                if(row[2]) persona.sexo = String(row[2]).toUpperCase().includes('M') ? 'Mujer' : 'Hombre';
-                if(row[3]) persona.nac = parseDate(row[3]);
-                if(row[4]) persona.bau = parseDate(row[4]);
-                
-                persona.anciano = privs.includes("ANC");
-                persona.sm = privs.includes("SM") || privs.includes("SIERVO");
-                persona.pr = privs.includes("PR") || privs.includes("REGULAR");
-                persona.pe = privs.includes("ESP") || privs.includes("ESPECIAL");
-                persona.mis = privs.includes("MIS");
-                
-                if(row[6]) persona.esp = String(row[6]).toUpperCase().includes('UNG') ? 'Ungido' : 'Otras ovejas';
-                if(row[7]) persona.notas = String(row[7]).trim();
-
-                if (esNuevo) state.personas.push(persona);
+                const sexo = valueAt(columns.sexo).toUpperCase();
+                if (sexo) persona.sexo = sexo === 'M' || sexo.includes('MUJER') ? 'Mujer' : 'Hombre';
+                if (nac) persona.nac = nac;
+                if (bau) persona.bau = bau;
+                const privsValue = valueAt(columns.privilegios);
+                if (privsValue) {
+                    const privs = privsValue.toUpperCase();
+                    persona.anciano = privs.includes('ANC'); persona.sm = privs.includes('SM') || privs.includes('SIERVO');
+                    persona.pr = privs.includes('PR') || privs.includes('REGULAR'); persona.pe = privs.includes('ESP') || privs.includes('ESPECIAL'); persona.mis = privs.includes('MIS');
+                }
+                const esperanza = valueAt(columns.esperanza);
+                if (esperanza) persona.esp = esperanza.toUpperCase().includes('UNG') ? 'Ungido' : 'Otras ovejas';
+                const notas = valueAt(columns.notas);
+                if (notas) persona.notas = notas;
 
                 mapMeses.forEach(dato => {
-                    const valHoras = row[dato.colH]; 
-                    const valEst   = row[dato.colE]; 
+                    if (dato.colH < 0 && dato.colE < 0) return;
+                    const valHoras = dato.colH >= 0 ? row[dato.colH] : undefined;
+                    const valEst = dato.colE >= 0 ? row[dato.colE] : undefined;
 
                     if( (valHoras !== undefined && valHoras !== "") || (valEst !== undefined && valEst !== "") ) {
                         const key = `${dato.y}-${String(dato.m).padStart(2, '0')}`;
+                        if (key >= currentMonthKey) { countMesesOmitidos++; return; }
                         if (!state.activity[key]) state.activity[key] = {};
-
-                        let h = 0, e = 0, pub = false;
-                        const sHoras = String(valHoras).toUpperCase().trim();
-
-                        if (sHoras === 'P' || sHoras === 'X' || sHoras === 'SI') { pub = true; } 
-                        else if (!isNaN(parseFloat(sHoras))) { h = parseFloat(sHoras); pub = true; }
-                        if (valEst && !isNaN(parseFloat(valEst))) e = parseFloat(valEst);
-
-                        if (pub || e > 0) {
-                            state.activity[key][persona.id] = { part: true, horas: h, est: e, pa: false, nota: '' };
+                        const report = state.activity[key][persona.id] || { part:false, horas:0, est:0, pa:false, nota:'' };
+                        let validValue = false;
+                        if (valHoras !== undefined && valHoras !== '') {
+                            const sHoras = String(valHoras).toUpperCase().trim();
+                            if (['P','X','SI','SÍ'].includes(sHoras)) { report.part = true; report.horas = 0; validValue = true; }
+                            else if (!isNaN(Number(sHoras)) && Number(sHoras) >= 0) { report.part = true; report.horas = Number(sHoras); validValue = true; }
+                            else errores.push(`Fila ${rowNumber} (${nombre}), ${key}: horas inválidas.`);
                         }
+                        if (valEst !== undefined && valEst !== '') {
+                            const studies = Number(valEst);
+                            if (Number.isFinite(studies) && studies >= 0) { report.est = studies; if (studies > 0) report.part = true; validValue = true; }
+                            else errores.push(`Fila ${rowNumber} (${nombre}), ${key}: estudios inválidos.`);
+                        }
+                        if (validValue) { state.activity[key][persona.id] = report; countInformes++; }
                     }
                 });
             }
@@ -2014,11 +2443,14 @@ window.importFromExcel = function(input) {
             save();
             
             // AQUI ESTA EL TRUCO: renderAll() en vez de reload()
-            alert(`✅ IMPORTACIÓN EXITOSA\n\n🆕 Nuevos: ${countNuevos}\n✏️ Actualizados: ${countEditados}\n\nLa pantalla se actualizará sin salir.`);
+            const errorPreview = errores.length ? `\n\n⚠️ Filas o valores omitidos: ${errores.length}\n${errores.slice(0, 6).join('\n')}${errores.length > 6 ? `\n... y ${errores.length - 6} más.` : ''}` : '';
+            alert(`✅ IMPORTACIÓN FINALIZADA\n\n🆕 Nuevos: ${countNuevos}\n✏️ Actualizados: ${countEditados}\n📊 Informes procesados: ${countInformes}\n🚫 Datos del mes en curso o futuros omitidos: ${countMesesOmitidos}${errorPreview}`);
+            window.excelImportServiceYearOverride = null;
             renderAll(); 
 
         } catch(error) {
-            alert("❌ Error al procesar el Excel.");
+            window.excelImportServiceYearOverride = null;
+            alert(`❌ Error al procesar el Excel.\n\n${error?.message || 'Revisa que sea la plantilla correcta.'}`);
             console.error(error);
         }
     };
@@ -2117,8 +2549,6 @@ function parseDate(val) {
         
         if($('#btnSaveP')) $('#btnSaveP').onclick = savePersona;
         if($('#btnDeleteP')) $('#btnDeleteP').onclick = deletePersona;
-        if($('#pSalidaPendiente')) $('#pSalidaPendiente').onchange = (event) => { if (event.target.checked) $('#pFSac').value = ''; };
-        if($('#pFSac')) $('#pFSac').onchange = (event) => { if (event.target.value) $('#pSalidaPendiente').checked = false; };
 // Lógica mejorada para el botón EDITAR
         if($('#btnQEdit')) $('#btnQEdit').onclick = () => { 
             const n = $('#qPersona').value.trim();
@@ -2189,6 +2619,187 @@ function parseDate(val) {
     // ==========================================
     window.cloudConnected = false;
 
+    function updateSecureDeviceStatus() {
+        const box = $('#secureDeviceStatus');
+        if (!box) return;
+        if (!window.firebaseUserUid) {
+            box.textContent = 'Identidad segura: pendiente de conexión.';
+            return;
+        }
+        const shortId = `${window.firebaseUserUid.slice(0,6)}…${window.firebaseUserUid.slice(-5)}`;
+        if (window.cloudAccess?.active) {
+            const role = window.cloudAccess.role === 'admin' ? 'Administrador autorizado' :
+                window.cloudAccess.role === 'group' ? `Encargado autorizado · Grupo ${window.cloudAccess.group}` : 'Acceso autorizado';
+            box.textContent = `✅ ${role} · Dispositivo ${shortId}`;
+            box.style.color = '#166534';
+            box.style.background = '#f0fdf4';
+        } else {
+            box.textContent = `⚠️ Dispositivo ${shortId} todavía no autorizado.`;
+            box.style.color = '#92400e';
+            box.style.background = '#fffbeb';
+        }
+    }
+
+    async function refreshSecureDeviceAccess() {
+        if (!db || !window.fbGetDoc || !window.firebaseUserUid) return window.cloudAccess;
+        try {
+            const snapshot = await window.fbGetDoc(window.fbDoc(db,'accesos',window.firebaseUserUid));
+            window.cloudAccess = snapshot.exists() ? snapshot.data() : null;
+            updateSecureDeviceStatus();
+        } catch (error) {
+            console.warn('No se pudo actualizar la autorización del dispositivo:',error);
+        }
+        return window.cloudAccess;
+    }
+
+    window.testSecureWritePermission = async function() {
+        const button = $('#btnTestSecureWrite');
+        if (!window.cloudConnected || !db || !window.firebaseUserUid) return alert('Conecta primero la Nube.');
+        await refreshSecureDeviceAccess();
+        if (!window.cloudAccess?.active) return alert('Este dispositivo todavía no está autorizado.');
+        const reference = window.fbDoc(db,'pruebas_conexion',window.firebaseUserUid);
+        let created = false;
+        button.disabled = true;
+        button.textContent = 'Comprobando permiso…';
+        try {
+            const testId = `t${Date.now()}`;
+            await window.fbSetDoc(reference,{
+                testId,
+                uid:window.firebaseUserUid,
+                role:window.cloudAccess.role,
+                group:window.cloudAccess.group || null,
+                createdAt:new Date().toISOString()
+            });
+            created = true;
+            const snapshot = await window.fbGetDoc(reference);
+            if (!snapshot.exists() || snapshot.data().testId !== testId) throw new Error('Firebase no devolvió la misma prueba.');
+            await window.fbDeleteDoc(reference);
+            created = false;
+            alert('✅ PERMISO VERIFICADO\n\nEl dispositivo pudo escribir, comprobar y eliminar el registro técnico. No se modificaron informes ni datos de publicadores.');
+        } catch (error) {
+            console.error('Prueba de permiso seguro:',error);
+            alert(`❌ La prueba no se completó.\n\n${error.message || 'Error desconocido'}`);
+        } finally {
+            if (created) {
+                try { await window.fbDeleteDoc(reference); } catch (cleanupError) { console.warn('No se pudo limpiar la prueba:',cleanupError); }
+            }
+            button.disabled = false;
+            button.textContent = '🧪 Probar permiso de escritura';
+        }
+    };
+
+    async function registerSecureDeviceRequest(role, group = null) {
+        if (!window.cloudConnected || !db || !window.firebaseUserUid || window.cloudAccess?.active) return;
+        const deviceCode = window.firebaseUserUid.slice(-6).toUpperCase();
+        try {
+            await window.fbSetDoc(window.fbDoc(db,'solicitudes_acceso',window.firebaseUserUid),{
+                uid:window.firebaseUserUid,
+                requestedRole:role,
+                group:group == null ? null : String(group),
+                deviceCode,
+                status:'pending',
+                requestedAt:new Date().toISOString()
+            });
+            alert(`🔐 DISPOSITIVO PENDIENTE\n\nCódigo: ${deviceCode}\n\nEl administrador debe abrir Ajustes > Revisar dispositivos pendientes y aprobar este código antes de activar las reglas seguras.`);
+        } catch (error) {
+            console.error('Solicitud de acceso seguro:',error);
+        }
+    }
+
+    window.loadSecureAccessRequests = async function() {
+        if (!window.isAdmin() || !db || !window.fbGetDocs || !window.fbCollection) return;
+        const container = $('#secureAccessRequests');
+        container.textContent = 'Consultando solicitudes…';
+        try {
+            const snapshot = await window.fbGetDocs(window.fbCollection(db,'solicitudes_acceso'));
+            const pending = snapshot.docs.map(item => item.data()).filter(item => item.status === 'pending');
+            if (!pending.length) {
+                container.textContent = 'No hay dispositivos pendientes.';
+                return;
+            }
+            container.innerHTML = pending.map(request => {
+                const role = request.requestedRole === 'group' ? `Encargado · Grupo ${escapeHTML(request.group)}` : escapeHTML(request.requestedRole);
+                return `<div style="background:#fff; padding:9px; border-radius:8px; margin-top:6px; border:1px solid #c7d2fe;"><b>${role}</b><br>Código: <b>${escapeHTML(request.deviceCode)}</b><button class="btn success" style="width:100%; margin-top:7px;" onclick="approveSecureAccess('${safeInlineId(request.uid)}')">Aprobar dispositivo</button></div>`;
+            }).join('');
+        } catch (error) {
+            console.error('Listado de solicitudes:',error);
+            container.textContent = 'No se pudieron consultar las solicitudes.';
+        }
+    };
+
+    window.approveSecureAccess = async function(encodedUid) {
+        if (!window.isAdmin() || !db) return;
+        const uid = decodeURIComponent(encodedUid);
+        const snapshot = await window.fbGetDocs(window.fbCollection(db,'solicitudes_acceso'));
+        const request = snapshot.docs.find(item => item.id === uid)?.data();
+        if (!request || request.status !== 'pending') return alert('La solicitud ya no está disponible.');
+        const description = request.requestedRole === 'group' ? `encargado del Grupo ${request.group}` : request.requestedRole;
+        if (!confirm(`¿Autorizar el dispositivo ${request.deviceCode} como ${description}?`)) return;
+        try {
+            await window.fbSetDoc(window.fbDoc(db,'accesos',uid),{
+                role:request.requestedRole,
+                group:request.group,
+                groupNumber:request.group == null ? null : Number(request.group),
+                deviceCode:request.deviceCode || uid.slice(-6).toUpperCase(),
+                active:true,
+                approvedAt:new Date().toISOString(),
+                approvedBy:window.firebaseUserUid
+            });
+            await window.fbDeleteDoc(window.fbDoc(db,'solicitudes_acceso',uid));
+            showToast('✅ Dispositivo autorizado');
+            await window.loadSecureAccessRequests();
+        } catch (error) {
+            console.error('Aprobación de acceso:',error);
+            alert(`No se pudo autorizar el dispositivo.\n\n${error.message || ''}`);
+        }
+    };
+
+    window.loadAuthorizedDevices = async function() {
+        if (!window.isAdmin() || !db || !window.fbGetDocs) return;
+        const container = $('#authorizedDevicesList');
+        container.textContent = 'Consultando dispositivos…';
+        try {
+            const snapshot = await window.fbGetDocs(window.fbCollection(db,'accesos'));
+            const devices = snapshot.docs.map(item => ({ uid:item.id, ...item.data() })).filter(item => item.active);
+            if (!devices.length) {
+                container.textContent = 'No hay dispositivos autorizados.';
+                return;
+            }
+            container.innerHTML = devices.map(device => {
+                const isSelf = device.uid === window.firebaseUserUid;
+                const role = device.role === 'admin' ? 'Administrador' : device.role === 'group' ? `Encargado · Grupo ${escapeHTML(device.group)}` : 'Invitado';
+                const code = device.deviceCode || device.uid.slice(-6).toUpperCase();
+                const action = isSelf ? '<small style="color:#166534;">Este dispositivo</small>' : `<button class="btn danger" style="width:100%; margin-top:7px;" onclick="revokeSecureAccess('${safeInlineId(device.uid)}')">Revocar acceso</button>`;
+                return `<div style="background:#fff; padding:9px; border-radius:8px; margin-top:6px; border:1px solid #c7d2fe;"><b>${role}</b><br>Código: <b>${escapeHTML(code)}</b><br>${action}</div>`;
+            }).join('');
+        } catch (error) {
+            console.error('Dispositivos autorizados:',error);
+            container.textContent = 'No se pudo cargar la lista.';
+        }
+    };
+
+    window.revokeSecureAccess = async function(encodedUid) {
+        if (!window.isAdmin() || !db) return;
+        const uid = decodeURIComponent(encodedUid);
+        if (uid === window.firebaseUserUid) return alert('No puedes revocar el dispositivo que estás usando. Autoriza primero otro administrador de respaldo.');
+        try {
+            const snapshot = await window.fbGetDocs(window.fbCollection(db,'accesos'));
+            const devices = snapshot.docs.map(item => ({ uid:item.id, ...item.data() }));
+            const target = devices.find(item => item.uid === uid);
+            if (!target) return alert('El dispositivo ya no está autorizado.');
+            const activeAdmins = devices.filter(item => item.active && item.role === 'admin');
+            if (target.role === 'admin' && activeAdmins.length <= 1) return alert('No se puede eliminar el último administrador autorizado.');
+            const code = target.deviceCode || uid.slice(-6).toUpperCase();
+            if (!confirm(`¿Revocar el acceso del dispositivo ${code}?\n\nDejará de sincronizar en cuanto Firebase actualice sus permisos.`)) return;
+            await window.fbDeleteDoc(window.fbDoc(db,'accesos',uid));
+            showToast('🔒 Acceso revocado');
+            await window.loadAuthorizedDevices();
+        } catch (error) {
+            console.error('Revocación de acceso:',error);
+            alert(`No se pudo revocar el dispositivo.\n\n${error.message || ''}`);
+        }
+    };
+
     window.connectFirebase = async function(apiKey, projectId) {
         const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
         if (isForcedOffline) {
@@ -2203,16 +2814,51 @@ function parseDate(val) {
         try {
             // 🚀 MAGIA: Descargamos Firebase oficial solo en este instante
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js");
-            const { getFirestore, doc, setDoc, updateDoc, onSnapshot, FieldPath, runTransaction } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+            const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js");
+            const { getFirestore, collection, query, where, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, FieldPath, runTransaction, writeBatch } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
             
             // Guardamos las herramientas globalmente para que la app las use
             window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbUpdateDoc = updateDoc; window.fbFieldPath = FieldPath; window.fbOnSnapshot = onSnapshot;
             window.fbRunTransaction = runTransaction;
+            window.fbWriteBatch = writeBatch;
+            window.fbCollection = collection;
+            window.fbGetDocs = getDocs;
+            window.fbGetDoc = getDoc;
+            window.fbDeleteDoc = deleteDoc;
+            window.fbQuery = query;
+            window.fbWhere = where;
 
             const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
             
             if (!app) app = initializeApp(firebaseConfig);
             db = getFirestore(app);
+            firebaseAuth = getAuth(app);
+            if (typeof firebaseAuth.authStateReady === 'function') await firebaseAuth.authStateReady();
+            const credential = firebaseAuth.currentUser ? null : await signInAnonymously(firebaseAuth);
+            window.firebaseUserUid = (firebaseAuth.currentUser || credential?.user)?.uid || '';
+            window.cloudAccess = null;
+            if (window.firebaseUserUid) {
+                const accessSnapshot = await getDoc(doc(db,'accesos',window.firebaseUserUid));
+                if (accessSnapshot.exists()) window.cloudAccess = accessSnapshot.data();
+            }
+            updateSecureDeviceStatus();
+
+            // Detecta automáticamente una migración ya preparada, incluso en otro
+            // dispositivo conectado al mismo proyecto.
+            try {
+                const migrationSnapshot = await getDoc(doc(db,'sistema','migracion'));
+                if (migrationSnapshot.exists()) {
+                    const migration = migrationSnapshot.data();
+                    localStorage.setItem('cong_pro_split_storage_ready', JSON.stringify({
+                        migrationId:migration._migrationId || '',
+                        ownerUid:migration.ownerUid || '',
+                        verifiedAt:migration.migratedAt || new Date().toISOString(),
+                        expected:Object.values(migration.counts || {})
+                    }));
+                }
+            } catch (migrationCheckError) {
+                console.warn('No se pudo comprobar la estructura dividida:',migrationCheckError);
+            }
             
             startRealtimeSync(); // Iniciamos la escucha de datos
             
@@ -2287,9 +2933,11 @@ function parseDate(val) {
                 }
                 try {
                     const result = await window.fbRunTransaction(db, async transaction => {
-                        const reference = window.fbDoc(db, "congregacion", "datos_generales");
+                        const usesDividedStorage = splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'group';
+                        const dividedReference = window.fbDoc(db,'informes',encodeURIComponent(`${change.monthKey}__${change.personId}`));
+                        const reference = usesDividedStorage ? dividedReference : window.fbDoc(db, "congregacion", "datos_generales");
                         const snapshot = await transaction.get(reference);
-                        const remoteReport = snapshot.data()?.activity?.[change.monthKey]?.[change.personId] || {};
+                        const remoteReport = usesDividedStorage ? (snapshot.data() || {}) : (snapshot.data()?.activity?.[change.monthKey]?.[change.personId] || {});
                         const remoteVersion = Number(remoteReport._syncVersion) || 0;
                         const fieldChangedRemotely = Object.keys(uploadedFields).some(field =>
                             JSON.stringify(currentReportFieldValue(remoteReport, field)) !== JSON.stringify(change.baseFields?.[field]));
@@ -2299,14 +2947,27 @@ function parseDate(val) {
                             throw conflict;
                         }
                         const nextVersion = remoteVersion + 1;
-                        const args = [];
-                        Object.entries(uploadedFields).forEach(([field, value]) => {
-                            args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, field), safeReportFieldValue(field, value));
-                        });
-                        args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_syncVersion'), nextVersion);
-                        args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_updatedAt'), new Date().toISOString());
-                        args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_updatedBy'), `grupo-${currentSession.group}`);
-                        transaction.update(reference, ...args);
+                        if (usesDividedStorage) {
+                            transaction.set(dividedReference,{
+                                month:change.monthKey,
+                                personId:String(change.personId),
+                                group:String(change.group),
+                                ...remoteReport,
+                                ...uploadedFields,
+                                _syncVersion:nextVersion,
+                                _updatedAt:new Date().toISOString(),
+                                _updatedBy:`grupo-${currentSession.group}`
+                            });
+                        } else {
+                            const args = [];
+                            Object.entries(uploadedFields).forEach(([field, value]) => {
+                                args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, field), safeReportFieldValue(field, value));
+                            });
+                            args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_syncVersion'), nextVersion);
+                            args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_updatedAt'), new Date().toISOString());
+                            args.push(new window.fbFieldPath('activity', change.monthKey, change.personId, '_updatedBy'), `grupo-${currentSession.group}`);
+                            transaction.update(reference, ...args);
+                        }
                         return { nextVersion };
                     });
                     const current = pendingReportChanges[key];
@@ -2353,13 +3014,161 @@ function parseDate(val) {
         }
     }
 
+    function splitStorageEnabled() {
+        return Boolean(localStorage.getItem('cong_pro_split_storage_ready'));
+    }
+
+    function splitDocumentMap(sourceState) {
+        const source = sourceState || {};
+        const documents = new Map();
+        const put = (path, id, value) => documents.set(`${path}/${encodeURIComponent(String(id))}`, JSON.parse(JSON.stringify(value || {})));
+        (source.personas || []).forEach(person => put('publicadores', person.id, person));
+        Object.entries(source.activity || {}).forEach(([month, reports]) => {
+            Object.entries(reports || {}).forEach(([personId, report]) => {
+                const person = (source.personas || []).find(item => String(item.id) === String(personId));
+                put('informes', `${month}__${personId}`, { month, personId:String(personId), group:String(person?.grupo || ''), ...report });
+            });
+        });
+        Object.entries(source.attendance || {}).forEach(([month, values]) => put('asistencia', month, { month, values }));
+        (source.s303Observaciones || []).forEach((record,index) => put('observaciones_visita', record.id || `o${index}`, record));
+        const reserved = new Set(['personas','activity','attendance','s303Observaciones','config']);
+        put('configuracion', 'general', { values:source.config || {} });
+        put('configuracion', 'estado', { values:Object.fromEntries(Object.entries(source).filter(([key]) => !reserved.has(key))) });
+        return documents;
+    }
+
+    async function syncSplitShadowState(nextState) {
+        if (!splitStorageEnabled() || !db || !window.fbWriteBatch || currentSession.role !== 'admin') return true;
+        const previous = splitDocumentMap(splitShadowBaseline || nextState);
+        const next = splitDocumentMap(nextState);
+        const changes = [];
+        next.forEach((value,key) => {
+            if (JSON.stringify(previous.get(key)) !== JSON.stringify(value)) changes.push({ type:'set', key, value });
+        });
+        previous.forEach((_,key) => {
+            if (!next.has(key)) changes.push({ type:'delete', key });
+        });
+        if (!changes.length) {
+            splitShadowBaseline = JSON.parse(JSON.stringify(nextState));
+            return true;
+        }
+        for (let start=0; start<changes.length; start+=400) {
+            const batch = window.fbWriteBatch(db);
+            changes.slice(start,start+400).forEach(change => {
+                const slash = change.key.indexOf('/');
+                const collectionName = change.key.slice(0,slash);
+                const documentId = change.key.slice(slash+1);
+                const reference = window.fbDoc(db,collectionName,documentId);
+                if (change.type === 'delete') batch.delete(reference);
+                else batch.set(reference,{ ...change.value, _shadowUpdatedAt:new Date().toISOString() });
+            });
+            await batch.commit();
+        }
+        splitShadowBaseline = JSON.parse(JSON.stringify(nextState));
+        splitShadowNeedsRetry = false;
+        console.log(`✅ Estructura dividida actualizada: ${changes.length} documento(s).`);
+        return true;
+    }
+
+    function startAdminSplitReportSync() {
+        if (!db || !window.fbOnSnapshot || !window.fbCollection) return;
+        if (window.unsubscribeAdminSplitReports) window.unsubscribeAdminSplitReports();
+        window.unsubscribeAdminSplitReports = window.fbOnSnapshot(window.fbCollection(db,'informes'),async snapshot => {
+            const nextActivity = {};
+            snapshot.docs.forEach(item => {
+                const report = item.data();
+                if (!report.month || !report.personId) return;
+                if (!nextActivity[report.month]) nextActivity[report.month] = {};
+                nextActivity[report.month][String(report.personId)] = report;
+            });
+            adminSplitActivity = nextActivity;
+            adminSplitReportsLoaded = true;
+            state.activity = JSON.parse(JSON.stringify(adminSplitActivity));
+            window.state = state;
+            rebuildCalculatedMemberEvents();
+            try { await saveLocalState(); } catch (_) {}
+            renderAll();
+        },error => console.error('Sincronización dividida para administrador:',error));
+    }
+
+    function startAuthorizedGroupSync(groupValue) {
+        if (!db || !window.fbOnSnapshot || !window.fbQuery || !window.fbWhere) return;
+        const groupNumber = Number(groupValue);
+        const groupText = String(groupValue);
+        if (window.unsubscribeSync) window.unsubscribeSync();
+        if (window.unsubscribeSplitPeople) window.unsubscribeSplitPeople();
+        if (window.unsubscribeSplitReports) window.unsubscribeSplitReports();
+
+        const peopleQuery = window.fbQuery(
+            window.fbCollection(db,'publicadores'),
+            window.fbWhere('grupo','==',groupNumber)
+        );
+        const reportsQuery = window.fbQuery(
+            window.fbCollection(db,'informes'),
+            window.fbWhere('group','==',groupText)
+        );
+
+        window.unsubscribeSplitPeople = window.fbOnSnapshot(peopleQuery,async snapshot => {
+            state.personas = snapshot.docs.map(item => item.data());
+            state.attendance = {};
+            state.s303Observaciones = [];
+            window.state = state;
+            rebuildCalculatedMemberEvents();
+            try { await saveLocalState(); } catch (_) {}
+            renderAll();
+        },error => {
+            console.error('Sincronización de publicadores del grupo:',error);
+            updateCloudUI(false,null,true);
+        });
+
+        window.unsubscribeSplitReports = window.fbOnSnapshot(reportsQuery,async snapshot => {
+            const groupActivity = {};
+            snapshot.docs.forEach(item => {
+                const report = item.data();
+                if (!report.month || !report.personId) return;
+                if (!groupActivity[report.month]) groupActivity[report.month] = {};
+                groupActivity[report.month][String(report.personId)] = report;
+            });
+            state.activity = groupActivity;
+            state = mergePendingChangesIntoState(state);
+            window.state = state;
+            rebuildCalculatedMemberEvents();
+            try { await saveLocalState(); } catch (_) {}
+            renderAll();
+            if (currentSession.role === 'group') syncGroupPendingReports();
+        },error => {
+            console.error('Sincronización de informes del grupo:',error);
+            updateCloudUI(false,null,true);
+        });
+    }
+
     function startRealtimeSync() {
         if(!db || !window.fbOnSnapshot) return;
+        if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'group') {
+            startAuthorizedGroupSync(window.cloudAccess.group);
+            return;
+        }
+        if (splitStorageEnabled() && window.firebaseUserUid && !window.cloudAccess?.active) {
+            // Un dispositivo pendiente no debe volver a descargar el documento
+            // general. Solo se oculta la vista; el respaldo local no se destruye.
+            state = { ...state, personas:[], activity:{}, attendance:{}, s303Observaciones:[] };
+            window.state = state;
+            renderAll();
+            return;
+        }
+        if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'admin') {
+            startAdminSplitReportSync();
+        }
         
         window.unsubscribeSync = window.fbOnSnapshot(window.fbDoc(db, "congregacion", "datos_generales"), async (docSnap) => {
             if(docSnap.exists()) {
                 const cloudData = docSnap.data();
+                const dividedReports = adminSplitReportsLoaded ? JSON.parse(JSON.stringify(adminSplitActivity)) : null;
+                if (splitStorageEnabled() && currentSession.role === 'admin' && !splitShadowNeedsRetry) {
+                    splitShadowBaseline = JSON.parse(JSON.stringify(cloudData));
+                }
                 state = mergePendingChangesIntoState(cloudData);
+                if (dividedReports) state.activity = dividedReports;
                 window.state = state;
                 
                 if(!state.personas) state.personas = [];
@@ -2398,15 +3207,25 @@ function parseDate(val) {
             // 2. Subir a la Nube
             if (window.cloudConnected && db && window.fbSetDoc) {
                 try {
+                    let splitShadowWarning = false;
                     if (currentSession.role === 'group') {
                         await syncGroupPendingReports();
                     } else if (currentSession.role === 'admin') {
+                        let shadowError = null;
+                        try {
+                            await syncSplitShadowState(state);
+                        } catch (error) {
+                            shadowError = error;
+                            splitShadowWarning = true;
+                            splitShadowNeedsRetry = true;
+                            console.error('No se pudo actualizar la copia dividida:',error);
+                        }
                         await window.fbSetDoc(window.fbDoc(db, "congregacion", "datos_generales"), state);
                     } else {
                         throw new Error('Rol sin permiso de escritura');
                     }
                     console.log("✅ ÉXITO: Datos guardados en la Nube.");
-                    if (!silent) showToast("☁️ Guardado en la Nube");
+                    if (!silent) showToast(splitShadowWarning ? '⚠️ Nube guardada; copia segura pendiente' : "☁️ Guardado en la Nube");
                 } catch (errorNube) {
                     console.error("❌ Error al subir a la Nube:", errorNube);
                     if (!silent) showToast("💾 Guardado local (Fallo en Nube)");
@@ -2482,6 +3301,10 @@ window.confirmNewAdminPwd = async function() {
 window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     if (enforceVersionPolicy()) return alert('Debes actualizar la aplicación antes de ingresar.');
     console.log("🔵 Intentando acceder...");
+    await refreshSecureDeviceAccess();
+    if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'group') {
+        startAuthorizedGroupSync(window.cloudAccess.group);
+    }
 
     const input = document.getElementById('mPwd');
     const pwd = input ? input.value.trim() : '';
@@ -2501,6 +3324,9 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     const adminStored = config.pwd || '12345';
     // Validamos: ¿El hash coincide? O ¿La clave plana coincide? (Compatibilidad)
     if (hashedInput === adminStored || pwd === adminStored) {
+        if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role !== 'admin') {
+            return alert('Este dispositivo está autorizado para otro rol, no como administrador.');
+        }
         
        // Magia: Si entró con texto plano, lo pasamos a código secreto
         if (pwd === adminStored && adminStored !== '12345') {
@@ -2511,6 +3337,7 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
 
         window.CURRENT_ROLE = 'ADMIN';
         currentSession = { role: 'admin', group: null }; // 🔓 Acceso Total
+        await registerSecureDeviceRequest('admin');
         enterApp(); 
         return; 
     }
@@ -2521,6 +3348,9 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     const guestKey = (window.state.config && window.state.config.guestPwd) ? window.state.config.guestPwd : 'visita';
 
     if (hashedInput === guestKey || pwd === guestKey) { 
+        if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role !== 'guest') {
+            return alert('Este dispositivo está autorizado para otro rol.');
+        }
         console.log("🟢 Acceso concedido como Invitado");
 
         if (pwd === guestKey && guestKey !== 'visita') {
@@ -2531,7 +3361,7 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
         document.body.classList.add('guest-mode'); 
         
         currentSession = { role: 'guest', group: null }; 
-        
+        await registerSecureDeviceRequest('guest');
         enterApp(); 
         alert("👁️ Modo Invitado: Solo Lectura");
         return; 
@@ -2559,9 +3389,14 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     }
 
     if (foundGroup) {
+        if (splitStorageEnabled() && window.cloudAccess?.active &&
+            (window.cloudAccess.role !== 'group' || String(window.cloudAccess.group) !== String(foundGroup))) {
+            return alert(`Este dispositivo solo está autorizado para el Grupo ${window.cloudAccess.group || ''}.`);
+        }
         window.CURRENT_ROLE = 'G' + foundGroup;
         // 🔒 AQUÍ ESTÁ EL TRUCO: Guardamos quién es para bloquearlo después
         currentSession = { role: 'group', group: foundGroup }; 
+        await registerSecureDeviceRequest('group',foundGroup);
         enterApp(); 
     } else {
         alert("❌ Clave incorrecta.");
@@ -2650,7 +3485,52 @@ function enterApp() {
 
 
 
+window.updateS10AnnualReminder = function() {
+    const reminder = $('#s10AnnualReminder');
+    if (!reminder) return;
+
+    const today = new Date();
+    const isReminderPeriod = today.getMonth() === 8 && today.getDate() >= 1 && today.getDate() <= 20;
+    const isAdministrator = window.CURRENT_ROLE === 'ADMIN';
+    const wasSent = Boolean(state.s10Submissions?.[today.getFullYear()]?.sentAt);
+    reminder.classList.toggle('visible', isReminderPeriod && isAdministrator && !wasSent);
+
+    if (!isReminderPeriod || !isAdministrator || wasSent) return;
+    const daysRemaining = 20 - today.getDate();
+    const deadlineText = daysRemaining === 0
+        ? 'El plazo vence hoy.'
+        : `Faltan ${daysRemaining} día${daysRemaining === 1 ? '' : 's'} para el plazo.`;
+    $('#s10AnnualReminderText').textContent = `Enviar por JW Hub a más tardar el 20 de septiembre. ${deadlineText}`;
+};
+
+window.markS10AsSent = async function() {
+    if (window.CURRENT_ROLE !== 'ADMIN') return;
+    const year = new Date().getFullYear();
+    if (!confirm(`¿Confirmas que el informe anual S-10 ${year - 1}-${year} ya fue enviado por JW Hub?\n\nEl recordatorio dejará de mostrarse este año.`)) return;
+    if (!state.s10Submissions) state.s10Submissions = {};
+    state.s10Submissions[year] = { sentAt: new Date().toISOString() };
+    await save();
+    updateS10AnnualReminder();
+    showToast('✅ S-10 marcado como enviado por JW Hub');
+};
+
+window.openS10FromReminder = function() {
+    if (window.CURRENT_ROLE !== 'ADMIN') return;
+    document.querySelectorAll('.tabs button, .tab').forEach(el => el.classList.remove('active'));
+    const tabButton = document.querySelector('button[data-tab="s10"]');
+    const section = $('#s10');
+    if (tabButton) tabButton.classList.add('active');
+    if (section) section.classList.add('active');
+
+    // En septiembre se entrega el año de servicio que terminó en agosto
+    // del mismo año calendario, no el que acaba de comenzar.
+    if ($('#s10Year')) $('#s10Year').value = new Date().getFullYear();
+    renderS10Annual();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
    function renderAll() {
+    updateS10AnnualReminder();
     renderGroupOptions();
     if(currentSession && ['admin', 'group'].includes(currentSession.role)) renderMiembros();
     if(window.CURRENT_ROLE === 'ADMIN') { renderSacados(); renderPrecursores(); renderAsistInputs(); }
@@ -2690,10 +3570,12 @@ window.renderActividad = function() {
 
         if (difMeses < 0) {
             esPasado = true;
-            mensajeError = "🚫 INFORME FUTURO: No se pueden registrar meses futuros.";
+            puedeDesbloquear = window.isAdmin(false);
+            mensajeError = "🚫 INFORME FUTURO: Solo el administrador puede desbloquearlo para corregir o eliminar información existente.";
         } else if (difMeses === 0) {
             esPasado = true;
-            mensajeError = "🚫 MES EN CURSO: Registra este informe durante los primeros 20 días del próximo mes.";
+            puedeDesbloquear = window.isAdmin(false);
+            mensajeError = "🚫 MES EN CURSO: Solo el administrador puede desbloquearlo para corregir o eliminar información existente.";
         } else if (difMeses > 1) {
             esPasado = true;
             puedeDesbloquear = window.isAdmin(false);
@@ -2721,7 +3603,7 @@ window.renderActividad = function() {
         if (puedeDesbloquear && window.forceUnlock) {
             lockBanner.innerHTML = `
                 <div style="background:#fef3c7; color:#92400e; padding:10px; border-radius:8px; border:1px solid #fcd34d; display:flex; justify-content:space-between; align-items:center;">
-                    <span>🔓 <b>EDICIÓN HABILITADA:</b> Ten cuidado, estás modificando el historial.</span>
+                    <span>🔓 <b>EDICIÓN HABILITADA:</b> ${difMeses <= 0 ? 'Corrige o elimina solamente los datos existentes; no se permiten informes nuevos.' : 'Ten cuidado, estás modificando el historial.'}</span>
                     <button class="btn ghost" onclick="window.forceUnlock=false; renderActividad();" style="font-size:0.8rem; background:white;">Bloquear</button>
                 </div>`;
         } else {
@@ -2743,7 +3625,7 @@ window.renderActividad = function() {
 
     // 4. GENERAR TABLA
     const k = ymKey(actY, actM);
-    const list = state.personas.filter(p => p.grupo == g && !p.sacado).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+    const list = state.personas.filter(p => p.grupo == g && !p.sacado && !p.fallecido).sort((a,b)=>a.nombre.localeCompare(b.nombre));
     
     const cEl = document.getElementById('cAct'); if(cEl) cEl.innerText = `Publicadores: ${list.length}`;
     const regularPioneers = list.filter(person => person.pr).length;
@@ -2754,12 +3636,12 @@ window.renderActividad = function() {
         return; 
     }
 
-    // Estilo para inputs bloqueados
-    const disableAttr = isLocked ? 'disabled' : '';
-    const styleAttr = isLocked ? 'background-color:#f3f4f6; color:#9ca3af; cursor:not-allowed;' : '';
-
     list.forEach(p => {
-        const r = state.activity[k]?.[p.id] || {part:false, horas:0, est:0, pa:false, nota:''};
+        const storedReport = state.activity[k]?.[p.id];
+        const r = storedReport || {part:false, horas:0, est:0, pa:false, nota:''};
+        const rowIsLocked = isLocked || (difMeses <= 0 && !storedReport);
+        const disableAttr = rowIsLocked ? 'disabled' : '';
+        const styleAttr = rowIsLocked ? 'background-color:#f3f4f6; color:#9ca3af; cursor:not-allowed;' : '';
         const safeId = safeInlineId(p.id);
         
         tb.innerHTML += `
@@ -2768,7 +3650,7 @@ window.renderActividad = function() {
                 
                 <td style="text-align:center;">
                     <input type="checkbox" ${r.part?'checked':''} ${disableAttr} 
-                    onchange="updAct(decodeURIComponent('${safeId}'),'part',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
+                    onchange="updAct(decodeURIComponent('${safeId}'),'part',this.checked)" style="transform:scale(1.2); ${rowIsLocked ? 'opacity:0.5' : ''}">
                 </td>
                 
                 <td style="text-align:center;">
@@ -2785,7 +3667,7 @@ window.renderActividad = function() {
                 
                 <td style="text-align:center;">
                     <input type="checkbox" ${r.pa?'checked':''} ${disableAttr} 
-                    onchange="updAct(decodeURIComponent('${safeId}'),'pa',this.checked)" style="transform:scale(1.2); ${isLocked ? 'opacity:0.5' : ''}">
+                    onchange="updAct(decodeURIComponent('${safeId}'),'pa',this.checked)" style="transform:scale(1.2); ${rowIsLocked ? 'opacity:0.5' : ''}">
                 </td>
                 
                 <td>
@@ -2802,13 +3684,9 @@ window.renderActividad = function() {
         if (!['part', 'horas', 'est', 'pa', 'nota'].includes(f)) return;
         const hoy = new Date();
         const difMeses = (hoy.getFullYear() - actY) * 12 + (hoy.getMonth() - (actM - 1));
-        if (difMeses < 0) {
-            alert("❌ No se pueden guardar informes en meses futuros.");
-            renderActividad();
-            return;
-        }
-        if (difMeses === 0) {
-            alert("❌ El mes en curso no se puede registrar todavía.");
+        const k = ymKey(actY, actM);
+        if (difMeses <= 0 && !(window.isAdmin(false) && window.forceUnlock && state.activity[k]?.[pid])) {
+            alert("❌ En el mes en curso o en meses futuros solo puedes corregir información que ya exista. No se permiten informes nuevos.");
             renderActividad();
             return;
         }
@@ -2818,7 +3696,6 @@ window.renderActividad = function() {
             renderActividad();
             return;
         }
-        const k = ymKey(actY, actM); 
         if(!state.activity[k]) state.activity[k] = {}; 
         if(!state.activity[k][pid]) state.activity[k][pid] = {part:false, horas:0, est:0, pa:false}; 
         const previousValue = currentReportFieldValue(state.activity[k][pid], f);
@@ -2832,15 +3709,102 @@ window.renderActividad = function() {
             report._updatedAt = new Date().toISOString();
             report._updatedBy = 'administrador';
         }
+        if (difMeses <= 0) {
+            const report = state.activity[k][pid];
+            const hasInformation = Boolean(report.part || Number(report.horas) || Number(report.est) || report.pa || String(report.nota || '').trim());
+            if (!hasInformation) delete state.activity[k][pid];
+            if (Object.keys(state.activity[k]).length === 0) delete state.activity[k];
+        }
         await save();
     }
 
+    const prepareSecureStorageMigrationAction = async function() {
+        const button = $('#btnPrepareSecureStorage');
+        const status = $('#secureStorageStatus');
+        if (status) status.textContent = 'Comprobando permisos y conexión…';
+        if (!window.isAdmin()) {
+            if (status) status.textContent = 'Esta acción solo está disponible para el administrador.';
+            return;
+        }
+        if (!window.cloudConnected || !app || !db) {
+            if (status) status.textContent = 'Primero conecta tu proyecto Firebase.';
+            return alert('Conecta primero tu proyecto Firebase.');
+        }
+        if (!confirm('¿Preparar la estructura dividida y segura?\n\nNo se borrará ni reemplazará el documento actual. La aplicación seguirá utilizándolo hasta completar la siguiente fase.')) {
+            status.textContent = 'Preparación cancelada. No se realizó ningún cambio.';
+            return;
+        }
+        button.disabled = true;
+        status.textContent = 'Creando respaldo local y comprobando Firebase…';
+        try {
+            if (localDb) await localDb.settings.put({ key:'beforeSecureMigration', val:JSON.parse(JSON.stringify(state)), createdAt:new Date().toISOString() });
+            const [{ getAuth, signInAnonymously }, firestoreTools] = await Promise.all([
+                import('https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js'),
+                import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js')
+            ]);
+            const { collection, getDocs, writeBatch } = firestoreTools;
+            const credential = await signInAnonymously(getAuth(app));
+            const ownerUid = credential.user.uid;
+            const migrationId = `m${Date.now()}`;
+            const operations = [];
+            const addSet = (path, id, value) => operations.push({ ref:window.fbDoc(db,path,id), value:JSON.parse(JSON.stringify({ ...value, _migrationId:migrationId })) });
+
+            (state.personas || []).forEach(person => addSet('publicadores', encodeURIComponent(String(person.id)), { ...person }));
+            Object.entries(state.activity || {}).forEach(([month, reports]) => Object.entries(reports || {}).forEach(([personId, report]) => {
+                const person = (state.personas || []).find(item => String(item.id) === String(personId));
+                addSet('informes', encodeURIComponent(`${month}__${personId}`), { month, personId:String(personId), group:String(person?.grupo || ''), ...report });
+            }));
+            Object.entries(state.attendance || {}).forEach(([month, attendance]) => addSet('asistencia', encodeURIComponent(month), { month, values:attendance }));
+            (state.s303Observaciones || []).forEach((record,index) => addSet('observaciones_visita', encodeURIComponent(String(record.id || `o${index}`)), { ...record }));
+
+            const reserved = new Set(['personas','activity','attendance','s303Observaciones','config']);
+            const additionalState = Object.fromEntries(Object.entries(state).filter(([key]) => !reserved.has(key)));
+            addSet('configuracion','general',{ values:state.config || {} });
+            addSet('configuracion','estado',{ values:additionalState });
+            addSet('accesos',ownerUid,{ role:'admin', active:true, createdAt:new Date().toISOString() });
+            addSet('sistema','migracion',{ schemaVersion:2, ownerUid, migratedAt:new Date().toISOString(), legacyDocument:'congregacion/datos_generales', counts:{ publicadores:(state.personas || []).length, informes:Object.values(state.activity || {}).reduce((sum,reports)=>sum+Object.keys(reports || {}).length,0), asistencia:Object.keys(state.attendance || {}).length, observaciones:(state.s303Observaciones || []).length } });
+
+            status.textContent = `Copiando ${operations.length} documentos sin borrar el original…`;
+            for (let start=0; start<operations.length; start+=400) {
+                const batch = writeBatch(db);
+                operations.slice(start,start+400).forEach(operation => batch.set(operation.ref,operation.value));
+                await batch.commit();
+            }
+
+            status.textContent = 'Verificando cantidades…';
+            const collectionNames = ['publicadores','informes','asistencia','observaciones_visita'];
+            const expected = [(state.personas || []).length,Object.values(state.activity || {}).reduce((sum,reports)=>sum+Object.keys(reports || {}).length,0),Object.keys(state.attendance || {}).length,(state.s303Observaciones || []).length];
+            const snapshots = await Promise.all(collectionNames.map(name => getDocs(collection(db,name))));
+            const copied = snapshots.map(snapshot => snapshot.docs.filter(item => item.data()._migrationId === migrationId).length);
+            if (copied.some((count,index) => count !== expected[index])) throw new Error(`La verificación no coincidió (${copied.join(', ')} de ${expected.join(', ')}).`);
+
+            localStorage.setItem('cong_pro_split_storage_ready', JSON.stringify({ migrationId, ownerUid, verifiedAt:new Date().toISOString(), expected }));
+            splitShadowBaseline = JSON.parse(JSON.stringify(state));
+            status.textContent = `✅ Copia verificada: ${expected[0]} publicadores, ${expected[1]} informes, ${expected[2]} meses de asistencia y ${expected[3]} observaciones. El sistema actual permanece activo.`;
+            alert('✅ ALMACENAMIENTO PREPARADO Y VERIFICADO\n\nLos datos fueron copiados a la estructura nueva. El documento actual no se borró y continúa siendo el sistema activo. No publiques reglas nuevas todavía.');
+        } catch (error) {
+            console.error('Preparación de almacenamiento seguro:',error);
+            status.textContent = '❌ No se completó. El sistema actual no fue modificado.';
+            const authHint = String(error?.code || '').includes('operation-not-allowed') ? '\n\nActiva Firebase Authentication > Método de acceso > Anónimo.' : '';
+            alert(`❌ No se pudo preparar el almacenamiento.\n\n${error?.message || 'Error desconocido'}${authHint}`);
+        } finally {
+            button.disabled = false;
+        }
+    };
+
+    window.prepareSecureStorageMigration = prepareSecureStorageMigrationAction;
+
    window.savePersona = function() {
     if (!window.isAdmin()) return;
-    const id = $('#pId').value, n = $('#pNombre').value.trim();
+    const id = $('#pId').value;
+    const nombres = $('#pNombres').value.trim().replace(/\s+/g, ' ');
+    const apellido1 = $('#pApellido1').value.trim().replace(/\s+/g, ' ');
+    const apellido2 = $('#pApellido2').value.trim().replace(/\s+/g, ' ');
+    const n = [nombres, apellido1, apellido2].filter(Boolean).join(' ');
     const existingPerson = id ? state.personas.find(person => person.id == id) : null;
 
-    if (!n) return alert("❌ El nombre del miembro es obligatorio.");
+    if (!nombres) return alert("❌ Los nombres del publicador son obligatorios.");
+    if (!existingPerson && !apellido1) return alert("❌ El primer apellido es obligatorio para un registro nuevo.");
     const normalizedName = normalizePersonName(n);
     const shouldCheckDuplicate = !existingPerson || normalizePersonName(existingPerson.nombre) !== normalizedName;
     const duplicatePerson = shouldCheckDuplicate
@@ -2850,21 +3814,27 @@ window.renderActividad = function() {
         return alert(`❌ Ya existe un publicador con este nombre:\n\n${duplicatePerson.nombre} — Grupo ${duplicatePerson.grupo}\n\nBusca y edita esa ficha en lugar de crear otra.`);
     }
     const exitDateValue = $('#pFSac').value;
-    const pendingExitDate = $('#pSalidaPendiente').checked && !exitDateValue;
+    const deathDateValue = $('#pFallecimiento').value;
      
     // 1. Recopilamos los datos (Igual que antes)
     const data = {
         id: id || 'p' + Date.now(),
         nombre: n,
+        nombres,
+        primerApellido: apellido1,
+        segundoApellido: apellido2,
         grupo: $('#pGrupo').value,
         sexo: $('#pSexo').value,
         esp: $('#pEsp').value,
         nac: $('#pNac').value,
         bau: $('#pBau').value,
         inicio: $('#pInicio').value, 
+        tipoIngreso: $('#pTipoIngreso').value,
         fsac: exitDateValue,
-        salidaPendiente: pendingExitDate,
-        excluirS10Desde: pendingExitDate ? (existingPerson?.excluirS10Desde || `${getServiceYear() - 1}-09`) : (existingPerson?.excluirS10Desde || ''),
+        fallecimiento: deathDateValue,
+        fallecido: Boolean(deathDateValue),
+        salidaPendiente: false,
+        excluirS10Desde: existingPerson?.excluirS10Desde || '',
         pr: $('#pPR').checked,
         prInicio: $('#pPRInicio').value,
         prFin: $('#pPRFin').value,
@@ -2876,8 +3846,9 @@ window.renderActividad = function() {
         confinado: $('#pConfinado').checked,
         // Agrego protección por si estos campos no existen en todos lados
         mis: $('#pMis') ? $('#pMis').checked : false, 
-        sacado: exitDateValue || pendingExitDate
+        sacado: exitDateValue
     };
+
 
     const originalGroup = $('#pOriginalGrupo').value;
     if (!data.grupo) return alert('Selecciona el grupo correcto antes de guardar.');
@@ -2887,10 +3858,17 @@ window.renderActividad = function() {
 
     const todayKey = new Date().toISOString().slice(0, 10);
     const currentMonth = todayKey.slice(0, 7);
+    if (!existingPerson && !data.tipoIngreso) {
+        return alert("❌ Indica si es un nuevo publicador por primera vez o si llegó trasladado de otra congregación.");
+    }
+    if (!existingPerson && !/^\d{4}-(0[1-9]|1[0-2])$/.test(data.inicio)) {
+        return alert("❌ Indica el mes exacto en que comenzó a informar o llegó a la congregación.");
+    }
     if (data.nac && data.nac > todayKey) return alert("❌ La fecha de nacimiento no puede ser futura.");
     if (data.bau && data.bau > todayKey) return alert("❌ La fecha de bautismo no puede ser futura.");
     if (data.nac && data.bau && data.bau < data.nac) return alert("❌ La fecha de bautismo no puede ser anterior al nacimiento.");
-    if (data.fsac && data.fsac > todayKey) return alert("❌ La fecha de salida no puede ser futura.");
+    if (data.fsac && data.fsac > todayKey) return alert("❌ La fecha de sacado no puede ser futura.");
+    if (data.fallecimiento && data.fallecimiento > todayKey) return alert("❌ La fecha de fallecimiento no puede ser futura.");
     if (data.inicio && data.inicio > currentMonth) return alert("❌ Inicio/Reactivación no puede ser un mes futuro.");
     if (data.prInicio && data.prInicio > currentMonth) return alert("❌ El inicio como precursor no puede ser futuro.");
     if (data.prFin && data.prFin > currentMonth) return alert("❌ El último mes como precursor no puede ser futuro.");
@@ -2924,45 +3902,28 @@ window.renderActividad = function() {
         const previousExitDate = String(state.personas[index].fsac || '');
         state.personas[index] = { ...state.personas[index], ...data, id: state.personas[index].id };
         const updatedPerson = state.personas[index];
+        if (data.tipoIngreso && data.inicio) {
+            updatedPerson.eventos = (updatedPerson.eventos || []).filter(event => !isEntryEventType(event.type));
+            addMemberEvent(updatedPerson, data.tipoIngreso, data.inicio, 'registrado');
+        }
         if (data.fsac && previousExitDate !== data.fsac) {
             addMemberEvent(updatedPerson, 'salida', data.fsac, 'registrado');
-        } else if (wasRemoved && !data.sacado) {
+        }
+        if (data.fallecimiento && data.fallecimiento !== existingPerson.fallecimiento) {
+            addMemberEvent(updatedPerson, 'fallecimiento', data.fallecimiento, 'registrado');
+        }
+        if (wasRemoved && !data.sacado && !data.fallecido) {
             addMemberEvent(updatedPerson, 'reactivacion', data.inicio, 'registrado', 'Reactivación indicada al editar la ficha');
         }
     } else {
         // Es NUEVO: Lo agregamos a la lista
-        addMemberEvent(data, 'ingreso', data.inicio || currentMonth, 'registrado');
+        addMemberEvent(data, data.tipoIngreso, data.inicio, 'registrado');
         if (data.fsac) addMemberEvent(data, 'salida', data.fsac, 'registrado');
+        if (data.fallecimiento) addMemberEvent(data, 'fallecimiento', data.fallecimiento, 'registrado');
         state.personas.push(data);
-        
- // --- CORRECCIÓN INTELIGENTE: GUARDAR HISTORIAL ---
-        const checks = document.querySelectorAll('.check-historial:checked');
-
-        if (checks.length > 0) {
-            checks.forEach(check => {
-                const mes = parseInt(check.value);
-                
-                // El historial pertenece al ciclo de servicio actual.
-                const anioDestino = getYearForMonth(getServiceYear(), mes - 1);
-
-                const k = ymKey(anioDestino, mes); 
-
-                // Si no existe el mes, lo creamos
-                if (!state.activity[k]) state.activity[k] = {};
-
-                // Guardamos
-                state.activity[k][data.id] = { 
-                    part: true, 
-                    horas: 0, 
-                    est: 0, 
-                    pa: false, 
-                    nota: 'Historial' 
-                };
-            });
-            console.log("✅ Historial guardado inteligentemente.");
-        }
-        // --------------------------------------------------------
     }
+
+    const newTransferId = !existingPerson && data.tipoIngreso === 'traslado' ? data.id : '';
 
     // 3. Finalizar
     save(); 
@@ -2970,38 +3931,80 @@ window.renderActividad = function() {
     resetPForm(); 
     // Usamos tu función de notificaciones si existe, o alert
     if(window.showToast) showToast("Guardado correctamente"); else alert("Guardado");
+    if (newTransferId && confirm("¿El publicador trae informes anteriores de su otra congregación para registrarlos en su tarjeta?")) {
+        openTransferHistory(newTransferId);
+    }
 };
+    function purgePersonRecord(id) {
+        state.personas = state.personas.filter(person => String(person.id) !== String(id));
+        Object.values(state.activity || {}).forEach(month => {
+            if (month && typeof month === 'object') delete month[id];
+        });
+    }
+
    window.deletePersona = function() { 
         if (!window.isAdmin()) return;
 
         const id = $('#pId').value; 
         if(!id) return; 
         
-        if(confirm("¿ELIMINAR miembro?")) { 
-            state.personas = state.personas.filter(p => p.id !== id); 
+        if(confirm("¿Eliminar definitivamente esta ficha y sus informes mensuales?\n\nEsta acción no se puede deshacer.")) {
+            purgePersonRecord(id);
             save(); 
             renderMiembros(); 
             resetPForm(); 
             showToast("Eliminado"); 
         } 
     } 
+
+    window.transferOutPerson = async function() {
+        if (!window.isAdmin()) return;
+        const id = $('#pId').value;
+        const person = state.personas.find(item => String(item.id) === String(id));
+        if (!person) return;
+        if (confirm(`¿Deseas revisar o descargar primero la tarjeta de ${person.nombre}?\n\nAceptar: abrir tarjeta sin eliminar.\nCancelar: continuar al paso de eliminación.`)) {
+            document.querySelectorAll('.tabs button, .tab').forEach(el => el.classList.remove('active'));
+            document.querySelector('button[data-tab="tarjeta"]')?.classList.add('active');
+            $('#tarjeta')?.classList.add('active');
+            $('#s21Mode').value = 'individual';
+            toggleS21Inputs();
+            $('#s21Search').value = person.nombre;
+            $('#s21Year').value = getServiceYear();
+            previewS21();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            alert('Revisa o descarga la tarjeta. Cuando termines, vuelve a Gestión, edita la ficha y pulsa nuevamente "Traslado a otra congregación" para eliminarla.');
+            return;
+        }
+        if (!confirm(`¿Confirmas que ${person.nombre} se trasladó a otra congregación y deseas eliminar definitivamente su ficha y sus informes?`)) return;
+        purgePersonRecord(id);
+        await save();
+        renderAll();
+        resetPForm();
+        showToast('✅ Ficha trasladada y eliminada');
+    };
     
 window.resetPForm = function() { 
         $('#pId').value=''; 
         $('#pOriginalGrupo').value='';
-        $('#pNombre').value=''; 
+        $('#pNombres').value='';
+        $('#pApellido1').value='';
+        $('#pApellido2').value='';
+        $('#legacyNameNotice').style.display='none';
+        $('#pTipoIngreso').value='';
+        $('#btnTransferHistory').style.display='none';
         // 👇 AQUI AGREGAMOS 'pInicio' A LA LISTA DE LIMPIEZA
-        ['pNac','pBau','pFSac','pInicio','pPRInicio','pPRFin','pSexo','pEsp'].forEach(id=>$('#'+id).value=''); 
-        ['pAnc','pSM','pPE','pMis','pPR','pSordoSenas','pCiego','pConfinado','pSalidaPendiente'].forEach(id=>$('#'+id).checked=false); 
+        ['pNac','pBau','pFSac','pFallecimiento','pInicio','pPRInicio','pPRFin','pSexo','pEsp'].forEach(id=>$('#'+id).value='');
+        ['pAnc','pSM','pPE','pMis','pPR','pSordoSenas','pCiego','pConfinado'].forEach(id=>$('#'+id).checked=false);
         $('#btnCancelEdit').style.display='none'; 
         $('#btnDeleteP').style.display='none'; 
+        $('#btnTransferOut').style.display='none';
         $('#btnSaveP').textContent = '💾 Guardar Miembro'; 
         $('#btnSaveP').className = 'btn primary'; 
         renderMemberEventHistory();
     }    
     window.renderMiembros = function() { 
         const isGroup = currentSession && currentSession.role === 'group';
-        const list = state.personas.filter(p => !p.sacado && (!isGroup || String(p.grupo) === String(currentSession.group))).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+        const list = state.personas.filter(p => !p.sacado && !p.fallecido && (!isGroup || String(p.grupo) === String(currentSession.group))).sort((a,b)=>a.nombre.localeCompare(b.nombre));
         const cEl = $('#cGen'); if(cEl) cEl.innerText = `(${list.length})`;
         const title = $('#memberListTitle'); if (title) title.innerText = isGroup ? `📖 Resumen del Grupo ${currentSession.group}` : '📖 Lista General';
         const toolbar = $('#memberAdminToolbar'); if (toolbar) toolbar.style.display = isGroup ? 'none' : '';
@@ -3038,7 +4041,7 @@ window.resetPForm = function() {
         const today = new Date();
         const isGroup = currentSession && currentSession.role === 'group';
         const group = isGroup ? currentSession.group : null;
-        const members = state.personas.filter(person => !person.sacado && (!isGroup || String(person.grupo) === String(group)));
+        const members = state.personas.filter(person => !person.sacado && !person.fallecido && (!isGroup || String(person.grupo) === String(group)));
         const totalPioneers = members.filter(person => person.pr).length;
         const totalInactive = members.filter(person => getInactivityInfo(person, today).inactive).length;
         const totalIrregular = members.filter(person => getIrregularMonths(person, today).length > 0).length;
@@ -3050,7 +4053,7 @@ window.resetPForm = function() {
         const box = $('#memberStatsDetail');
         if (!box) return;
         const today = new Date();
-        const members = state.personas.filter(person => !person.sacado);
+        const members = state.personas.filter(person => !person.sacado && !person.fallecido);
         const titles = { publishers:'Publicadores', pioneers:'Precursores regulares', inactive:'Inactivos', irregular:'Irregulares', groups:'Resumen por grupo' };
         if (type === 'groups') {
             const totalGroups = state.config.totalGroups || 5;
@@ -3090,7 +4093,7 @@ window.resetPForm = function() {
         if (currentSession && currentSession.role === 'group') group = currentSession.group;
         const today = new Date();
         const titles = { publishers:'Publicadores', pioneers:'Precursores regulares', inactive:'Inactivos', irregular:'Irregulares' };
-        let selected = state.personas.filter(person => !person.sacado && String(person.grupo) === String(group));
+        let selected = state.personas.filter(person => !person.sacado && !person.fallecido && String(person.grupo) === String(group));
         if (type === 'pioneers') selected = selected.filter(person => person.pr);
         if (type === 'inactive') selected = selected.filter(person => getInactivityInfo(person, today).inactive);
         if (type === 'irregular') selected = selected.filter(person => getIrregularMonths(person, today).length > 0);
@@ -3112,7 +4115,7 @@ window.resetPForm = function() {
         if (!window.isAdmin()) return;
         if (typeof XLSX === 'undefined') return alert('No se pudo cargar el generador de Excel. Verifica la conexión e inténtalo nuevamente.');
         const selection = $('#memberListGroup').value;
-        const activeMembers = state.personas.filter(person => !person.sacado);
+        const activeMembers = state.personas.filter(person => !person.sacado && !person.fallecido);
         const members = activeMembers
             .filter(person => selection === 'all' || (selection === 'pioneers' ? person.pr : String(person.grupo) === String(selection)))
             .sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -3160,7 +4163,11 @@ window.editP = (id) => {
 
     // 1. LLENAR LOS CAMPOS DEL FORMULARIO
     $('#pId').value = p.id;
-    $('#pNombre').value = p.nombre;
+    const hasStructuredName = Boolean(p.nombres || p.primerApellido || p.segundoApellido);
+    $('#pNombres').value = hasStructuredName ? (p.nombres || '') : (p.nombre || '');
+    $('#pApellido1').value = p.primerApellido || '';
+    $('#pApellido2').value = p.segundoApellido || '';
+    $('#legacyNameNotice').style.display = hasStructuredName ? 'none' : 'block';
     const savedGroup = String(p.grupo ?? '').replace(/^Grupo\s*/i, '').trim();
     const groupSelect = $('#pGrupo');
     if (savedGroup && !Array.from(groupSelect.options).some(option => option.value === savedGroup)) {
@@ -3173,7 +4180,10 @@ window.editP = (id) => {
     $('#pNac').value = p.nac || '';
     $('#pBau').value = p.bau || '';
     $('#pInicio').value = p.inicio || ''; 
+    $('#pTipoIngreso').value = p.tipoIngreso || '';
+    updateTransferHistoryButton();
     $('#pFSac').value = p.fsac || '';
+    $('#pFallecimiento').value = p.fallecimiento || '';
     $('#pPRInicio').value = p.prInicio || '';
     $('#pPRFin').value = p.prFin || '';
 
@@ -3186,7 +4196,6 @@ window.editP = (id) => {
     $('#pSordoSenas').checked = !!p.sordoSenas;
     $('#pCiego').checked = !!p.ciego;
     $('#pConfinado').checked = !!p.confinado;
-    $('#pSalidaPendiente').checked = !!p.salidaPendiente;
     renderMemberEventHistory(p);
 
     // 2. CAMBIAR A LA PESTAÑA DE GESTIÓN (ID "personas")
@@ -3204,6 +4213,7 @@ window.editP = (id) => {
     // 3. CAMBIAR ESTADO DE BOTONES
     $('#btnCancelEdit').style.display = 'inline-flex';
     $('#btnDeleteP').style.display = 'inline-flex';
+    $('#btnTransferOut').style.display = (!p.sacado && !p.fallecido) ? 'inline-flex' : 'none';
     $('#btnSaveP').textContent = '💾 Actualizar';
     $('#btnSaveP').className = 'btn success';
 
@@ -3275,23 +4285,45 @@ window.exportBackup = async function() {
     } else {
         // Si es el Administrador, exporta toda la base (sin el config)
         fileName = `CongPro_Respaldo_TOTAL_${new Date().toISOString().slice(0,10)}.json`;
+        exportData.backupMeta = {
+            type: 'full_backup',
+            formatVersion: 3,
+            createdAt: new Date().toISOString(),
+            appVersion: APP_VERSION
+        };
     }
 
     const data = JSON.stringify(exportData);
 
-    // 4. LÓGICA DE GUARDADO (Mantenemos tu código que ya funciona perfecto)
+    // 4. LÓGICA DE GUARDADO
     if (isApp && Capacitor.Plugins.Filesystem) {
         try {
             const { Filesystem } = Capacitor.Plugins;
-            await Filesystem.writeFile({
+            const result = await Filesystem.writeFile({
                 path: fileName,
                 data: data,
-                directory: 'DOCUMENTS',
+                // En Android moderno, escribir directamente en DOCUMENTS puede
+                // producir un archivo que el usuario no ve por el almacenamiento
+                // restringido. CACHE + Share abre el selector nativo y permite
+                // guardarlo realmente en Archivos, Drive, WhatsApp, etc.
+                directory: 'CACHE',
                 encoding: 'utf8'
             });
-            alert("✅ ¡Respaldo guardado en Documentos del celular!");
+
+            if (!Capacitor.Plugins.Share) {
+                throw new Error("El selector para guardar o compartir no está disponible.");
+            }
+
+            await Capacitor.Plugins.Share.share({
+                title: 'Respaldo de CongPro',
+                text: 'Guarda este respaldo en un lugar seguro.',
+                url: result.uri,
+                dialogTitle: 'Guardar o compartir respaldo'
+            });
+
+            showToast("✅ Respaldo generado. Verifica que lo hayas guardado o enviado.");
         } catch (e) {
-            alert("❌ Error al guardar en celular: " + e.message);
+            alert("❌ No se pudo generar o compartir el respaldo: " + e.message);
         }
     } else {
         // LÓGICA PARA PC / NAVEGADOR
@@ -3379,13 +4411,17 @@ window.updatePassword = async function() {
 // window.renderSacados = function(){ ... (Esto NO lo borres, es lo que sigue)
     window.renderSacados=function(){
         const tb=$('#tblSacados tbody');if(!tb)return;tb.innerHTML='';
-        const list = state.personas.filter(p=>p.sacado);
+        const list = state.personas.filter(p=>p.sacado && !p.fallecido);
         const cEl = $('#cSac'); if(cEl) cEl.innerText = `(${list.length})`;
         list.forEach(p=>{
             const safeId = safeInlineId(p.id);
             const exitDisplay = p.salidaPendiente ? 'Pendiente de fecha' : (p.fsac || '-');
-            tb.innerHTML+=`<tr><td>${escapeHTML(p.nombre)}</td><td>${escapeHTML(p.bau||'-')}</td><td style="color:var(--danger)">${escapeHTML(exitDisplay)}</td><td><button class="btn success" style="padding:6px 10px; font-size:0.8rem;" onclick="reactivatePerson(decodeURIComponent('${safeId}'))">↩️ Reactivar</button></td></tr>`;
+            tb.innerHTML+=`<tr><td>${escapeHTML(p.nombre)}</td><td>${escapeHTML(p.bau||'-')}</td><td style="color:var(--danger)">${escapeHTML(exitDisplay)}</td><td><button class="btn ghost" style="padding:6px 10px; font-size:0.8rem;" onclick="editP(decodeURIComponent('${safeId}'))">Editar</button> <button class="btn success" style="padding:6px 10px; font-size:0.8rem;" onclick="reactivatePerson(decodeURIComponent('${safeId}'))">↩️ Reactivar</button></td></tr>`;
         });
+        const deceasedBody = $('#tblFallecidos tbody');
+        const deceased = state.personas.filter(person => person.fallecido || person.fallecimiento).sort((a,b) => a.nombre.localeCompare(b.nombre));
+        if (deceasedBody) deceasedBody.innerHTML = deceased.length ? deceased.map(person => { const safeId = safeInlineId(person.id); return `<tr><td>${escapeHTML(person.nombre)}</td><td>${escapeHTML(person.bau || '-')}</td><td>${escapeHTML(person.fallecimiento || '-')}</td><td><button class="btn ghost" style="padding:6px 10px; font-size:0.8rem;" onclick="editP(decodeURIComponent('${safeId}'))">Editar</button></td></tr>`; }).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay registros.</td></tr>';
+        const deceasedCount = $('#cFallecidos'); if (deceasedCount) deceasedCount.innerText = `(${deceased.length})`;
     }
 
     window.reactivatePerson = async function(id) {
@@ -3518,7 +4554,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
     // 3. OBTENER DATOS
     if (!state || !state.personas) return;
     const list = state.personas.filter(p =>
-        !p.sacado && (
+        !p.sacado && !p.fallecido && (
             wasRegularPioneer(p, anioDelMesSeleccionado, curM + 1) ||
             state.activity[selectedMonthKey]?.[p.id]?.pa
         )
@@ -3676,7 +4712,7 @@ window.renderEstadoEspiritual = function() {
         let countIna = 0, countFal = 0, countIrr = 0;
         
         const visiblePeople = state.personas.filter(p =>
-            !p.sacado && (currentSession.role !== 'group' || p.grupo == currentSession.group)
+            !p.sacado && !p.fallecido && (currentSession.role !== 'group' || p.grupo == currentSession.group)
         );
         visiblePeople.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{
             
@@ -3835,7 +4871,7 @@ window.renderEstadoEspiritual = function() {
     </div>`; 
 };
 
-    window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && !p.sacado);} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&!p.sacado);} else {l=state.personas.filter(p=>!p.sacado);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
+    window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && !p.sacado && !p.fallecido);} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&!p.sacado&&!p.fallecido);} else {l=state.personas.filter(p=>!p.sacado&&!p.fallecido);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
 
     async function downloadAllS21PageByPage(el) {
         const cards = Array.from(el.querySelectorAll('.print-canvas'));
@@ -3997,10 +5033,12 @@ window.renderEstadoEspiritual = function() {
         if (isPendingExitExcluded(person, key)) return false;
         const events = Array.isArray(person.eventos) ? person.eventos : [];
         const initialCandidates = events
-            .filter(event => ['ingreso', 'registro_inicial'].includes(event.type))
+            .filter(event => isEntryEventType(event.type))
             .map(event => String(event.date).slice(0, 7))
             .filter(Boolean)
-            .concat(Object.keys(state.activity || {}).filter(activityKey => state.activity[activityKey]?.[person.id]));
+            .concat(Object.keys(state.activity || {}).filter(activityKey =>
+                (!person.inicio || activityKey >= person.inicio) && state.activity[activityKey]?.[person.id]
+            ));
         if (person.inicio) initialCandidates.push(person.inicio);
         const initial = initialCandidates.sort()[0] || '';
         if (initial && key < initial) return false;
@@ -4010,13 +5048,15 @@ window.renderEstadoEspiritual = function() {
             .filter(event => String(event.date).slice(0, 7) <= key)
             .sort((a,b) => String(a.date).localeCompare(String(b.date)))
             .forEach(event => {
-                if (event.type === 'salida') isMember = false;
-                if (event.type === 'ingreso' || event.type === 'reactivacion') isMember = true;
+                if (event.type === 'salida' || event.type === 'fallecimiento') isMember = false;
+                if (isEntryEventType(event.type) || event.type === 'reactivacion') isMember = true;
             });
         const currentExit = String(person.fsac || person.sacado || '').slice(0, 7);
         if (currentExit && currentExit <= key && !events.some(event => event.type === 'reactivacion' && String(event.date).slice(0, 7) >= currentExit && String(event.date).slice(0, 7) <= key)) {
             isMember = false;
         }
+        const deathMonth = String(person.fallecimiento || '').slice(0, 7);
+        if (deathMonth && deathMonth <= key) isMember = false;
         return isMember;
     }
 
@@ -4346,7 +5386,7 @@ window.renderS88Preview = function() {
         const viewDate = `${y}-${String(m).padStart(2,'0')}`;
 
         state.personas.forEach(p=>{
-            if(p.sacado) return;
+            if(p.sacado || p.fallecido) return;
 
             // 2. SI LA FECHA DEL RESUMEN ES ANTERIOR A SU LLEGADA, NO CUENTA 🛑
             if(p.inicio && viewDate < p.inicio) return;
@@ -4403,6 +5443,23 @@ window.renderS88Preview = function() {
  // ==========================================
 // IMPORTADOR DE RESPALDOS (JSON) - 100% INTELIGENTE
 // ==========================================
+let backupImportChoiceResolver = null;
+window.resolveBackupImportChoice = function(choice) {
+    $('#modalBackupImportChoice').style.display = 'none';
+    if (backupImportChoiceResolver) backupImportChoiceResolver(choice);
+    backupImportChoiceResolver = null;
+};
+function requestBackupImportChoice(data, meta) {
+    const reportCount = Object.values(data.activity || {}).reduce((sum, reports) => sum + Object.keys(reports || {}).length, 0);
+    const attendanceMonths = Object.keys(data.attendance || {}).filter(month => {
+        const item = data.attendance[month] || {};
+        return [...(item.es || []), ...(item.fs || [])].some(value => Number(value) > 0);
+    }).length;
+    const dateLabel = meta.createdAt ? new Date(meta.createdAt).toLocaleString('es-CO') : 'No indicada (respaldo anterior)';
+    $('#backupImportSummary').innerHTML = `<b>Fecha:</b> ${escapeHTML(dateLabel)}<br><b>Publicadores:</b> ${escapeHTML((data.personas || []).length)}<br><b>Informes mensuales:</b> ${escapeHTML(reportCount)}<br><b>Meses con asistencia:</b> ${escapeHTML(attendanceMonths)}`;
+    $('#modalBackupImportChoice').style.display = 'flex';
+    return new Promise(resolve => { backupImportChoiceResolver = resolve; });
+}
 window.importData = (input) => { 
     const file = input.files[0]; 
     if(!file) return; 
@@ -4443,12 +5500,12 @@ window.importData = (input) => {
                     } else {
                         // Compatibilidad con respaldos generales y archivos de
                         // encargados creados por versiones anteriores.
-                        modoFusion = confirm(
-                            "📂 RESPALDO DETECTADO\n\n" +
-                            "¿Qué deseas hacer?\n\n" +
-                            "[ACEPTAR] = 🧬 FUSIONAR.\n" +
-                            "[CANCELAR] = ⚠️ RESTAURAR TOTAL."
-                        );
+                        const importChoice = await requestBackupImportChoice(dataImportada, backupMeta);
+                        if (importChoice === 'cancel') {
+                            input.value = '';
+                            return;
+                        }
+                        modoFusion = importChoice === 'merge';
 
                         if (modoFusion) {
                             grupoFiltro = prompt(
@@ -4550,15 +5607,22 @@ window.importData = (input) => {
 
                 } else {
                     // --- MODO RESTAURACIÓN TOTAL (SOLO ADMIN) ---
-                    if(confirm("🚨 ADVERTENCIA FINAL\n\n¿Estás 100% seguro de que quieres BORRAR tu base de datos actual y reemplazarla por este archivo?")) {
+                    if(confirm("🚨 CONFIRMAR RESTAURACIÓN COMPLETA\n\nSe reemplazarán los publicadores, informes, asistencia y demás registros actuales con el contenido del respaldo. Las claves y la conexión de este dispositivo se conservarán.\n\n¿Deseas continuar?")) {
                         // Los respaldos no contienen claves. Conservamos la
                         // configuración segura del administrador actual.
                         const currentConfig = state.config;
-                        state = dataImportada;
+                        const restoredData = { ...dataImportada };
+                        delete restoredData.backupMeta;
+                        state = restoredData;
                         state.config = currentConfig;
+                        if (!state.personas) state.personas = [];
+                        if (!state.activity) state.activity = {};
+                        if (!state.attendance) state.attendance = {};
+                        if (!state.s303Observaciones) state.s303Observaciones = [];
                         window.state = state;
-                        save(); 
-                        alert("✅ Datos restaurados correctamente."); 
+                        await save();
+                        const restoredAttendanceMonths = Object.keys(state.attendance).filter(month => [...(state.attendance[month]?.es || []), ...(state.attendance[month]?.fs || [])].some(value => Number(value) > 0)).length;
+                        alert(`✅ RESTAURACIÓN COMPLETA\n\nPublicadores: ${state.personas.length}\nMeses con informes: ${Object.keys(state.activity).length}\nMeses con asistencia: ${restoredAttendanceMonths}`);
                         renderAll(); 
                     } else {
                         input.value = ''; 
@@ -4656,59 +5720,10 @@ window.toggleConnection = async function() {
         // 3. Iniciar la interfaz gráfica
         init(); 
         enforceVersionPolicy();
+        if (!localStorage.getItem(INDEPENDENT_NOTICE_KEY)) {
+            $('#modalIndependentNotice').style.display = 'flex';
+        }
     });
-   // --- PEGAR ESTO ANTES DEL  DE LA LÍNEA 1264 ---
-
-window.renderizarHistorialRapido = function() {
-    const contenedor = document.getElementById('contenedor-historial-rapido');
-    if(!contenedor) return; 
-    contenedor.innerHTML = ''; 
-
-    const hoy = new Date();
-    const mesIndexActual = hoy.getMonth(); // 0 = Enero, 11 = Diciembre
-    
-    // Nombres para mostrar en pantalla
-    const nombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-
-    // LÓGICA DE RELOJ: Empezamos siempre en Septiembre (Índice 8)
-    let puntero = 8; 
-
-    // Recorremos máximo 12 meses o hasta encontrar el mes actual
-    for(let i=0; i<12; i++) {
-        // Normalizamos el puntero (si es 12 vuelve a 0, si es 13 vuelve a 1...)
-        let m = puntero % 12;
-
-        // ¡STOP! Si llegamos al mes actual (Enero), paramos el bucle.
-        if (m === mesIndexActual) break;
-
-        // CORRECCIÓN: Guardamos (m + 1) para que Enero sea "1" y Septiembre sea "9"
-        const valorReal = m + 1;
-
-        const div = document.createElement('div');
-        div.innerHTML = `
-            <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-size: 0.9em; background:white; padding:4px 8px; border-radius:6px; border:1px solid #e5e7eb;">
-                <input class="check-historial" type="checkbox" value="${valorReal}" checked style="accent-color: #0d6efd; transform:scale(1.2);">
-                <span style="font-weight:600; color:#374151;">${nombres[m]}</span>
-            </label>
-        `;
-        contenedor.appendChild(div);
-
-        // Avanzamos al siguiente mes
-        puntero++;
-    }
-};
-
-// Aseguramos que se ejecute al resetear el formulario
-const originalReset = window.resetPForm;
-window.resetPForm = function() {
-    if(originalReset) originalReset();
-    setTimeout(window.renderizarHistorialRapido, 50); 
-};
-
-// Ejecutar al inicio también para asegurar que aparezcan
-setTimeout(window.renderizarHistorialRapido, 500);
-
-
 </script>
 <div id="modalManual" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(5px); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:var(--surface); width:95%; max-width:750px; height:90vh; border-radius:24px; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); overflow:hidden; border:1px solid var(--border-light); font-family:'Inter', sans-serif;">
@@ -4723,7 +5738,27 @@ setTimeout(window.renderizarHistorialRapido, 500);
             <button onclick="document.getElementById('modalManual').style.display='none'" style="background:none; border:none; font-size:32px; color:var(--text-muted); cursor:pointer;">&times;</button>
         </div>
 
-        <div style="padding:0; overflow-y:auto; flex:1; background:var(--surface);">
+        <div style="padding:20px; overflow-y:auto; flex:1; background:var(--surface);">
+            <p style="margin:0 0 14px; color:var(--text-muted);">Toca una sección para ver sus acciones principales.</p>
+            <div class="manual-sections">
+                <details><summary>1. Gestión · Crear y actualizar fichas</summary><div><b>Nuevo:</b> escribe nombres, primer apellido y, si tiene, segundo apellido; completa grupo, mes y tipo de ingreso y pulsa <b>Guardar miembro</b>. Elige <b>Nuevo publicador</b> o <b>Traslado</b>. Si es traslado, registra los informes anteriores cuando la app lo pregunte.<br><b>Editar:</b> busca la persona, abre su ficha y pulsa <b>Actualizar</b>. En registros anteriores, distribuye manualmente el nombre y los apellidos cuando aparezca el aviso azul. <b>Cancelar edición</b> descarta cambios no guardados.<br><b>Bajas:</b> usa Fecha sacado para conservarlo en Sacados; Fecha de fallecimiento para archivarlo en Fallecidos; o <b>Traslado a otra congregación</b> para revisar su tarjeta y eliminar la ficha.</div></details>
+                <details><summary>2. Lista General · Consultar miembros</summary><div>Consulta publicadores activos y totales por grupo. Usa los contadores para ver publicadores, precursores, inactivos o irregulares. El administrador puede abrir <b>Editar</b> y descargar listados por grupo, precursores o toda la congregación.</div></details>
+                <details><summary>3. Informes · Registrar actividad mensual</summary><div>Selecciona grupo, mes y año. Marca participación y registra horas, cursos, precursor auxiliar y notas. Pulsa <b>Guardar</b>. El mes anterior permanece disponible hasta el día 20; solo el administrador puede desbloquear meses cerrados. Si aparecen datos en el mes en curso o en un mes futuro, el administrador puede desbloquearlo para corregirlos o eliminarlos, pero no crear informes nuevos.</div></details>
+                <details><summary>4. Asistencia · Registrar reuniones</summary><div>Selecciona mes y año, escribe la asistencia de cada reunión de entre semana y fin de semana, y pulsa <b>Guardar asistencia</b>. Estos datos alimentan el Registro S-88 y el informe anual S-10.</div></details>
+                <details><summary>5. Precursores · Revisar progreso</summary><div>Selecciona mes y año y pulsa <b>Ver datos</b>. Revisa horas acumuladas, meta y estado de los precursores regulares. Abajo verás quiénes sirvieron como precursores auxiliares en el mes elegido.</div></details>
+                <details><summary>6. Tarjeta Publicador · Ver o descargar S-21</summary><div>Elige modo individual, grupo, precursores o todos; selecciona persona/grupo y año de servicio. Pulsa <b>Ver</b> para revisar y <b>PDF</b> para descargar. Los informes anteriores de un traslado también aparecen aquí.</div></details>
+                <details><summary>7. Registro Asistencia · Generar S-88</summary><div>Selecciona el año de servicio y pulsa <b>Ver</b>. Comprueba los promedios mensuales registrados en Asistencia y usa <b>PDF</b> para descargar el registro.</div></details>
+                <details><summary>8. S-10 anual · Preparar el informe</summary><div>Selecciona el año de servicio, registra territorios sin abarcar y pulsa <b>Calcular informe</b>. Corrige datos faltantes antes de <b>Cerrar informe anual</b>; al cerrarlo, sus cifras quedan conservadas. Descárgalo en PDF y envíalo por JW Hub antes del 20 de septiembre.</div></details>
+                <details><summary>9. Resumen · Analizar un mes</summary><div>Selecciona mes y año y pulsa <b>Analizar datos</b>. Consulta totales y resultados mensuales para revisar que los informes estén completos.</div></details>
+                <details><summary>10. Sacados · Conservar bajas y fallecidos</summary><div><b>Sacados:</b> consulta fecha e historial; usa <b>Editar</b> para corregir datos o <b>Reactivar</b> si vuelve. Si un sacado fallece, edítalo y agrega la fecha de fallecimiento: pasará a Fallecidos sin perder su historial.<br><b>Fallecidos:</b> se conservan aparte y no cuentan como miembros activos.</div></details>
+                <details><summary>11. Inactivos · Detectar seguimiento pendiente</summary><div>Consulta inactivos, informes faltantes dentro del plazo e irregulares. La app calcula estas listas desde el mes real de ingreso; no cuenta meses anteriores a que la persona comenzara o llegara.</div></details>
+                <details><summary>12. Inf-Visita Circuito · Guardar observaciones</summary><div>Registra fecha, nombre del superintendente y observaciones; pulsa <b>Guardar</b>. Usa <b>Editar</b> para corregir o <b>Eliminar</b> para borrar una observación.</div></details>
+            </div>
+            <div style="margin-top:16px; padding:12px; border-radius:10px; background:var(--bg-body); color:var(--text-muted); font-size:.88rem;"><b>Ajustes:</b> administra nube, accesos, grupos y respaldos. Al importar un respaldo total, usa <b>Restaurar copia completa</b> para recuperar también la asistencia; <b>Fusionar publicadores e informes</b> conserva la base actual y no incorpora asistencia. Consulta también <b>Uso independiente y privacidad</b>: la app no es oficial, el desarrollador no recibe los datos y el usuario debe estar autorizado para tratar información de terceros. Para migrar, carga cualquier Excel, relaciona sus columnas, revisa la vista previa y confirma. La plantilla es opcional y la app omite informes del mes en curso o futuros. En Android, al crear un respaldo elige dónde guardarlo o compartirlo y verifica el archivo.</div>
+            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.4.0</small></div>
+        </div>
+
+        <div style="display:none; padding:0; overflow-y:auto; flex:1; background:var(--surface);">
             <div style="padding:25px; display:flex; flex-direction:column; gap:30px;">
 
                 <div>
@@ -4954,15 +5989,65 @@ setTimeout(window.renderizarHistorialRapido, 500);
     </div>
 </div>
 <style>
+    .manual-sections { display:flex; flex-direction:column; gap:9px; }
+    .manual-sections details { border:1px solid var(--border-light); border-radius:11px; background:var(--surface); overflow:hidden; }
+    .manual-sections summary { padding:13px 15px; cursor:pointer; font-weight:750; color:var(--text-main); }
+    .manual-sections details > div { padding:13px 16px; border-top:1px solid var(--border-light); color:var(--text-muted); line-height:1.55; font-size:.92rem; }
     body.dark-mode * { color: #e2e8f0 !important; border-color: #334155 !important; }
     body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #020617 !important; color: #fff !important; }
     body.dark-mode .btn, body.dark-mode .status-badge { color: inherit !important; }
 
-/* 🛡️ Evita que el texto del Login se vuelva blanco e invisible */
-body.dark-mode #modalAuth, 
-body.dark-mode #modalAuth * {
-    color: initial !important;
+/* El acceso siempre usa una tarjeta clara, aunque el navegador recuerde modo oscuro. */
+#modalAuth .card,
+body.dark-mode #modalAuth .card {
+    background:#ffffff !important;
+    color:#111827 !important;
+    border-color:#d1d5db !important;
 }
+#modalAuth h2,
+body.dark-mode #modalAuth h2 { color:#4f46e5 !important; }
+#modalAuth .offline-info,
+body.dark-mode #modalAuth .offline-info { background:#e2e8f0 !important; border-color:#94a3b8 !important; }
+#modalAuth .access-info,
+body.dark-mode #modalAuth .access-info { background:#dcfce7 !important; border-color:#86efac !important; }
+#modalAuth .offline-info *,
+body.dark-mode #modalAuth .offline-info * { color:#0f172a !important; }
+#modalAuth .access-info *,
+body.dark-mode #modalAuth .access-info * { color:#064e3b !important; }
+#modalAuth #mEnter,
+body.dark-mode #modalAuth #mEnter { background:#4f46e5 !important; color:#ffffff !important; }
+#modalAuth p[onclick="handleForgotPwd()"],
+body.dark-mode #modalAuth p[onclick="handleForgotPwd()"] { color:#4f46e5 !important; }
+
+#modalIndependentNotice .card,
+body.dark-mode #modalIndependentNotice .card { background:#ffffff !important; color:#111827 !important; border-color:#d1d5db !important; }
+#modalIndependentNotice .card p,
+#modalIndependentNotice .card label,
+#modalIndependentNotice .card span,
+body.dark-mode #modalIndependentNotice .card p,
+body.dark-mode #modalIndependentNotice .card label,
+body.dark-mode #modalIndependentNotice .card span { color:#334155 !important; }
+#modalIndependentNotice .card h2,
+body.dark-mode #modalIndependentNotice .card h2 { color:#4f46e5 !important; }
+#modalIndependentNotice .btn,
+body.dark-mode #modalIndependentNotice .btn { background:#4f46e5 !important; color:#ffffff !important; }
+
+#modalBackupImportChoice .card,
+body.dark-mode #modalBackupImportChoice .card { background:#ffffff !important; color:#111827 !important; border-color:#d1d5db !important; }
+#modalBackupImportChoice h2,
+body.dark-mode #modalBackupImportChoice h2 { color:#4f46e5 !important; }
+#modalBackupImportChoice p,
+#modalBackupImportChoice small,
+#modalBackupImportChoice #backupImportSummary,
+body.dark-mode #modalBackupImportChoice p,
+body.dark-mode #modalBackupImportChoice small,
+body.dark-mode #modalBackupImportChoice #backupImportSummary { color:#334155 !important; }
+#modalBackupImportChoice #backupImportSummary,
+body.dark-mode #modalBackupImportChoice #backupImportSummary { background:#f8fafc !important; border-color:#e2e8f0 !important; }
+#modalBackupImportChoice .btn.primary,
+body.dark-mode #modalBackupImportChoice .btn.primary { background:#4f46e5 !important; color:#ffffff !important; }
+#modalBackupImportChoice .btn.info,
+body.dark-mode #modalBackupImportChoice .btn.info { background:#0284c7 !important; color:#ffffff !important; }
 
 /* El campo de acceso debe conservar alto contraste en móvil y modo oscuro. */
 #modalAuth #mPwd,
@@ -5008,6 +6093,18 @@ body.dark-mode #modalAuth #mPwd {
 #modalAuth .card{
   width: min(360px, 92vw);
   padding: clamp(14px, 2.2vh, 22px) !important;
+}
+
+@media (max-width: 640px){
+  #modalAuth { padding:12px !important; }
+  #modalAuth .card { width:min(360px, 94vw); max-width:94vw; }
+  #modalAuth .card > div:first-child { width:52px !important; height:52px !important; margin-bottom:12px !important; }
+  #modalAuth h2 { font-size:1.5rem !important; margin:10px 0 14px !important; }
+  #modalAuth .card > div:nth-of-type(2) { gap:10px !important; margin-bottom:14px !important; }
+  #modalAuth .info-card { padding:11px !important; gap:9px !important; }
+  #modalAuth #mPwd { margin-bottom:16px !important; padding:11px !important; }
+  #modalAuth #mEnter { padding:13px !important; }
+  #modalAuth p[onclick="handleForgotPwd()"] { margin-top:14px !important; }
 }
 
 /* Reduce tamaños cuando la pantalla es baja */
