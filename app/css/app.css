@@ -1,0 +1,621 @@
+
+        :root {
+            --primary: #4f46e5; --primary-hover: #4338ca; --bg-body: #f3f4f6;
+            --surface: #ffffff; --text-main: #1f2937; --text-muted: #6b7280;
+            --border-light: #e5e7eb; --success: #10b981; --danger: #ef4444;
+            --warning: #f59e0b; --info: #3b82f6; --radius-md: 16px; --radius-sm: 10px;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+/* ========================================================= */
+    /* 🌑 MODO OSCURO "MASTER" (CORREGIDO HEADER Y TABLAS) 🌑 */
+    /* ========================================================= */
+    body.dark-mode {
+        --bg-body: #0f172a;        /* Fondo Azul Noche */
+        --surface: #1e293b;        /* Tarjetas Gris Azulado */
+        --text-main: #f1f5f9;      /* Blanco Brillante */
+        --text-muted: #94a3b8;     /* Gris Claro */
+        --border-light: #334155;   /* Bordes Oscuros */
+        --input-bg: #0f172a;      /* Inputs  */
+    }
+
+    /* 1. ARREGLO DEL HEADER (BARRA SUPERIOR) */
+    body.dark-mode header.top {
+        background-color: var(--bg-body) !important;
+        border-bottom: 1px solid var(--border-light) !important;
+    }
+    
+    /* El Título "Congregación Pro" a Blanco */
+    body.dark-mode header.top h1 {
+        color: #ffffff !important;
+    }
+    
+    /* Los selectores de Fecha (Año/Mes) en el Header */
+    body.dark-mode header.top input,
+    body.dark-mode header.top select {
+        background-color: var(--surface) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--border-light) !important;
+    }
+
+    /* 2. ARREGLO DE ETIQUETAS (BADGES) */
+    /* Badge de "Administrador" o "Encargado" */
+    body.dark-mode #roleBadge {
+        background-color: #312e81 !important; /* Fondo Azul Oscuro */
+        color: #c7d2fe !important;            /* Letras Azul Claro Brillante */
+        border: 1px solid #4338ca !important;
+    }
+    /* Badge de "Online/Offline" */
+    body.dark-mode .status-badge {
+        background-color: var(--input-bg) !important;
+        color: #fff !important;
+        border: 1px solid var(--border-light) !important;
+    }
+
+    /* 3. FUERZA BRUTA: TARJETAS Y CONTENEDORES */
+    body.dark-mode, 
+    body.dark-mode .container,
+    body.dark-mode .modal-content {
+        background-color: var(--bg-body) !important;
+        color: var(--text-main) !important;
+    }
+
+    body.dark-mode .card,
+    body.dark-mode .settings-card,
+    body.dark-mode .dash-card {
+        background-color: var(--surface) !important;
+        border-color: var(--border-light) !important;
+        color: var(--text-main) !important;
+    }
+
+    /* 4. TEXTOS GENERALES (Para que nada quede oculto) */
+    body.dark-mode h2, body.dark-mode h3, body.dark-mode h4,
+    body.dark-mode strong, body.dark-mode b, body.dark-mode label,
+    body.dark-mode span:not(.badge):not(.status-badge) {
+        color: #e2e8f0 !important;
+    }
+
+    /* 5. TABLAS (Nombres visibles) */
+    body.dark-mode .table th {
+        background-color: #020617 !important;
+        color: #94a3b8 !important;
+        border-bottom-color: var(--border-light) !important;
+    }
+    body.dark-mode .table td {
+        background-color: var(--surface) !important;
+        color: #e2e8f0 !important; /* <--- ESTO ARREGLA LOS NOMBRES */
+        border-bottom-color: var(--border-light) !important;
+    }
+    body.dark-mode .table tbody tr:hover td {
+        background-color: #334155 !important;
+        color: #fff !important;
+    }
+
+    /* 6. INPUTS (Cajas de texto negras) */
+    body.dark-mode input:not([type="checkbox"]), 
+    body.dark-mode select, 
+    body.dark-mode textarea {
+        background-color: var(--input-bg) !important;
+        color: #fff !important;
+        border: 1px solid #475569 !important;
+    }
+
+  /* 7. LIMPIEZA DE FONDOS BLANCOS REBELDES (Versión Blindada) */
+    body.dark-mode *[style*="background:white"],
+    body.dark-mode *[style*="background: white"],
+    body.dark-mode *[style*="background:#fff"],
+    body.dark-mode *[style*="background: #fff"],
+    body.dark-mode *[style*="background-color: #f9fafb"] {
+        background-color: var(--surface) !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-light) !important;
+    }
+
+    /* 🔥 ATAQUE DIRECTO AL CUADRO DEL HISTORIAL (Por ID) 🔥 */
+    body.dark-mode #boxHistorial {
+        background-color: var(--surface) !important;
+        border-color: var(--border-light) !important;
+    }
+    
+    /* Arreglar el texto pequeño dentro del cuadro */
+    body.dark-mode #boxHistorial small {
+        color: #cbd5e1 !important; 
+    }
+    
+    /* Arreglar el título azul dentro del cuadro */
+    body.dark-mode #boxHistorial label {
+        color: #60a5fa !important;
+    }    
+    /* 8. BOTONES GHOST (Ajustes y Guía) */
+    body.dark-mode .btn.ghost {
+        color: #cbd5e1 !important;
+        border-color: #475569 !important;
+    }
+    body.dark-mode .btn.ghost:hover {
+        background-color: #334155 !important;
+    }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; font-size: 14px; margin: 0; }
+
+        /* HEADER & TABS */
+        header.top { background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-light); padding: 0.8rem 1.5rem; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: 10px; }
+        h1 { font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -0.5px; }
+        .tabs-container { background: var(--surface); border-bottom: 1px solid var(--border-light); padding: 0 1.5rem; position: sticky; top: 60px; z-index: 90; overflow-x: auto; white-space: nowrap; }
+        .tabs-container::-webkit-scrollbar { height: 0px; background: transparent; }
+        .tabs { display: flex; gap: 20px; }
+        .tabs button { padding: 14px 4px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .tabs button:hover { color: var(--primary); }
+        .tabs button.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .s10-reminder { display:none; margin:14px auto 0; max-width:1400px; padding:0 1.5rem; }
+        .s10-reminder.visible { display:block; }
+        .s10-reminder-panel { width:100%; border:1px solid #f59e0b; border-radius:12px; background:#fffbeb; color:#78350f; padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:14px; box-shadow:var(--shadow-sm); }
+        .s10-reminder-title { display:block; font-weight:800; margin-bottom:3px; }
+        .s10-reminder-detail { display:block; font-size:.88rem; line-height:1.35; }
+        .s10-reminder-actions { flex:0 0 auto; display:flex; align-items:center; gap:8px; }
+        .s10-reminder-action { border:1px solid #d97706; padding:7px 10px; border-radius:8px; background:#f59e0b; color:#451a03; font-size:.8rem; font-weight:800; cursor:pointer; }
+        .s10-reminder-action.secondary { background:#fff; }
+        body.dark-mode .s10-reminder-panel { background:#422006; border-color:#d97706; color:#fef3c7; }
+        body.dark-mode .s10-reminder-action { background:#f59e0b; color:#451a03; }
+        body.dark-mode .s10-reminder-action.secondary { background:#292524; color:#fef3c7; }
+        @media (max-width: 640px) {
+            .s10-reminder-panel { align-items:stretch; flex-direction:column; }
+            .s10-reminder-actions { width:100%; }
+            .s10-reminder-action { flex:1; }
+        }
+
+        /* UI ELEMENTS */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: var(--surface); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); margin-bottom: 1.5rem; }
+        .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--text-main); border-bottom: 1px solid var(--border-light); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .count-badge { background: #f3f4f6; color: var(--text-muted); padding: 2px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; margin-left: 8px; }
+        label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+        input:not([type="checkbox"]), select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-size: 0.95rem; transition: 0.2s; background: #fff; color: var(--text-main); font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; border: none; gap: 8px; font-size: 0.9rem; transition: 0.2s; }
+        .btn:active { transform: scale(0.97); }
+        .btn.primary { background: var(--primary); color: white; box-shadow: 0 2px 5px rgba(79, 70, 229, 0.3); }
+        .btn.success { background: var(--success); color: white; }
+        .btn.danger { background: var(--danger); color: white; }
+        .btn.warning { background: var(--warning); color: white; }
+        .btn.info { background: var(--info); color: white; }
+        .btn.ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-light); }
+        .btn.ghost:hover { background: var(--bg-body); color: var(--text-main); }
+        .admin-tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #f9fafb; padding: 1.2rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid var(--border-light); }
+        .table-container { border-radius: var(--radius-md); border: 1px solid var(--border-light); overflow-x: auto; -webkit-overflow-scrolling: touch; background: white; }
+        .table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .table th { background: #f9fafb; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; padding: 12px 16px; text-align: left; text-transform: uppercase; border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+        .table td { padding: 12px 16px; border-bottom: 1px solid var(--border-light); color: var(--text-main); font-size: 0.9rem; }
+        .table tbody tr:hover { background-color: #f8fafc; }
+        .row-sacado td { color: var(--text-muted); text-decoration: line-through; background: #fef2f2; }
+
+        /* DASHBOARD */
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        .dash-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border-light); transition: 0.2s; display: flex; flex-direction: column; }
+        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .dash-header { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid #f3f4f6; padding-bottom: 10px; }
+        .dash-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; flex: 1; }
+        .dash-stat { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .dash-num { font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 4px; color: var(--text-main); }
+        .dash-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+        .member-stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+        .member-stat-card { background:var(--surface); border:1px solid var(--border-light); border-radius:10px; padding:9px 12px; box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:52px; }
+        button.member-stat-card { width:100%; font:inherit; text-align:left; cursor:pointer; color:inherit; transition:transform .15s, box-shadow .15s; }
+        button.member-stat-card:hover { transform:translateY(-2px); box-shadow:0 5px 12px rgba(0,0,0,.1); }
+        .member-count-link { border:0; background:transparent; color:var(--primary); font:inherit; font-weight:800; padding:6px 10px; border-radius:8px; cursor:pointer; min-width:38px; }
+        .member-count-link:hover { background:var(--primary-soft); text-decoration:underline; }
+        .member-stat-card .dash-label { line-height:1.15; }
+        .member-stat-card .dash-value { font-size:1.35rem; line-height:1; font-weight:800; color:var(--text-main); }
+        .member-list-layout { display:grid; gap:14px; }
+        .member-toolbar { display:grid; grid-template-columns:minmax(190px, 280px) minmax(190px, 230px); gap:10px 16px; align-items:end; padding:12px 14px; background:var(--bg-body); border:1px solid var(--border-light); border-radius:12px; }
+        .member-toolbar p { grid-column:1/-1; margin:0; color:var(--text-muted); font-size:.8rem; }
+        .member-block { border:1px solid var(--border-light); border-radius:12px; overflow:hidden; background:var(--surface); }
+        .member-block-title { padding:10px 14px; background:var(--bg-body); border-bottom:1px solid var(--border-light); color:var(--text-main); font-size:.82rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+        .member-block .table-container { border:0; border-radius:0; }
+        #lista_global .table th { background:var(--surface); }
+        .num-blue { color: var(--primary); } .num-green { color: var(--success); } .num-orange { color: var(--warning); } .num-purple { color: #8b5cf6; }
+        .asist-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 15px; }
+        
+        #roleBadge { background: #e0e7ff; color: #4338ca; font-weight: 700; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; text-transform: uppercase; }
+        .status-badge { font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; transition: 0.3s; display: inline-flex; align-items: center; gap: 4px; }
+        .status-badge.sync { background: #dcfce7; color: #166534; }
+        .status-badge.offline { background: #fee2e2; color: #991b1b; }
+        #toast { position: fixed; top: 20px; right: 20px; background: #1f2937; color: white; padding: 12px 24px; border-radius: 10px; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; z-index: 2000; border-left: 4px solid #10b981; }
+        
+        /* SETTINGS MODAL */
+        #modalAuth, #modalPwd, #modalSettings, #modalSupport { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+        #modalSupport { z-index: 10000; } 
+
+        .settings-card { width: 420px; max-width: 100%; background: var(--surface); border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column; }
+        .settings-header { padding: 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 10; }
+        .settings-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .settings-group { border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; }
+        .settings-group summary { padding: 15px; background: #fafafa; font-weight: 600; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); font-size: 0.95rem; }
+        details.settings-collapsible > summary::after { content:'›'; font-size:1.35rem; color:var(--text-muted); transform:rotate(90deg); transition:transform .18s ease; }
+        details.settings-collapsible[open] > summary::after { transform:rotate(-90deg); }
+        details.settings-collapsible[open] > summary { color:var(--primary); background:#f5f7ff; border-bottom:1px solid var(--border-light); }
+        .settings-content { padding: 15px; border-top: 1px solid var(--border-light); background: white; }
+        .status-card { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 10px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .status-card.offline { background: #fef2f2; border-color: #fecaca; }
+        .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .icon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; border: 1px solid var(--border-light); border-radius: 12px; background: white; cursor: pointer; transition: 0.2s; color: var(--text-main); text-align: center; gap: 5px; }
+        .icon-btn:hover { background: #f9fafb; border-color: var(--primary); }
+
+        /* PREVIEW AREA */
+        #preview-viewport, #s88-preview-viewport { padding: 20px; background: #525252; display:flex; flex-direction:column; align-items:center; margin-top: 20px; border-radius: 8px; }
+        .print-canvas { width: 190mm; min-width: 190mm; background: #ffffff !important; color: #000; padding: 10mm; font-family: 'Inter', sans-serif; page-break-after: always; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .official-table { width: 100%; border-collapse: collapse !important; border: 1.5px solid #000 !important; margin-top: 5px; }
+        .official-table th, .official-table td { border: 1.2px solid #000 !important; padding: 4px; font-size: 8.5pt; text-align: center; color: #000; }
+        
+        #app-content { display: none; }
+        .tab { display: none; }
+        .tab.active { display: block; animation: fadeIn 0.3s ease; }
+        body.role-restricted .admin-only { display: none !important; }
+        body.role-restricted .tabs button:not([data-tab="lista_global"]):not([data-tab="actividad"]):not([data-tab="inactivos"]) { display: none !important; }
+        body.role-restricted #inactiveListCard, body.role-restricted #irregularListCard { display:none !important; }
+        body.role-restricted #missingReportsCard { margin-top:0 !important; }
+        body.role-admin .restricted-only { display: none !important; }
+
+        /* En computador, mantener visibles todas las secciones sin desplazamiento oculto. */
+        @media (min-width: 769px) {
+            .tabs-container { overflow-x: visible; white-space: normal; }
+            .tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 12px; max-width: 1400px; margin: 0 auto; }
+            .tabs button { min-height: 48px; padding: 10px 4px; line-height: 1.2; white-space: normal; }
+        }
+
+        @media (min-width: 1500px) {
+            .tabs { grid-template-columns: repeat(12, minmax(0, 1fr)); max-width: none; }
+        }
+
+        @media (max-width: 768px) {
+            header.top { flex-direction: column; align-items: stretch; gap: 12px; }
+            .tabs-container { top: 115px; } 
+            .tabs { width: max-content; }
+            .tabs button { white-space: nowrap; }
+            .admin-tools-grid, .asist-grid-layout, .stat-grid, .dash-grid { grid-template-columns: 1fr; } 
+            .member-stats-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+            .member-stat-card { padding:8px 7px; gap:4px; min-width:0; min-height:48px; }
+            .member-stat-card .dash-label { min-width:0; font-size:.7rem; overflow-wrap:anywhere; }
+            .member-stat-card .dash-value { flex:0 0 auto; font-size:1.2rem; }
+            .member-toolbar { grid-template-columns:1fr; padding:11px; }
+            .member-toolbar p { grid-column:1; }
+            .member-list-layout, #memberStatsDetail, #memberStatsDetail .card, #memberStatsDetail .table-container { min-width:0; width:100%; max-width:100%; }
+            #memberStatsDetail .table-container { overflow-x:hidden; }
+            .group-summary-table thead { display:none; }
+            .group-summary-table, .group-summary-table tbody { display:block; width:100%; min-width:0 !important; max-width:100%; }
+            .group-summary-table tr { display:block; margin:0 0 10px; padding:8px 10px; border:1px solid var(--border-light); border-radius:10px; background:var(--surface); }
+            .group-summary-table td { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:7px 2px; border:0; border-bottom:1px solid var(--border-light); text-align:right; }
+            .group-summary-table td:last-child { border-bottom:0; }
+            .group-summary-table td::before { content:attr(data-label); color:var(--text-muted); font-size:.78rem; font-weight:700; text-align:left; }
+            .group-summary-table td:first-child { font-size:1rem; text-align:left; }
+            .group-summary-table td:first-child::before { content:none; }
+        }
+        /* === PARCHE FINAL: TEXTOS VISIBLES === */
+    body.dark-mode label, 
+    body.dark-mode .dash-label,
+    body.dark-mode h3, 
+    body.dark-mode h4,
+    body.dark-mode strong,
+    body.dark-mode b {
+        color: #e2e8f0 !important; /* Blanco brillante */
+    }
+
+    body.dark-mode input, 
+    body.dark-mode select, 
+    body.dark-mode textarea {
+        color: #ffffff !important;
+    }
+    /* === ARREGLO DE FONDO DEL FORMULARIO === */
+    body.dark-mode .admin-tools-grid {
+        background-color: transparent !important;
+        border-color: var(--border-light) !important;
+    }
+    
+    /* Asegurar que los títulos de los campos se vean bien */
+    body.dark-mode .admin-tools-grid label {
+        color: #e2e8f0 !important;
+    }
+/* === ÚLTIMO PARCHE: ETIQUETAS PEQUEÑAS === */
+
+    /* 1. SECCIÓN 2: Los grupos (G1, G2...) */
+    /* 2. SECCIÓN 5: Las horas LDC */
+    body.dark-mode #tblPrecursores div[style*="background:#eff6ff"],
+    body.dark-mode #tblPrecursores div[style*="background: #eff6ff"] {
+        background-color: #172554 !important;
+        color: #bfdbfe !important;
+        border-color: #1e40af !important;
+    }
+
+    /* 3. SECCIÓN 10: La etiqueta "Inactivo" */
+    body.dark-mode #tblInactivos span {
+        background-color: #450a0a !important;
+        color: #fca5a5 !important;
+        border: 1px solid #7f1d1d !important;
+    }
+    /* 4. ARREGLO BOTÓN GUÍA */
+    body.dark-mode #btnAdminHelp {
+        background-color: #312e81 !important; /* Fondo Azul Oscuro */
+        color: #ffffff !important;            /* Letra Blanca */
+        border: 1px solid #4338ca !important;
+    }
+    /* === ARREGLO DE MODALES (GUÍA Y AJUSTES) === */
+
+    /* 1. Fondo Oscuro para la ventana de Ajustes */
+    body.dark-mode .settings-card {
+        background-color: #1e293b !important; /* Gris Azulado Oscuro */
+        border: 1px solid #334155 !important;
+    }
+
+    /* 2. Fondo Oscuro para la ventana de la Guía */
+    /* Ataca directamente al div blanco dentro del modal */
+    body.dark-mode #modalManual > div {
+        background-color: #1e293b !important;
+        color: #fff !important;
+    }
+
+    /* 3. Arreglo de los desplegables y cajas internas */
+    body.dark-mode summary,
+    body.dark-mode .settings-group,
+    body.dark-mode .settings-content {
+        background-color: #0f172a !important; /* Fondo casi negro */
+        color: #e2e8f0 !important;
+        border-color: #334155 !important;
+    }
+
+    /* 4. Asegurar que los textos dentro se lean */
+    body.dark-mode #modalManual p, 
+    body.dark-mode #modalManual li,
+    body.dark-mode .settings-body p {
+        color: #cbd5e1 !important; /* Gris claro suave */
+    }
+    /* === RETOQUE FINAL: CONTRASTE EN CAJAS INTERNAS === */
+
+    /* 1. Botones cuadrados grandes (Respaldo, Excel...) */
+    body.dark-mode .icon-btn {
+        background-color: #1e293b !important;
+        color: #fff !important;
+        border: 1px solid #475569 !important;
+    }
+    
+    /* 2. Forzar oscuras todas las cajitas de colores (Verde, Naranja, Azul, Gris) */
+    /* Esto es lo que arregla que no se lean los textos claros */
+    body.dark-mode #modalManual div[style*="background"],
+    body.dark-mode #modalManual details,
+    body.dark-mode #modalManual summary,
+    body.dark-mode .settings-card div[style*="background"],
+    body.dark-mode .settings-card details,
+    body.dark-mode .settings-card summary,
+    body.dark-mode .status-card {
+        background-color: #0f172a !important; /* Fondo casi negro */
+        color: #e2e8f0 !important;             /* Letra blanca legible */
+        border-color: #334155 !important;      /* Borde sutil */
+    }
+
+    /* 3. Asegurar que las letras pequeñas y párrafos brillen */
+    body.dark-mode .settings-card small,
+    body.dark-mode .settings-card p,
+    body.dark-mode #modalManual small,
+    body.dark-mode #modalManual li,
+    body.dark-mode #modalManual p {
+        color: #cbd5e1 !important;
+    }
+    /* === ÚLTIMO DETALLE: BOTÓN DE SOPORTE === */
+    /* Atrapamos el botón por su función de abrir el soporte */
+    body.dark-mode button[onclick*="modalSupport"] {
+        background-color: #1e3a8a !important; /* Azul Noche Profundo */
+        color: #ffffff !important;            /* Letra Blanca Brillante */
+        border: 2px solid #1e40af !important; /* Borde Azul Oscuro */
+        box-shadow: none !important;
+    }
+    /* === ARREGLO FINAL: ENCABEZADO DE AJUSTES === */
+    /* Pintamos la barra de título de oscuro */
+    body.dark-mode .settings-header {
+        background-color: #1e293b !important; /* Mismo gris azulado que la ventana */
+        border-bottom: 1px solid #334155 !important;
+    }
+
+    /* Aseguramos que el título "Ajustes" resalte */
+    body.dark-mode .settings-header h3 {
+        color: #ffffff !important;
+    }
+    /* === ARREGLO DE CONTADORES (NUMERITOS) === */
+    body.dark-mode .count-badge {
+        background-color: #334155 !important; /* Gris Oscuro */
+        color: #ffffff !important;            /* Número Blanco */
+        border: 1px solid #475569 !important; /* Borde fino */
+    }
+    /* ========================================================= */
+    /* 📄 CORRECCIÓN PARA VER HOJAS DE PAPEL EN MODO OSCURO 📄 */
+    /* ========================================================= */
+    
+    /* Forzamos que dentro de la hoja (.print-canvas) TODO sea negro */
+    body.dark-mode .print-canvas,
+    body.dark-mode .print-canvas * {
+        color: #000000 !important;       /* Letra Negra */
+        border-color: #000000 !important; /* Bordes Negros */
+    }
+
+    /* Aseguramos que las tablas dentro del papel también sean negras */
+    body.dark-mode .print-canvas .official-table th,
+    body.dark-mode .print-canvas .official-table td {
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+/* ========================================================= */
+    /* 📄 CORRECCIÓN TOTAL PARA PDF EN MODO OSCURO 📄 */
+    /* ========================================================= */
+    
+    /* 1. La hoja completa: Fondo blanco y letra negra base */
+    body.dark-mode .print-canvas {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    /* 2. ATAQUE DIRECTO A LA INFO PERSONAL (Cabecera) */
+    /* Aquí es donde está el Nombre, Grupo, Fechas, etc. */
+    body.dark-mode .print-canvas .s21-header-box,
+    body.dark-mode .print-canvas .s21-header-box div,
+    body.dark-mode .print-canvas .s21-header-box span,
+    body.dark-mode .print-canvas .s21-header-box b,
+    body.dark-mode .print-canvas .s21-header-box strong,
+    body.dark-mode .print-canvas .s21-header-box label {
+        color: #000000 !important; /* ¡NEGRO PURO! */
+        background-color: transparent !important; /* Sin fondo oscuro */
+        border-color: #000000 !important;
+    }
+
+    /* 3. Las Tablas y sus bordes */
+    body.dark-mode .print-canvas table,
+    body.dark-mode .print-canvas th,
+    body.dark-mode .print-canvas td {
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+
+    /* 4. Seguridad extra: Cualquier texto dentro del papel */
+    body.dark-mode .print-canvas * {
+        color: #000000 !important;
+    }
+    /* ========================================================= */
+    /* 🔒 MODO INVITADO (SOLO LECTURA) 🔒 */
+    /* ========================================================= */
+
+    /* 1. Ocultar botones de Guardar, Borrar, Añadir y Editar */
+    body.guest-mode .btn-save,       /* Asegúrate que tus botones de guardar tengan esta clase */
+    body.guest-mode .btn-delete,     /* O esta */
+    body.guest-mode .btn-add,        /* Botones flotantes de agregar (+) */
+    body.guest-mode button[onclick*="save"],   /* Oculta cualquier botón que llame a save */
+    body.guest-mode button[onclick*="delete"], /* Oculta cualquier botón que llame a delete */
+    body.guest-mode button[onclick*="update"] {
+        display: none !important;
+    }
+
+    /* 2. Bloquear todos los Inputs y Selects (No se pueden escribir ni cambiar) */
+    body.guest-mode input,
+    body.guest-mode select,
+    body.guest-mode textarea {
+        pointer-events: none; /* No permite hacer clic */
+        background-color: transparent !important; /* Que parezca solo texto */
+        border: none !important;
+    }
+
+    /* 3. EXCEPCIONES: Cosas que SÍ deben funcionar */
+    
+    /* El botón de búsqueda SÍ debe funcionar */
+    body.guest-mode #searchInput, 
+    body.guest-mode .search-bar input {
+        pointer-events: auto !important;
+        border: 1px solid #ccc !important;
+        background-color: white !important;
+    }
+
+    /* Los botones de navegación y "Ojos" (Ver) SÍ deben verse */
+    body.guest-mode .nav-btn,
+    body.guest-mode .btn-view,   /* El ojito para ver reportes */
+    body.guest-mode .tab-link {
+        display: block !important;
+        pointer-events: auto !important;
+    }
+
+    /* 4. IMPORTANTE: Soporte y Donación SÍ permitidos */
+    body.guest-mode #btn-support,
+    body.guest-mode .donate-section,
+    body.guest-mode a[href*="paypal"],
+    body.guest-mode .btn-about {
+        display: block !important;
+        pointer-events: auto !important;
+        opacity: 1 !important;
+    }
+
+   /* ========================================================= */
+    /* 🔒 MODO INVITADO (CORREGIDO: SIN PDF) 🔒 */
+    /* ========================================================= */
+
+    /* 1. OCULTAR BOTONES DE EDICIÓN, GUARDADO Y **DESCARGAS** */
+    body.guest-mode .btn-save, 
+    body.guest-mode .btn-delete,
+    body.guest-mode .btn-add,
+    body.guest-mode button[onclick*="save"], 
+    body.guest-mode button[onclick*="update"],
+    body.guest-mode button[onclick*="delete"],
+    /* 👇 AQUÍ ESTÁ EL CAMBIO: OCULTAMOS LOS PDF 👇 */
+    body.guest-mode button[onclick*="downloadPDF"], 
+    body.guest-mode button[onclick*="generatePDF"] {
+        display: none !important;
+    }
+
+    /* 2. BLOQUEO GENERAL (Por defecto, nada se toca) */
+    body.guest-mode input,
+    body.guest-mode select,
+    body.guest-mode textarea {
+        pointer-events: none !important;
+        border: none !important;
+        background: transparent !important;
+        color: inherit;
+    }
+
+    /* 3. ¡EXCEPCIONES! (Lo que SÍ se puede tocar para navegar) */
+    body.guest-mode #headerMonth, body.guest-mode #headerYear,      
+    body.guest-mode #actMonthSelect, body.guest-mode #actYearInput, 
+    body.guest-mode #selGInforme,                                   
+    body.guest-mode #asistMonthSelect, body.guest-mode #asistYearInput, 
+    body.guest-mode #precMes, body.guest-mode #precAno,             
+    body.guest-mode #s21Mode, body.guest-mode #s21Year,             
+    body.guest-mode #s21Search, body.guest-mode #s21GroupSel,       
+    body.guest-mode #s88Year,                                       
+    body.guest-mode #resMonth, body.guest-mode #resYear,            
+    body.guest-mode #qPersona, body.guest-mode #searchInput {       
+        
+        pointer-events: auto !important; 
+        border: 1px solid #ccc !important; 
+        background-color: var(--surface) !important; 
+        border-radius: 6px !important;
+        opacity: 1 !important;
+    }
+
+    /* 4. Permitir botones de "Ver" (Ojitos) y Navegación */
+    body.guest-mode .btn-view,
+    body.guest-mode button[onclick*="render"],
+    body.guest-mode button[onclick*="preview"], /* <--- ESTE ES EL BOTÓN "VER" (OJITO) */
+    body.guest-mode button[onclick*="Search"] {
+        pointer-events: auto !important;
+        display: inline-block !important;
+        cursor: pointer !important;
+    }
+
+    /* ========================================================= */
+    /* 🛠️ AJUSTES VISUALES PARA INVITADO (CONFIGURACIÓN) 🛠️ */
+    /* ========================================================= */
+    
+    /* 1. Ocultar lo que NO debe ver */
+    body.guest-mode #secShareKey,  /* Compartir Llave */
+    body.guest-mode #secRespaldo,  /* Respaldo Local */
+    body.guest-mode #secExcel,     /* Excel */
+    body.guest-mode #secAccesos {  /* Gestión de Claves */
+        display: none !important;
+    }
+
+    /* 2. Mostrar "Conexión Rápida" (que normalmente se oculta a los admins) */
+    body.guest-mode #smartConnectBox {
+        display: block !important;
+    }
+
+    /* =============================================== */
+    /* FIX: FONDO BLANCO PARA PDF (Ahorro de Tinta)    */
+    /* Fuerza que la hoja sea blanca en Modo Oscuro    */
+    /* =============================================== */
+    #modalTarjeta > div, 
+    #modalRegistro > div, 
+    #cardS21, 
+    #cardS88,
+    .hoja-pdf {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    /* Corrección para textos dentro de la tabla en modo oscuro */
+    #modalTarjeta table, #modalTarjeta td, #modalTarjeta th,
+    #modalRegistro table, #modalRegistro td, #modalRegistro th {
+        color: #000000 !important;
+        border-color: #000000 !important;
+    }
+    

@@ -1,0 +1,149 @@
+
+    .manual-sections { display:flex; flex-direction:column; gap:9px; }
+    .manual-sections details { border:1px solid var(--border-light); border-radius:11px; background:var(--surface); overflow:hidden; }
+    .manual-sections summary { padding:13px 15px; cursor:pointer; font-weight:750; color:var(--text-main); }
+    .manual-sections details > div { padding:13px 16px; border-top:1px solid var(--border-light); color:var(--text-muted); line-height:1.55; font-size:.92rem; }
+    body.dark-mode * { color: #e2e8f0 !important; border-color: #334155 !important; }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #020617 !important; color: #fff !important; }
+    body.dark-mode .btn, body.dark-mode .status-badge { color: inherit !important; }
+
+/* El acceso siempre usa una tarjeta clara, aunque el navegador recuerde modo oscuro. */
+#modalAuth .card,
+body.dark-mode #modalAuth .card {
+    background:#ffffff !important;
+    color:#111827 !important;
+    border-color:#d1d5db !important;
+}
+#modalAuth h2,
+body.dark-mode #modalAuth h2 { color:#4f46e5 !important; }
+#modalAuth .offline-info,
+body.dark-mode #modalAuth .offline-info { background:#e2e8f0 !important; border-color:#94a3b8 !important; }
+#modalAuth .access-info,
+body.dark-mode #modalAuth .access-info { background:#dcfce7 !important; border-color:#86efac !important; }
+#modalAuth .offline-info *,
+body.dark-mode #modalAuth .offline-info * { color:#0f172a !important; }
+#modalAuth .access-info *,
+body.dark-mode #modalAuth .access-info * { color:#064e3b !important; }
+#modalAuth #mEnter,
+body.dark-mode #modalAuth #mEnter { background:#4f46e5 !important; color:#ffffff !important; }
+#modalAuth p[onclick="handleForgotPwd()"],
+body.dark-mode #modalAuth p[onclick="handleForgotPwd()"] { color:#4f46e5 !important; }
+
+#modalIndependentNotice .card,
+body.dark-mode #modalIndependentNotice .card { background:#ffffff !important; color:#111827 !important; border-color:#d1d5db !important; }
+#modalIndependentNotice .card p,
+#modalIndependentNotice .card label,
+#modalIndependentNotice .card span,
+body.dark-mode #modalIndependentNotice .card p,
+body.dark-mode #modalIndependentNotice .card label,
+body.dark-mode #modalIndependentNotice .card span { color:#334155 !important; }
+#modalIndependentNotice .card h2,
+body.dark-mode #modalIndependentNotice .card h2 { color:#4f46e5 !important; }
+#modalIndependentNotice .btn,
+body.dark-mode #modalIndependentNotice .btn { background:#4f46e5 !important; color:#ffffff !important; }
+
+#modalBackupImportChoice .card,
+body.dark-mode #modalBackupImportChoice .card { background:#ffffff !important; color:#111827 !important; border-color:#d1d5db !important; }
+#modalBackupImportChoice h2,
+body.dark-mode #modalBackupImportChoice h2 { color:#4f46e5 !important; }
+#modalBackupImportChoice p,
+#modalBackupImportChoice small,
+#modalBackupImportChoice #backupImportSummary,
+body.dark-mode #modalBackupImportChoice p,
+body.dark-mode #modalBackupImportChoice small,
+body.dark-mode #modalBackupImportChoice #backupImportSummary { color:#334155 !important; }
+#modalBackupImportChoice #backupImportSummary,
+body.dark-mode #modalBackupImportChoice #backupImportSummary { background:#f8fafc !important; border-color:#e2e8f0 !important; }
+#modalBackupImportChoice .btn.primary,
+body.dark-mode #modalBackupImportChoice .btn.primary { background:#4f46e5 !important; color:#ffffff !important; }
+#modalBackupImportChoice .btn.info,
+body.dark-mode #modalBackupImportChoice .btn.info { background:#0284c7 !important; color:#ffffff !important; }
+
+/* El campo de acceso debe conservar alto contraste en móvil y modo oscuro. */
+#modalAuth #mPwd,
+body.dark-mode #modalAuth #mPwd {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    caret-color: #4f46e5 !important;
+    border: 2px solid #94a3b8 !important;
+    color-scheme: light;
+}
+#modalAuth #mPwd:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.22) !important;
+}
+#modalAuth #mPwd::placeholder {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    opacity: 1;
+}
+#modalAuth #mPwd:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #111827 !important;
+}
+/* Centra el contenido del login */
+#modalAuth {
+    justify-content: center !important;
+    align-items: center !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* Ocultar scrollbar (pero mantener scroll) SOLO en el login */
+#modalAuth .card{
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge viejo */
+}
+#modalAuth .card::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}
+
+/* LOGIN: que siempre quepa sin scroll */
+#modalAuth .card{
+  width: min(360px, 92vw);
+  padding: clamp(14px, 2.2vh, 22px) !important;
+}
+
+@media (max-width: 640px){
+  #modalAuth { padding:12px !important; }
+  #modalAuth .card { width:min(360px, 94vw); max-width:94vw; }
+  #modalAuth .card > div:first-child { width:52px !important; height:52px !important; margin-bottom:12px !important; }
+  #modalAuth h2 { font-size:1.5rem !important; margin:10px 0 14px !important; }
+  #modalAuth .card > div:nth-of-type(2) { gap:10px !important; margin-bottom:14px !important; }
+  #modalAuth .info-card { padding:11px !important; gap:9px !important; }
+  #modalAuth #mPwd { margin-bottom:16px !important; padding:11px !important; }
+  #modalAuth #mEnter { padding:13px !important; }
+  #modalAuth p[onclick="handleForgotPwd()"] { margin-top:14px !important; }
+}
+
+/* Reduce tamaños cuando la pantalla es baja */
+@media (max-height: 720px){
+  #modalAuth .card{ padding: 14px !important; }
+  #modalAuth h1, #modalAuth h2, #modalAuth .title{
+    font-size: 22px !important;
+    margin: 8px 0 !important;
+  }
+  #modalAuth .info-card{
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+  }
+  #modalAuth #mPwd{
+    padding: 10px 12px !important;
+    margin-top: 10px !important;
+  }
+  #modalAuth #mEnter{
+    padding: 12px !important;
+    margin-top: 12px !important;
+  }
+  #modalAuth p[onclick*="Forgot"], 
+  #modalAuth p[onclick*="forgot"], 
+  #modalAuth .forgot{
+    margin-top: 10px !important;
+  }
+}
+
+/* Pantallas MUY bajitas */
+@media (max-height: 620px){
+  #modalAuth .info-card{ display: none !important; } /* opcional: oculta las 2 tarjetas informativas */
+}
