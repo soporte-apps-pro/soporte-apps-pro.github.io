@@ -85,6 +85,32 @@
         <p onclick="handleForgotPwd()" style="margin-top:20px; font-size:0.85rem; color:var(--primary); cursor:pointer; text-decoration:underline; font-weight:600;">
     ¿Olvidaste tu clave?
 </p>
+        <p onclick="openLoginAccessRequest()" style="margin-top:12px; font-size:0.85rem; color:var(--primary); cursor:pointer; text-decoration:underline; font-weight:700;">
+            Conectar este dispositivo / solicitar acceso
+        </p>
+    </div>
+</div>
+<div id="modalLoginAccessRequest" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:10010; align-items:center; justify-content:center; padding:20px;">
+    <div class="card" style="width:100%; max-width:410px; padding:26px; background:white; border-radius:15px; position:relative;">
+        <button class="btn ghost" type="button" onclick="closeLoginAccessRequest()" style="position:absolute; right:12px; top:10px; border:none; font-size:1.4rem; padding:2px 9px;">&times;</button>
+        <h2 style="margin:0 35px 8px 0; color:var(--primary);">Solicitar acceso</h2>
+        <p style="font-size:.86rem; color:var(--text-muted); line-height:1.45;">Pega la llave de conexión que te envió el administrador. Después, este dispositivo aparecerá en la lista de solicitudes pendientes.</p>
+        <label for="loginAccessToken">Llave de conexión</label>
+        <textarea id="loginAccessToken" rows="3" autocomplete="off" placeholder="Pega aquí la llave..." style="width:100%; resize:vertical;"></textarea>
+        <label for="loginAccessDeviceName" style="margin-top:10px;">Nombre del dispositivo</label>
+        <input id="loginAccessDeviceName" type="text" maxlength="60" placeholder="Ejemplo: PC Secretaría">
+        <label for="loginAccessRole" style="margin-top:10px;">Tipo de acceso</label>
+        <select id="loginAccessRole" onchange="toggleLoginAccessGroup()">
+            <option value="admin">Administrador</option>
+            <option value="group">Encargado de grupo</option>
+            <option value="guest">Invitado</option>
+        </select>
+        <div id="loginAccessGroupWrap" style="display:none; margin-top:10px;">
+            <label for="loginAccessGroup">Número de grupo</label>
+            <input id="loginAccessGroup" type="number" min="1" inputmode="numeric" placeholder="Ejemplo: 1">
+        </div>
+        <div id="loginAccessStatus" style="font-size:.8rem; color:var(--text-muted); min-height:20px; margin:12px 0 4px;"></div>
+        <button id="btnLoginAccessRequest" class="btn primary" type="button" onclick="submitLoginAccessRequest()" style="width:100%;">CONECTAR Y SOLICITAR</button>
     </div>
 </div>
 <div id="modalBackupDeviceNotice" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:10007; align-items:center; justify-content:center; padding:20px;">
@@ -1419,6 +1445,59 @@
         }
     };
 
+    window.openLoginAccessRequest = function() {
+        const savedName = localStorage.getItem('cong_pro_device_name') || '';
+        if ($('#loginAccessDeviceName')) $('#loginAccessDeviceName').value = savedName;
+        if ($('#loginAccessStatus')) $('#loginAccessStatus').textContent = '';
+        $('#modalLoginAccessRequest').style.display = 'flex';
+    };
+
+    window.closeLoginAccessRequest = function() {
+        $('#modalLoginAccessRequest').style.display = 'none';
+    };
+
+    window.toggleLoginAccessGroup = function() {
+        $('#loginAccessGroupWrap').style.display = $('#loginAccessRole').value === 'group' ? 'block' : 'none';
+    };
+
+    window.submitLoginAccessRequest = async function() {
+        const token = $('#loginAccessToken').value.trim();
+        const deviceName = $('#loginAccessDeviceName').value.trim().slice(0,60);
+        const role = $('#loginAccessRole').value;
+        const group = role === 'group' ? $('#loginAccessGroup').value.trim() : null;
+        const status = $('#loginAccessStatus');
+        const button = $('#btnLoginAccessRequest');
+        if (!token) return alert('Pega primero la llave de conexión.');
+        if (!deviceName) return alert('Escribe un nombre para reconocer este dispositivo.');
+        if (role === 'group' && (!group || Number(group) < 1)) return alert('Indica un número de grupo válido.');
+
+        button.disabled = true;
+        button.textContent = 'CONECTANDO...';
+        status.textContent = 'Conectando este dispositivo con Firebase…';
+        try {
+            const data = JSON.parse(atob(token));
+            if (!data.k || !data.p) throw new Error('La llave de conexión está incompleta.');
+            localStorage.setItem(CRED_KEY,JSON.stringify({ apiKey:data.k, projectId:data.p }));
+            localStorage.setItem('cong_pro_device_name',deviceName);
+            window.cloudConnectionPromise = window.connectFirebase(data.k,data.p);
+            const connected = await window.cloudConnectionPromise;
+            if (!connected) throw new Error('No fue posible conectar con la Nube.');
+            await refreshSecureDeviceAccess();
+            if (window.cloudAccess?.active) {
+                status.textContent = '✅ Este dispositivo ya está autorizado. Actualiza la página e ingresa.';
+                return;
+            }
+            const requested = await registerSecureDeviceRequest(role,group,deviceName);
+            if (requested) status.textContent = '✅ Solicitud enviada. El administrador debe aprobarla desde un dispositivo autorizado.';
+        } catch (error) {
+            console.error('Solicitud de acceso desde el inicio:',error);
+            status.textContent = `❌ ${error.message || 'No se pudo enviar la solicitud.'}`;
+        } finally {
+            button.disabled = false;
+            button.textContent = 'CONECTAR Y SOLICITAR';
+        }
+    };
+
     window.requestBackupAdminAccess = async function() {
         const status = $('#backupSecureRequestStatus');
         if (!window.cloudConnected) return alert('Primero conecta este celular con la llave.');
@@ -2128,11 +2207,13 @@ window.processCanonicalExcelInput = function(input) {
         }
     };
 
-    async function registerSecureDeviceRequest(role, group = null) {
+    async function registerSecureDeviceRequest(role, group = null, suppliedDeviceName = null) {
         if (!window.cloudConnected || !db || !window.firebaseUserUid || window.cloudAccess?.active) return;
         const deviceCode = window.firebaseUserUid.slice(-6).toUpperCase();
         const savedDeviceName = localStorage.getItem('cong_pro_device_name') || '';
-        const requestedDeviceName = prompt('Escribe un nombre para reconocer este dispositivo.\n\nEjemplo: Juan - Samsung A15', savedDeviceName);
+        const requestedDeviceName = suppliedDeviceName == null
+            ? prompt('Escribe un nombre para reconocer este dispositivo.\n\nEjemplo: Juan - Samsung A15', savedDeviceName)
+            : suppliedDeviceName;
         if (requestedDeviceName === null) return;
         const deviceName = requestedDeviceName.trim().slice(0,60);
         if (!deviceName) return alert('Escribe un nombre breve para identificar el dispositivo.');
@@ -2148,8 +2229,10 @@ window.processCanonicalExcelInput = function(input) {
                 requestedAt:new Date().toISOString()
             });
             alert(`🔐 DISPOSITIVO PENDIENTE\n\nNombre: ${deviceName}\nCódigo: ${deviceCode}\n\nEl administrador debe abrir Ajustes > Revisar dispositivos pendientes y aprobar este dispositivo antes de activar las reglas seguras.`);
+            return true;
         } catch (error) {
             console.error('Solicitud de acceso seguro:',error);
+            throw error;
         }
     }
 
