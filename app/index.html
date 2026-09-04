@@ -368,7 +368,7 @@
                 </div>
             </div>
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.0 • Web/App</span>
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.1 • Web/App</span>
                 
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
@@ -840,7 +840,7 @@
     };
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
-    const APP_VERSION = "1.6.0";
+    const APP_VERSION = "1.6.1";
     window.versionBlocked = false;
     // ... debajo de const CICLO_S88 ...
 
@@ -2552,7 +2552,10 @@ window.processCanonicalExcelInput = function(input) {
         (window.unsubscribeAdminDivided || []).forEach(unsubscribe => unsubscribe());
         window.unsubscribeAdminDivided = [];
         const fragments = { ready:new Set(), personas:[], activity:{}, attendance:{}, observations:[], config:null, extra:{} };
-        let integrityValidated = false;
+        // La copia ya fue verificada al crear sistema/migracion. El documento
+        // legado es un respaldo histórico: después de activar el almacenamiento
+        // dividido sus cantidades pueden diferir por cambios legítimos.
+        let integrityValidated = splitStorageEnabled();
         let integrityChecking = false;
 
         const applyCompleteState = async () => {
@@ -2889,6 +2892,38 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     if (enforceVersionPolicy()) return alert('Debes actualizar la aplicación antes de ingresar.');
     console.log("🔵 Intentando acceder...");
     await refreshSecureDeviceAccess();
+
+    // En un navegador autorizado no se debe validar contra la copia local antes
+    // de que Firebase entregue la configuración vigente. Es especialmente
+    // importante en un PC nuevo, cuya caché puede contener la clave inicial.
+    if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'admin') {
+        const enterButton = document.getElementById('mEnter');
+        const previousLabel = enterButton?.textContent || 'ENTRAR AL SISTEMA';
+        if (enterButton) {
+            enterButton.disabled = true;
+            enterButton.textContent = 'CARGANDO DATOS...';
+        }
+        try {
+            if (!db || !window.fbGetDoc || !window.fbDoc) {
+                throw new Error('La conexión segura todavía no está lista.');
+            }
+            const configSnapshot = await window.fbGetDoc(window.fbDoc(db,'configuracion','general'));
+            if (!configSnapshot.exists()) {
+                throw new Error('No se encontró la configuración de acceso en la Nube.');
+            }
+            window.state.config = JSON.parse(JSON.stringify(configSnapshot.data().values || {}));
+            state.config = window.state.config;
+        } catch (error) {
+            console.error('No se pudo cargar la configuración antes de ingresar:',error);
+            alert(`⚠️ No se pudo comprobar la clave.\n\n${error.message || 'Revisa la conexión e inténtalo nuevamente.'}`);
+            return;
+        } finally {
+            if (enterButton) {
+                enterButton.disabled = false;
+                enterButton.textContent = previousLabel;
+            }
+        }
+    }
     if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'group') {
         startAuthorizedGroupSync(window.cloudAccess.group);
     }
@@ -5376,7 +5411,7 @@ window.toggleConnection = async function() {
                 <details><summary>12. Inf-Visita Circuito · Guardar observaciones</summary><div>Registra fecha, nombre del superintendente y observaciones; pulsa <b>Guardar</b>. Usa <b>Editar</b> para corregir o <b>Eliminar</b> para borrar una observación.</div></details>
             </div>
             <div style="margin-top:16px; padding:12px; border-radius:10px; background:var(--bg-body); color:var(--text-muted); font-size:.88rem;"><b>Ajustes:</b> administra nube, accesos, grupos y respaldos. Al importar un respaldo total, usa <b>Restaurar copia completa</b> para recuperar también la asistencia; <b>Fusionar publicadores e informes</b> conserva la base actual y no incorpora asistencia. Consulta también <b>Uso independiente y privacidad</b>: la app no es oficial, el desarrollador no recibe los datos y el usuario debe estar autorizado para tratar información de terceros. Para migrar, carga cualquier Excel, relaciona sus columnas, revisa la vista previa y confirma. La plantilla es opcional y la app omite informes del mes en curso o futuros. En Android, al crear un respaldo elige dónde guardarlo o compartirlo y verifica el archivo.</div>
-            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.0</small></div>
+            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.1</small></div>
         </div>
 
         <div style="display:none; padding:0; overflow-y:auto; flex:1; background:var(--surface);">
@@ -5604,7 +5639,7 @@ window.toggleConnection = async function() {
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.0</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.1</span>
             </div>
         </div>
     </div>
