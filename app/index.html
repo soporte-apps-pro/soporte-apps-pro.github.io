@@ -2033,7 +2033,7 @@ window.processCanonicalExcelInput = function(input) {
         const storedCreds = localStorage.getItem(CRED_KEY);
         if(storedCreds) {
             const creds = JSON.parse(storedCreds);
-            connectFirebase(creds.apiKey, creds.projectId);
+            window.cloudConnectionPromise = window.connectFirebase(creds.apiKey, creds.projectId);
         }
     }
 
@@ -2891,6 +2891,30 @@ window.confirmNewAdminPwd = async function() {
 window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     if (enforceVersionPolicy()) return alert('Debes actualizar la aplicación antes de ingresar.');
     console.log("🔵 Intentando acceder...");
+
+    // init() inicia Firebase en segundo plano. Si el usuario pulsa Entrar antes
+    // de que termine, esperamos esa misma conexión para no validar una clave
+    // local desactualizada.
+    if (window.cloudConnectionPromise) {
+        const enterButton = document.getElementById('mEnter');
+        const previousLabel = enterButton?.textContent || 'ENTRAR AL SISTEMA';
+        if (enterButton) {
+            enterButton.disabled = true;
+            enterButton.textContent = 'CONECTANDO...';
+        }
+        try {
+            const connected = await window.cloudConnectionPromise;
+            if (!connected) throw new Error('No fue posible conectar con la Nube.');
+        } catch (error) {
+            alert(`⚠️ No se pudo comprobar la clave.\n\n${error.message || 'Revisa la conexión e inténtalo nuevamente.'}`);
+            return;
+        } finally {
+            if (enterButton) {
+                enterButton.disabled = false;
+                enterButton.textContent = previousLabel;
+            }
+        }
+    }
     await refreshSecureDeviceAccess();
 
     // En un navegador autorizado no se debe validar contra la copia local antes
