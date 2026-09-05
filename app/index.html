@@ -781,9 +781,18 @@
         </section>
 
         <section id="sacados" class="tab admin-only">
-            <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha sacado</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
-            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--primary)">🚚 Trasladados a otra congregación</span> <span id="cTrasladados" class="count-badge">0</span></h3><p style="color:var(--text-muted); margin-top:-5px;">Estas fichas y sus informes históricos se conservan, pero ya no cuentan como miembros actuales.</p><div class="table-container"><table class="table" id="tblTrasladados"><thead><tr><th>Nombre</th><th>Grupo anterior</th><th>Fecha de traslado</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
-            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--text-muted)">🕊️ Fallecidos</span> <span id="cFallecidos" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblFallecidos"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha de fallecimiento</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card">
+                <h3 style="margin-bottom:8px;">Historial de salidas</h3>
+                <p style="color:var(--text-muted); margin-top:0;">Selecciona una categoría para consultar sus registros.</p>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;">
+                    <button id="btnExitTrasladados" class="btn ghost" type="button" aria-expanded="false" onclick="toggleExitHistory('trasladados')">🚚 Trasladados <span id="cTrasladados" class="count-badge">(0)</span></button>
+                    <button id="btnExitSacados" class="btn ghost" type="button" aria-expanded="false" onclick="toggleExitHistory('sacados')">🚫 Sacados <span id="cSac" class="count-badge">(0)</span></button>
+                    <button id="btnExitFallecidos" class="btn ghost" type="button" aria-expanded="false" onclick="toggleExitHistory('fallecidos')">🕊️ Fallecidos <span id="cFallecidos" class="count-badge">(0)</span></button>
+                </div>
+            </div>
+            <div id="exitPanelTrasladados" class="card" style="display:none; margin-top:20px;"><h3 style="color:var(--primary)">🚚 Trasladados a otra congregación</h3><p style="color:var(--text-muted); margin-top:-5px;">Estas fichas y sus informes históricos se conservan, pero ya no cuentan como miembros actuales.</p><div class="table-container"><table class="table" id="tblTrasladados"><thead><tr><th>Nombre</th><th>Grupo anterior</th><th>Fecha de traslado</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
+            <div id="exitPanelSacados" class="card" style="display:none; margin-top:20px;"><h3 style="color:var(--danger)">🚫 Lista de Sacados</h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha sacado</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
+            <div id="exitPanelFallecidos" class="card" style="display:none; margin-top:20px;"><h3 style="color:var(--text-muted)">🕊️ Fallecidos</h3><div class="table-container"><table class="table" id="tblFallecidos"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha de fallecimiento</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
         <section id="inactivos" class="tab">
@@ -4197,6 +4206,30 @@ window.updatePassword = async function() {
     inputGuest.value = '';
     document.getElementById('modalPwd').style.display = 'none';
 };
+
+    window.toggleExitHistory = function(category) {
+        const panels = {
+            trasladados: $('#exitPanelTrasladados'),
+            sacados: $('#exitPanelSacados'),
+            fallecidos: $('#exitPanelFallecidos')
+        };
+        const buttons = {
+            trasladados: $('#btnExitTrasladados'),
+            sacados: $('#btnExitSacados'),
+            fallecidos: $('#btnExitFallecidos')
+        };
+        const target = panels[category];
+        if (!target) return;
+        const shouldOpen = target.style.display === 'none' || !target.style.display;
+        Object.keys(panels).forEach(key => {
+            const isOpen = key === category && shouldOpen;
+            if (panels[key]) panels[key].style.display = isOpen ? 'block' : 'none';
+            if (buttons[key]) {
+                buttons[key].setAttribute('aria-expanded', String(isOpen));
+                buttons[key].className = isOpen ? 'btn primary' : 'btn ghost';
+            }
+        });
+    };
 
 // window.renderSacados = function(){ ... (Esto NO lo borres, es lo que sigue)
     window.renderSacados=function(){
