@@ -16,6 +16,7 @@
     <script src="vendor/dexie-4.2.1.js"></script>
     <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/responsive.css">
+<style>body.guest-mode .download-action{display:none!important}</style>
 </head>
 <body>
 
@@ -94,9 +95,11 @@
     <div class="card" style="width:100%; max-width:410px; padding:26px; background:white; border-radius:15px; position:relative;">
         <button class="btn ghost" type="button" onclick="closeLoginAccessRequest()" style="position:absolute; right:12px; top:10px; border:none; font-size:1.4rem; padding:2px 9px;">&times;</button>
         <h2 style="margin:0 35px 8px 0; color:var(--primary);">Solicitar acceso</h2>
-        <p style="font-size:.86rem; color:var(--text-muted); line-height:1.45;">Pega la llave de conexión que te envió el administrador. Después, este dispositivo aparecerá en la lista de solicitudes pendientes.</p>
-        <label for="loginAccessToken">Llave de conexión</label>
-        <textarea id="loginAccessToken" rows="3" autocomplete="off" placeholder="Pega aquí la llave..." style="width:100%; resize:vertical;"></textarea>
+        <p id="loginAccessInstructions" style="font-size:.86rem; color:var(--text-muted); line-height:1.45;">Pega la llave de conexión que te envió el administrador. Después, este dispositivo aparecerá en la lista de solicitudes pendientes.</p>
+        <div id="loginAccessTokenWrap">
+            <label for="loginAccessToken">Llave de conexión</label>
+            <textarea id="loginAccessToken" rows="3" autocomplete="off" placeholder="Pega aquí la llave..." style="width:100%; resize:vertical;"></textarea>
+        </div>
         <label for="loginAccessDeviceName" style="margin-top:10px;">Nombre del dispositivo</label>
         <input id="loginAccessDeviceName" type="text" maxlength="60" placeholder="Ejemplo: PC Secretaría">
         <label for="loginAccessRole" style="margin-top:10px;">Tipo de acceso</label>
@@ -640,7 +643,7 @@
                 <div class="member-list-layout">
                     <div class="member-toolbar" id="memberAdminToolbar">
                         <div><label>Listado para descargar</label><select id="memberListGroup"></select></div>
-                        <button class="btn success" onclick="downloadGroupMemberList()" style="width:100%;">Descargar listado Excel</button>
+                        <button class="btn success download-action" onclick="downloadGroupMemberList()" style="width:100%;">Descargar listado Excel</button>
                         <p>Incluye activos, inactivos e irregulares actuales. Se excluyen sacados, fallecidos y trasladados.</p>
                     </div>
                     <div id="memberStatsTotals" class="member-stats-grid"></div>
@@ -734,7 +737,7 @@
                     <div id="s21InputIndiv"><label>Buscar Persona</label><input id="s21Search" list="pList" placeholder="Escribe nombre..."></div>
                     <div id="s21InputGroup" style="display:none;"><label>Grupo</label><select id="s21GroupSel" class="dynamic-group-select"></select></div>
                     <div><label>Año Servicio</label><select id="s21Year" style="font-weight:bold;"></select></div>
-                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="previewS21()">👁️ Ver</button><button id="btnPdfS21" class="btn success" onclick="downloadPDFS21()">📥 PDF</button></div>
+                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="previewS21()">👁️ Ver</button><button id="btnPdfS21" class="btn success download-action" onclick="downloadPDFS21()">📥 PDF</button></div>
                 </div>
                 <div id="preview-viewport"></div>
             </div>
@@ -745,7 +748,7 @@
                 <h3>📈 Registro de Asistencia</h3>
                 <div class="admin-tools-grid">
                  <div><label>Año Servicio</label><select id="s88Year" style="font-weight:bold;"></select></div>
-                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="renderS88Preview()">👁️ Ver</button><button class="btn success" onclick="generatePDF('s88')">📥 PDF</button></div>
+                    <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="renderS88Preview()">👁️ Ver</button><button class="btn success download-action" onclick="generatePDF('s88')">📥 PDF</button></div>
                 </div>
                 <div id="s88-preview-viewport"></div>
             </div>
@@ -764,7 +767,7 @@
                 <div id="s10Content"></div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; justify-content:flex-end;">
                     <button id="btnCloseS10" class="btn warning" onclick="closeS10AnnualReport()">Cerrar informe anual</button>
-                    <button id="btnPdfS10" class="btn success" onclick="downloadS10PDF()">Descargar PDF</button>
+                    <button id="btnPdfS10" class="btn success download-action" onclick="downloadS10PDF()">Descargar PDF</button>
                 </div>
             </div>
         </section>
@@ -1468,8 +1471,20 @@
 
     window.openLoginAccessRequest = function() {
         const savedName = localStorage.getItem('cong_pro_device_name') || '';
+        let hasSavedConnection = false;
+        try {
+            const savedConnection = JSON.parse(localStorage.getItem(CRED_KEY) || 'null');
+            hasSavedConnection = Boolean(savedConnection?.apiKey && savedConnection?.projectId);
+        } catch (error) {
+            hasSavedConnection = false;
+        }
         if ($('#loginAccessDeviceName')) $('#loginAccessDeviceName').value = savedName;
         if ($('#loginAccessStatus')) $('#loginAccessStatus').textContent = '';
+        if ($('#loginAccessTokenWrap')) $('#loginAccessTokenWrap').style.display = hasSavedConnection ? 'none' : 'block';
+        if ($('#loginAccessInstructions')) $('#loginAccessInstructions').textContent = hasSavedConnection
+            ? 'Este dispositivo ya conserva la conexión con la Nube. Elige el acceso que necesitas y envía la solicitud.'
+            : 'Pega la llave de conexión que te envió el administrador. Después, este dispositivo aparecerá en la lista de solicitudes pendientes.';
+        if ($('#btnLoginAccessRequest')) $('#btnLoginAccessRequest').textContent = hasSavedConnection ? 'SOLICITAR ACCESO' : 'CONECTAR Y SOLICITAR';
         $('#modalLoginAccessRequest').style.display = 'flex';
     };
 
@@ -1483,12 +1498,13 @@
 
     window.submitLoginAccessRequest = async function() {
         const token = $('#loginAccessToken').value.trim();
+        const savedConnection = localStorage.getItem(CRED_KEY);
         const deviceName = $('#loginAccessDeviceName').value.trim().slice(0,60);
         const role = $('#loginAccessRole').value;
         const group = role === 'group' ? $('#loginAccessGroup').value.trim() : null;
         const status = $('#loginAccessStatus');
         const button = $('#btnLoginAccessRequest');
-        if (!token) return alert('Pega primero la llave de conexión.');
+        if (!token && !savedConnection) return alert('Pega primero la llave de conexión.');
         if (!deviceName) return alert('Escribe un nombre para reconocer este dispositivo.');
         if (role === 'group' && (!group || Number(group) < 1)) return alert('Indica un número de grupo válido.');
 
@@ -1496,17 +1512,29 @@
         button.textContent = 'CONECTANDO...';
         status.textContent = 'Conectando este dispositivo con Firebase…';
         try {
-            const data = JSON.parse(atob(token));
-            if (!data.k || !data.p) throw new Error('La llave de conexión está incompleta.');
-            localStorage.setItem(CRED_KEY,JSON.stringify({ apiKey:data.k, projectId:data.p }));
+            const data = token ? JSON.parse(atob(token)) : JSON.parse(savedConnection);
+            const apiKey = data.k || data.apiKey;
+            const projectId = data.p || data.projectId;
+            if (!apiKey || !projectId) throw new Error('La conexión guardada está incompleta.');
+            localStorage.setItem(CRED_KEY,JSON.stringify({ apiKey, projectId }));
             localStorage.setItem('cong_pro_device_name',deviceName);
-            window.cloudConnectionPromise = window.connectFirebase(data.k,data.p);
-            const connected = await window.cloudConnectionPromise;
+            if (!window.cloudConnected && !window.cloudConnectionPromise) {
+                window.cloudConnectionPromise = window.connectFirebase(apiKey,projectId);
+            }
+            const connected = window.cloudConnected || await window.cloudConnectionPromise;
             if (!connected) throw new Error('No fue posible conectar con la Nube.');
             await refreshSecureDeviceAccess();
             if (window.cloudAccess?.active) {
-                status.textContent = '✅ Este dispositivo ya está autorizado. Actualiza la página e ingresa.';
-                return;
+                if (hasCloudRole('admin') || hasCloudRole(role)) {
+                    status.textContent = hasCloudRole('admin')
+                        ? '✅ Este dispositivo ya es administrador. Puede entrar también como encargado o invitado usando la clave correspondiente.'
+                        : '✅ Este dispositivo ya tiene autorizado ese acceso. Puede ingresar con la clave correspondiente.';
+                    return;
+                }
+                if (role !== 'guest') {
+                    status.textContent = '⚠️ Para conservar el acceso actual, solo se puede añadir aquí el modo Invitado.';
+                    return;
+                }
             }
             const requested = await registerSecureDeviceRequest(role,group,deviceName);
             if (requested) status.textContent = '✅ Solicitud enviada. El administrador debe aprobarla desde un dispositivo autorizado.';
@@ -1515,7 +1543,7 @@
             status.textContent = `❌ ${error.message || 'No se pudo enviar la solicitud.'}`;
         } finally {
             button.disabled = false;
-            button.textContent = 'CONECTAR Y SOLICITAR';
+            button.textContent = localStorage.getItem(CRED_KEY) ? 'SOLICITAR ACCESO' : 'CONECTAR Y SOLICITAR';
         }
     };
 
@@ -2158,6 +2186,16 @@ window.processCanonicalExcelInput = function(input) {
     // ==========================================
     window.cloudConnected = false;
 
+    function cloudAccessRoles(access = window.cloudAccess) {
+        const roles = Array.isArray(access?.roles) ? [...access.roles] : [];
+        if (access?.role) roles.push(access.role);
+        return [...new Set(roles.filter(role => ['admin','group','guest'].includes(role)))];
+    }
+
+    function hasCloudRole(role, access = window.cloudAccess) {
+        return Boolean(access?.active && cloudAccessRoles(access).includes(role));
+    }
+
     function updateSecureDeviceStatus() {
         const box = $('#secureDeviceStatus');
         if (!box) return;
@@ -2167,8 +2205,9 @@ window.processCanonicalExcelInput = function(input) {
         }
         const shortId = `${window.firebaseUserUid.slice(0,6)}…${window.firebaseUserUid.slice(-5)}`;
         if (window.cloudAccess?.active) {
-            const role = window.cloudAccess.role === 'admin' ? 'Administrador autorizado' :
-                window.cloudAccess.role === 'group' ? `Encargado autorizado · Grupo ${window.cloudAccess.group}` : 'Acceso autorizado';
+            const roles = cloudAccessRoles().map(role => role === 'admin' ? 'Administrador' :
+                role === 'group' ? `Encargado · Grupo ${window.cloudAccess.group}` : 'Invitado');
+            const role = `${roles.join(' + ')} autorizado`;
             const deviceName = window.cloudAccess.deviceName ? ` · ${window.cloudAccess.deviceName}` : '';
             box.textContent = `✅ ${role}${deviceName} · Dispositivo ${shortId}`;
             box.style.color = '#166534';
@@ -2229,7 +2268,9 @@ window.processCanonicalExcelInput = function(input) {
     };
 
     async function registerSecureDeviceRequest(role, group = null, suppliedDeviceName = null) {
-        if (!window.cloudConnected || !db || !window.firebaseUserUid || window.cloudAccess?.active) return;
+        if (!window.cloudConnected || !db || !window.firebaseUserUid) return;
+        if (hasCloudRole('admin') || hasCloudRole(role)) return;
+        if (window.cloudAccess?.active && role !== 'guest') return alert('Solo se puede añadir el acceso de invitado sin reemplazar el rol actual.');
         const deviceCode = window.firebaseUserUid.slice(-6).toUpperCase();
         const savedDeviceName = localStorage.getItem('cong_pro_device_name') || '';
         const requestedDeviceName = suppliedDeviceName == null
@@ -2289,16 +2330,23 @@ window.processCanonicalExcelInput = function(input) {
         const recognizableName = request.deviceName || request.deviceCode;
         if (!confirm(`¿Autorizar "${recognizableName}" como ${description}?\n\nCódigo: ${request.deviceCode}`)) return;
         try {
-            await window.fbSetDoc(window.fbDoc(db,'accesos',uid),{
-                role:request.requestedRole,
-                group:request.group,
-                groupNumber:request.group == null ? null : Number(request.group),
+            const accessReference = window.fbDoc(db,'accesos',uid);
+            const currentSnapshot = await window.fbGetDoc(accessReference);
+            const currentAccess = currentSnapshot.exists() ? currentSnapshot.data() : null;
+            const roles = cloudAccessRoles(currentAccess);
+            if (!roles.includes(request.requestedRole)) roles.push(request.requestedRole);
+            const keepsExistingRole = Boolean(currentAccess?.active);
+            await window.fbSetDoc(accessReference,{
+                role:keepsExistingRole ? currentAccess.role : request.requestedRole,
+                roles,
+                group:keepsExistingRole ? (currentAccess.group ?? null) : request.group,
+                groupNumber:keepsExistingRole ? (currentAccess.groupNumber ?? null) : (request.group == null ? null : Number(request.group)),
                 deviceName:request.deviceName || '',
                 deviceCode:request.deviceCode || uid.slice(-6).toUpperCase(),
                 active:true,
                 approvedAt:new Date().toISOString(),
                 approvedBy:window.firebaseUserUid
-            });
+            },{ merge:true });
             await window.fbDeleteDoc(window.fbDoc(db,'solicitudes_acceso',uid));
             if (request.requestedRole === 'admin' && uid !== window.firebaseUserUid) {
                 localStorage.setItem(BACKUP_DEVICE_CONFIRMED_KEY,'true');
@@ -2324,7 +2372,7 @@ window.processCanonicalExcelInput = function(input) {
             }
             container.innerHTML = devices.map(device => {
                 const isSelf = device.uid === window.firebaseUserUid;
-                const role = device.role === 'admin' ? 'Administrador' : device.role === 'group' ? `Encargado · Grupo ${escapeHTML(device.group)}` : 'Invitado';
+                const role = cloudAccessRoles(device).map(item => item === 'admin' ? 'Administrador' : item === 'group' ? `Encargado · Grupo ${escapeHTML(device.group)}` : 'Invitado').join(' + ');
                 const code = device.deviceCode || device.uid.slice(-6).toUpperCase();
                 const action = isSelf ? '<small style="color:#166534;">Este dispositivo</small>' : `<button class="btn danger" style="width:100%; margin-top:7px;" onclick="revokeSecureAccess('${safeInlineId(device.uid)}')">Revocar acceso</button>`;
                 const deviceName = device.deviceName ? escapeHTML(device.deviceName) : 'Sin nombre asignado';
@@ -2805,8 +2853,61 @@ window.processCanonicalExcelInput = function(input) {
         });
     }
 
+    function startAuthorizedGuestSync() {
+        if (!db || !window.fbOnSnapshot || !window.fbCollection) return;
+        (window.unsubscribeGuestSync || []).forEach(unsubscribe => unsubscribe());
+        window.unsubscribeGuestSync = [];
+        const guestData = { ready:new Set(), personas:[], activity:{}, attendance:{}, observations:[], config:null };
+        const applyGuestView = () => {
+            if (guestData.ready.size < 5) return;
+            state = {
+                ...state,
+                personas:JSON.parse(JSON.stringify(guestData.personas)),
+                activity:JSON.parse(JSON.stringify(guestData.activity)),
+                attendance:JSON.parse(JSON.stringify(guestData.attendance)),
+                s303Observaciones:JSON.parse(JSON.stringify(guestData.observations)),
+                config:JSON.parse(JSON.stringify(guestData.config || state.config || {}))
+            };
+            window.state = state;
+            rebuildCalculatedMemberEvents();
+            renderAll();
+        };
+        const listenCollection = (name,onData) => {
+            const unsubscribe = window.fbOnSnapshot(window.fbCollection(db,name),snapshot => {
+                onData(snapshot.docs.map(item => item.data()));
+                guestData.ready.add(name);
+                applyGuestView();
+            },error => console.error(`Lectura de invitado (${name}):`,error));
+            window.unsubscribeGuestSync.push(unsubscribe);
+        };
+        listenCollection('publicadores',documents => { guestData.personas = documents; });
+        listenCollection('informes',documents => {
+            const activity = {};
+            documents.forEach(report => {
+                if (!report.month || !report.personId) return;
+                if (!activity[report.month]) activity[report.month] = {};
+                activity[report.month][String(report.personId)] = report;
+            });
+            guestData.activity = activity;
+        });
+        listenCollection('asistencia',documents => {
+            guestData.attendance = Object.fromEntries(documents.filter(item => item.month).map(item => [item.month,item.values || {}]));
+        });
+        listenCollection('observaciones_visita',documents => { guestData.observations = documents; });
+        const configUnsubscribe = window.fbOnSnapshot(window.fbDoc(db,'configuracion','general'),snapshot => {
+            guestData.config = snapshot.exists() ? (snapshot.data().values || {}) : {};
+            guestData.ready.add('configuracion/general');
+            applyGuestView();
+        },error => console.error('Lectura de invitado (configuración):',error));
+        window.unsubscribeGuestSync.push(configUnsubscribe);
+    }
+
     function startRealtimeSync() {
         if(!db || !window.fbOnSnapshot) return;
+        if (splitStorageEnabled() && hasCloudRole('guest') && !hasCloudRole('admin')) {
+            startAuthorizedGuestSync();
+            return;
+        }
         if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role === 'group') {
             startAuthorizedGroupSync(window.cloudAccess.group);
             return;
@@ -3021,6 +3122,20 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     }
     await refreshSecureDeviceAccess();
 
+    // Un invitado aprobado necesita la configuración vigente para validar su
+    // clave, pero su sincronización posterior es exclusivamente de lectura.
+    if (splitStorageEnabled() && hasCloudRole('guest') && !hasCloudRole('admin')) {
+        try {
+            const guestConfigSnapshot = await window.fbGetDoc(window.fbDoc(db,'configuracion','general'));
+            if (!guestConfigSnapshot.exists()) throw new Error('No se encontró la configuración de acceso en la Nube.');
+            window.state.config = JSON.parse(JSON.stringify(guestConfigSnapshot.data().values || {}));
+            state.config = window.state.config;
+        } catch (error) {
+            console.error('No se pudo cargar la configuración para el invitado:',error);
+            return alert('⚠️ No se pudo comprobar la clave de invitado. Revisa la conexión e inténtalo nuevamente.');
+        }
+    }
+
     // En un navegador autorizado no se debe validar contra la copia local antes
     // de que Firebase entregue la configuración vigente. Es especialmente
     // importante en un PC nuevo, cuya caché puede contener la clave inicial.
@@ -3098,7 +3213,8 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     const guestKey = (window.state.config && window.state.config.guestPwd) ? window.state.config.guestPwd : 'visita';
 
     if (hashedInput === guestKey || pwd === guestKey) { 
-        if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role !== 'guest') {
+        if (splitStorageEnabled() && window.cloudAccess?.active &&
+            !hasCloudRole('guest') && !hasCloudRole('admin')) {
             return alert('Este dispositivo está autorizado para otro rol.');
         }
         console.log("🟢 Acceso concedido como Invitado");
@@ -3139,7 +3255,7 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
     }
 
     if (foundGroup) {
-        if (splitStorageEnabled() && window.cloudAccess?.active &&
+        if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role !== 'admin' &&
             (window.cloudAccess.role !== 'group' || String(window.cloudAccess.group) !== String(foundGroup))) {
             return alert(`Este dispositivo solo está autorizado para el Grupo ${window.cloudAccess.group || ''}.`);
         }
@@ -4817,6 +4933,7 @@ window.renderEstadoEspiritual = function() {
     }
     
     window.downloadPDFS21 = async function() { 
+    if (currentSession?.role === 'guest') return alert('🔒 El modo invitado es únicamente de lectura y no permite descargar archivos.');
     const el = document.getElementById('preview-viewport');
     if(!el.innerHTML) return alert("Ver primero");
 
@@ -5192,6 +5309,7 @@ window.renderS88Preview = function() {
         </div>`; 
     };    
     window.generatePDF = function() { 
+    if (currentSession?.role === 'guest') return alert('🔒 El modo invitado es únicamente de lectura y no permite descargar archivos.');
     const el = document.getElementById('s88-preview-viewport');
     if(!el) return;
 
