@@ -394,7 +394,7 @@
                 </div>
             </div>
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.1 • Web/App</span>
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.2 • Web/App</span>
                 
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
@@ -536,7 +536,7 @@
             <button data-tab="s88" class="admin-only">7. Registro Asistencia</button>
             <button data-tab="s10" class="admin-only">8. S-10 anual</button>
             <button data-tab="resumen" class="admin-only">9. Resumen</button>
-            <button data-tab="sacados" class="admin-only" style="color:var(--danger)">10. Sacados</button>
+            <button data-tab="sacados" class="admin-only" style="color:var(--danger)">10. Historial de salidas</button>
             <button data-tab="inactivos" id="tabInactiveReports" style="color:var(--warning)">11. Inactivos</button>
             <button data-tab="s303" class="admin-only">12. Inf-Visita Circuito</button>
         </div>
@@ -641,7 +641,7 @@
                     <div class="member-toolbar" id="memberAdminToolbar">
                         <div><label>Listado para descargar</label><select id="memberListGroup"></select></div>
                         <button class="btn success" onclick="downloadGroupMemberList()" style="width:100%;">Descargar listado Excel</button>
-                        <p>Incluye activos, inactivos e irregulares. Solo se excluyen los sacados.</p>
+                        <p>Incluye activos, inactivos e irregulares actuales. Se excluyen sacados, fallecidos y trasladados.</p>
                     </div>
                     <div id="memberStatsTotals" class="member-stats-grid"></div>
                     <div id="memberStatsDetail" style="display:none;"></div>
@@ -782,6 +782,7 @@
 
         <section id="sacados" class="tab admin-only">
             <div class="card"><h3><span style="color:var(--danger)">🚫 Lista de Sacados</span> <span id="cSac" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblSacados"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha sacado</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="card" style="margin-top:20px;"><h3><span style="color:var(--primary)">🚚 Trasladados a otra congregación</span> <span id="cTrasladados" class="count-badge">0</span></h3><p style="color:var(--text-muted); margin-top:-5px;">Estas fichas y sus informes históricos se conservan, pero ya no cuentan como miembros actuales.</p><div class="table-container"><table class="table" id="tblTrasladados"><thead><tr><th>Nombre</th><th>Grupo anterior</th><th>Fecha de traslado</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
             <div class="card" style="margin-top:20px;"><h3><span style="color:var(--text-muted)">🕊️ Fallecidos</span> <span id="cFallecidos" class="count-badge">0</span></h3><div class="table-container"><table class="table" id="tblFallecidos"><thead><tr><th>Nombre</th><th>Fecha Bautismo</th><th>Fecha de fallecimiento</th><th>Acción</th></tr></thead><tbody></tbody></table></div></div>
         </section>
 
@@ -866,7 +867,7 @@
     };
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
-    const APP_VERSION = "1.6.1";
+    const APP_VERSION = "1.6.2";
     window.versionBlocked = false;
     // ... debajo de const CICLO_S88 ...
 
@@ -965,6 +966,12 @@
     };
 
     const INITIAL_ENTRY_EVENT_TYPES = ['ingreso', 'registro_inicial', 'nuevo_publicador', 'traslado'];
+    function isTransferred(person) {
+        return Boolean(person?.trasladado || person?.fechaTraslado);
+    }
+    function isCurrentMember(person) {
+        return Boolean(person) && !person.sacado && !person.fallecido && !isTransferred(person);
+    }
     const isEntryEventType = type => INITIAL_ENTRY_EVENT_TYPES.includes(type);
 
     function addMemberEvent(person, type, date, origin = 'registrado', note = '') {
@@ -1024,7 +1031,7 @@
             if (!candidates.length) return;
 
             let key = candidates.sort()[0];
-            const exitKey = String(person.fsac || person.sacado || '').slice(0, 7);
+            const exitKey = String(person.fechaTraslado || person.fsac || person.sacado || '').slice(0, 7);
             const exitMonths = new Set(person.eventos.filter(event => event.type === 'salida').map(event => String(event.date).slice(0, 7)));
             const returnMonths = new Set(person.eventos.filter(event => event.type === 'reactivacion' && event.origin !== 'calculado').map(event => String(event.date).slice(0, 7)));
             let missing = 0;
@@ -1081,7 +1088,12 @@
         rebuildCalculatedMemberEvents();
         const events = Array.isArray(person.eventos) ? [...person.eventos].sort((a,b) => String(b.date).localeCompare(String(a.date))) : [];
         box.innerHTML = `<label style="font-weight:bold; display:block; margin-bottom:6px;">Historial de eventos</label>${events.length
-            ? events.map(event => `<div style="padding:5px 0; border-top:1px solid var(--border-light);"><b>${escapeHTML(event.date)}</b> · ${escapeHTML(EVENT_LABELS[event.type] || event.type)}${event.origin === 'calculado' ? ' <small>(calculado)</small>' : ''}</div>`).join('')
+            ? events.map(event => {
+                const eventLabel = event.type === 'salida' && event.origin === 'traslado'
+                    ? 'Se trasladó a otra congregación'
+                    : (EVENT_LABELS[event.type] || event.type);
+                return `<div style="padding:5px 0; border-top:1px solid var(--border-light);"><b>${escapeHTML(event.date)}</b> · ${escapeHTML(eventLabel)}${event.origin === 'calculado' ? ' <small>(calculado)</small>' : ''}</div>`;
+            }).join('')
             : '<small>Todavía no hay eventos registrados.</small>'}`;
     }
 
@@ -3360,7 +3372,7 @@ window.renderActividad = function() {
 
     // 4. GENERAR TABLA
     const k = ymKey(actY, actM);
-    const list = state.personas.filter(p => p.grupo == g && !p.sacado && !p.fallecido).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+    const list = state.personas.filter(p => p.grupo == g && isCurrentMember(p)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
     
     const cEl = document.getElementById('cAct'); if(cEl) cEl.innerText = `Publicadores: ${list.length}`;
     const regularPioneers = list.filter(person => person.pr).length;
@@ -3736,15 +3748,30 @@ window.renderActividad = function() {
             $('#s21Year').value = getServiceYear();
             previewS21();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert('Revisa o descarga la tarjeta. Cuando termines, vuelve a Gestión, edita la ficha y pulsa nuevamente "Traslado a otra congregación" para eliminarla.');
+            alert('Revisa o descarga la tarjeta. Cuando termines, vuelve a Gestión, edita la ficha y pulsa nuevamente "Traslado a otra congregación" para archivarla sin borrar su historial.');
             return;
         }
-        if (!confirm(`¿Confirmas que ${person.nombre} se trasladó a otra congregación y deseas eliminar definitivamente su ficha y sus informes?`)) return;
-        purgePersonRecord(id);
+        const todayKey = new Date().toISOString().slice(0,10);
+        const requestedDate = prompt(
+            `TRASLADO DE ${person.nombre}\n\nEscribe la fecha efectiva del traslado en formato AAAA-MM-DD:`,
+            todayKey
+        );
+        if (requestedDate === null) return;
+        const transferDate = requestedDate.trim();
+        const parsedTransferDate = new Date(`${transferDate}T12:00:00`);
+        if (!/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(transferDate) || Number.isNaN(parsedTransferDate.getTime()) || parsedTransferDate.toISOString().slice(0,10) !== transferDate) {
+            return alert('❌ Escribe una fecha válida en formato AAAA-MM-DD.');
+        }
+        if (transferDate > todayKey) return alert('❌ La fecha del traslado no puede ser futura.');
+        if (person.inicio && transferDate.slice(0,7) < person.inicio) return alert('❌ El traslado no puede ser anterior al ingreso de la persona.');
+        if (!confirm(`¿Confirmas que ${person.nombre} se trasladó el ${transferDate}?\n\nLa ficha y todos sus informes anteriores se conservarán. Dejará de aparecer como miembro actual.`)) return;
+        person.trasladado = true;
+        person.fechaTraslado = transferDate;
+        addMemberEvent(person, 'salida', transferDate, 'traslado', 'Traslado a otra congregación');
         await save();
         renderAll();
         resetPForm();
-        showToast('✅ Ficha trasladada y eliminada');
+        showToast('✅ Traslado archivado; historial conservado');
     };
     
 window.resetPForm = function() { 
@@ -3768,7 +3795,7 @@ window.resetPForm = function() {
     }    
     window.renderMiembros = function() { 
         const isGroup = currentSession && currentSession.role === 'group';
-        const list = state.personas.filter(p => !p.sacado && !p.fallecido && (!isGroup || String(p.grupo) === String(currentSession.group))).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+        const list = state.personas.filter(p => isCurrentMember(p) && (!isGroup || String(p.grupo) === String(currentSession.group))).sort((a,b)=>a.nombre.localeCompare(b.nombre));
         const cEl = $('#cGen'); if(cEl) cEl.innerText = `(${list.length})`;
         const title = $('#memberListTitle'); if (title) title.innerText = isGroup ? `📖 Resumen del Grupo ${currentSession.group}` : '📖 Lista General';
         const toolbar = $('#memberAdminToolbar'); if (toolbar) toolbar.style.display = isGroup ? 'none' : '';
@@ -3805,7 +3832,7 @@ window.resetPForm = function() {
         const today = new Date();
         const isGroup = currentSession && currentSession.role === 'group';
         const group = isGroup ? currentSession.group : null;
-        const members = state.personas.filter(person => !person.sacado && !person.fallecido && (!isGroup || String(person.grupo) === String(group)));
+        const members = state.personas.filter(person => isCurrentMember(person) && (!isGroup || String(person.grupo) === String(group)));
         const totalPioneers = members.filter(person => person.pr).length;
         const totalInactive = members.filter(person => getInactivityInfo(person, today).inactive).length;
         const totalIrregular = members.filter(person => getIrregularMonths(person, today).length > 0).length;
@@ -3817,7 +3844,7 @@ window.resetPForm = function() {
         const box = $('#memberStatsDetail');
         if (!box) return;
         const today = new Date();
-        const members = state.personas.filter(person => !person.sacado && !person.fallecido);
+        const members = state.personas.filter(isCurrentMember);
         const titles = { publishers:'Publicadores', pioneers:'Precursores regulares', inactive:'Inactivos', irregular:'Irregulares', groups:'Resumen por grupo' };
         if (type === 'groups') {
             const totalGroups = state.config.totalGroups || 5;
@@ -3857,7 +3884,7 @@ window.resetPForm = function() {
         if (currentSession && currentSession.role === 'group') group = currentSession.group;
         const today = new Date();
         const titles = { publishers:'Publicadores', pioneers:'Precursores regulares', inactive:'Inactivos', irregular:'Irregulares' };
-        let selected = state.personas.filter(person => !person.sacado && !person.fallecido && String(person.grupo) === String(group));
+        let selected = state.personas.filter(person => isCurrentMember(person) && String(person.grupo) === String(group));
         if (type === 'pioneers') selected = selected.filter(person => person.pr);
         if (type === 'inactive') selected = selected.filter(person => getInactivityInfo(person, today).inactive);
         if (type === 'irregular') selected = selected.filter(person => getIrregularMonths(person, today).length > 0);
@@ -3879,7 +3906,7 @@ window.resetPForm = function() {
         if (!window.isAdmin()) return;
         if (typeof XLSX === 'undefined') return alert('No se pudo cargar el generador de Excel. Verifica la conexión e inténtalo nuevamente.');
         const selection = $('#memberListGroup').value;
-        const activeMembers = state.personas.filter(person => !person.sacado && !person.fallecido);
+        const activeMembers = state.personas.filter(isCurrentMember);
         const members = activeMembers
             .filter(person => selection === 'all' || (selection === 'pioneers' ? person.pr : String(person.grupo) === String(selection)))
             .sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -3977,7 +4004,7 @@ window.editP = (id) => {
     // 3. CAMBIAR ESTADO DE BOTONES
     $('#btnCancelEdit').style.display = 'inline-flex';
     $('#btnDeleteP').style.display = 'inline-flex';
-    $('#btnTransferOut').style.display = (!p.sacado && !p.fallecido) ? 'inline-flex' : 'none';
+    $('#btnTransferOut').style.display = isCurrentMember(p) ? 'inline-flex' : 'none';
     $('#btnSaveP').textContent = '💾 Actualizar';
     $('#btnSaveP').className = 'btn success';
 
@@ -4174,18 +4201,50 @@ window.updatePassword = async function() {
 // window.renderSacados = function(){ ... (Esto NO lo borres, es lo que sigue)
     window.renderSacados=function(){
         const tb=$('#tblSacados tbody');if(!tb)return;tb.innerHTML='';
-        const list = state.personas.filter(p=>p.sacado && !p.fallecido);
+        const list = state.personas.filter(p=>p.sacado && !p.fallecido && !isTransferred(p));
         const cEl = $('#cSac'); if(cEl) cEl.innerText = `(${list.length})`;
         list.forEach(p=>{
             const safeId = safeInlineId(p.id);
             const exitDisplay = p.salidaPendiente ? 'Pendiente de fecha' : (p.fsac || '-');
             tb.innerHTML+=`<tr><td>${escapeHTML(p.nombre)}</td><td>${escapeHTML(p.bau||'-')}</td><td style="color:var(--danger)">${escapeHTML(exitDisplay)}</td><td><button class="btn ghost" style="padding:6px 10px; font-size:0.8rem;" onclick="editP(decodeURIComponent('${safeId}'))">Editar</button> <button class="btn success" style="padding:6px 10px; font-size:0.8rem;" onclick="reactivatePerson(decodeURIComponent('${safeId}'))">↩️ Reactivar</button></td></tr>`;
         });
+        const transferredBody = $('#tblTrasladados tbody');
+        const transferred = state.personas.filter(isTransferred).sort((a,b) => a.nombre.localeCompare(b.nombre));
+        if (transferredBody) transferredBody.innerHTML = transferred.length ? transferred.map(person => {
+            const safeId = safeInlineId(person.id);
+            return `<tr><td>${escapeHTML(person.nombre)}</td><td>G${escapeHTML(person.grupo || '-')}</td><td>${escapeHTML(person.fechaTraslado || '-')}</td><td><button class="btn ghost" style="padding:6px 10px; font-size:0.8rem;" onclick="editP(decodeURIComponent('${safeId}'))">Ver ficha</button> <button class="btn success" style="padding:6px 10px; font-size:0.8rem;" onclick="reactivateTransferredPerson(decodeURIComponent('${safeId}'))">↩️ Regresó</button></td></tr>`;
+        }).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay registros.</td></tr>';
+        const transferredCount = $('#cTrasladados'); if (transferredCount) transferredCount.innerText = `(${transferred.length})`;
         const deceasedBody = $('#tblFallecidos tbody');
         const deceased = state.personas.filter(person => person.fallecido || person.fallecimiento).sort((a,b) => a.nombre.localeCompare(b.nombre));
         if (deceasedBody) deceasedBody.innerHTML = deceased.length ? deceased.map(person => { const safeId = safeInlineId(person.id); return `<tr><td>${escapeHTML(person.nombre)}</td><td>${escapeHTML(person.bau || '-')}</td><td>${escapeHTML(person.fallecimiento || '-')}</td><td><button class="btn ghost" style="padding:6px 10px; font-size:0.8rem;" onclick="editP(decodeURIComponent('${safeId}'))">Editar</button></td></tr>`; }).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay registros.</td></tr>';
         const deceasedCount = $('#cFallecidos'); if (deceasedCount) deceasedCount.innerText = `(${deceased.length})`;
     }
+
+    window.reactivateTransferredPerson = async function(id) {
+        if (!window.isAdmin()) return;
+        const person = state.personas.find(item => String(item.id) === String(id));
+        if (!person || !isTransferred(person)) return alert('❌ No se encontró la persona trasladada.');
+        const now = new Date();
+        const currentMonth = ymKey(now.getFullYear(), now.getMonth() + 1);
+        const requestedMonth = prompt(
+            `REGRESO DE ${person.nombre}\n\nEscribe el mes de regreso en formato AAAA-MM:`,
+            currentMonth
+        );
+        if (requestedMonth === null) return;
+        const returnMonth = requestedMonth.trim();
+        const transferMonth = String(person.fechaTraslado || '').slice(0,7);
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(returnMonth)) return alert('❌ Usa el formato AAAA-MM.');
+        if (returnMonth > currentMonth) return alert('❌ El regreso no puede ser futuro.');
+        if (transferMonth && returnMonth < transferMonth) return alert('❌ El regreso no puede ser anterior al traslado.');
+        if (!confirm(`¿Confirmas que ${person.nombre} regresó en ${returnMonth}?\n\nSe conservará todo el historial anterior.`)) return;
+        person.trasladado = false;
+        person.fechaTraslado = '';
+        addMemberEvent(person, 'reactivacion', returnMonth, 'registrado', 'Regreso después de traslado a otra congregación');
+        await save();
+        renderAll();
+        showToast('✅ Persona reactivada; historial conservado');
+    };
 
     window.reactivatePerson = async function(id) {
         if (!window.isAdmin()) return;
@@ -4317,7 +4376,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
     // 3. OBTENER DATOS
     if (!state || !state.personas) return;
     const list = state.personas.filter(p =>
-        !p.sacado && !p.fallecido && (
+        isMemberInS10Month(p, selectedMonthKey) && (
             wasRegularPioneer(p, anioDelMesSeleccionado, curM + 1) ||
             state.activity[selectedMonthKey]?.[p.id]?.pa
         )
@@ -4475,7 +4534,7 @@ window.renderEstadoEspiritual = function() {
         let countIna = 0, countFal = 0, countIrr = 0;
         
         const visiblePeople = state.personas.filter(p =>
-            !p.sacado && !p.fallecido && (currentSession.role !== 'group' || p.grupo == currentSession.group)
+            isCurrentMember(p) && (currentSession.role !== 'group' || p.grupo == currentSession.group)
         );
         visiblePeople.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{
             
@@ -4634,7 +4693,7 @@ window.renderEstadoEspiritual = function() {
     </div>`; 
 };
 
-    window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && !p.sacado && !p.fallecido);} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&!p.sacado&&!p.fallecido);} else {l=state.personas.filter(p=>!p.sacado&&!p.fallecido);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
+    window.previewS21 = function() { const m=$('#s21Mode').value; let l=[]; if(m==='individual'){const n=$('#s21Search').value; const p=state.personas.find(x=>x.nombre===n); if(p)l=[p];} else if(m==='group'){l=state.personas.filter(p=>p.grupo==$('#s21GroupSel').value && isCurrentMember(p));} else if(m==='pr'){l=state.personas.filter(p=>p.pr&&isCurrentMember(p));} else {l=state.personas.filter(isCurrentMember);} $('#preview-viewport').innerHTML=l.map(p=>getS21HTML(p,parseInt($('#s21Year').value))).join(''); }
 
     async function downloadAllS21PageByPage(el) {
         const cards = Array.from(el.querySelectorAll('.print-canvas'));
@@ -4814,13 +4873,23 @@ window.renderEstadoEspiritual = function() {
                 if (event.type === 'salida' || event.type === 'fallecimiento') isMember = false;
                 if (isEntryEventType(event.type) || event.type === 'reactivacion') isMember = true;
             });
-        const currentExit = String(person.fsac || person.sacado || '').slice(0, 7);
+        const currentExit = String(person.fechaTraslado || person.fsac || person.sacado || '').slice(0, 7);
         if (currentExit && currentExit <= key && !events.some(event => event.type === 'reactivacion' && String(event.date).slice(0, 7) >= currentExit && String(event.date).slice(0, 7) <= key)) {
             isMember = false;
         }
         const deathMonth = String(person.fallecimiento || '').slice(0, 7);
         if (deathMonth && deathMonth <= key) isMember = false;
         return isMember;
+    }
+
+    function wasActiveInMonth(person, key) {
+        for (let offset = 0; offset < 6; offset++) {
+            const candidate = addMonthsToKey(key, -offset);
+            if (!isMemberInS10Month(person, candidate)) continue;
+            const report = state.activity[candidate]?.[person.id];
+            if (report && (Number(report.horas) > 0 || report.part)) return true;
+        }
+        return false;
     }
 
     function getS10Attendance(serviceYear, type) {
@@ -5149,13 +5218,12 @@ window.renderS88Preview = function() {
         const viewDate = `${y}-${String(m).padStart(2,'0')}`;
 
         state.personas.forEach(p=>{
-            if(p.sacado || p.fallecido) return;
-
-            // 2. SI LA FECHA DEL RESUMEN ES ANTERIOR A SU LLEGADA, NO CUENTA 🛑
-            if(p.inicio && viewDate < p.inicio) return;
+            // La pertenencia se evalúa en el mes consultado, no por el estado
+            // actual. Así un traslado posterior no modifica meses ya cerrados.
+            if (!isMemberInS10Month(p, viewDate)) return;
 
             tM++; // Sumamos al total de publicadores
-            if (!getInactivityInfo(p).inactive) activos++;
+            if (wasActiveInMonth(p, viewDate)) activos++;
             const r=act[p.id]||{}; if(r.horas>0||r.part){ const h=parseFloat(r.horas||0), e=parseInt(r.est||0); if(wasRegularPioneer(p,y,m)){prC++;prH+=h;prE+=e;} else if(r.pa){paC++;paH+=h;paE+=e;} else{pubC++;pubE+=e;} } 
         }); 
         const avgES=att.es.filter(n=>n>0).length?Math.round(att.es.reduce((a,b)=>a+b,0)/att.es.filter(n=>n>0).length):0; 
@@ -5504,7 +5572,7 @@ window.toggleConnection = async function() {
         <div style="padding:20px; overflow-y:auto; flex:1; background:var(--surface);">
             <p style="margin:0 0 14px; color:var(--text-muted);">Toca una sección para ver sus acciones principales.</p>
             <div class="manual-sections">
-                <details><summary>1. Gestión · Crear y actualizar fichas</summary><div><b>Nuevo:</b> escribe nombres, primer apellido y, si tiene, segundo apellido; completa grupo, mes y tipo de ingreso y pulsa <b>Guardar miembro</b>. Elige <b>Nuevo publicador</b> o <b>Traslado</b>. Si es traslado, registra los informes anteriores cuando la app lo pregunte.<br><b>Editar:</b> busca la persona, abre su ficha y pulsa <b>Actualizar</b>. En registros anteriores, distribuye manualmente el nombre y los apellidos cuando aparezca el aviso azul. <b>Cancelar edición</b> descarta cambios no guardados.<br><b>Bajas:</b> usa Fecha sacado para conservarlo en Sacados; Fecha de fallecimiento para archivarlo en Fallecidos; o <b>Traslado a otra congregación</b> para revisar su tarjeta y eliminar la ficha.</div></details>
+                <details><summary>1. Gestión · Crear y actualizar fichas</summary><div><b>Nuevo:</b> escribe nombres, primer apellido y, si tiene, segundo apellido; completa grupo, mes y tipo de ingreso y pulsa <b>Guardar miembro</b>. Elige <b>Nuevo publicador</b> o <b>Traslado</b>. Si es traslado, registra los informes anteriores cuando la app lo pregunte.<br><b>Editar:</b> busca la persona, abre su ficha y pulsa <b>Actualizar</b>. En registros anteriores, distribuye manualmente el nombre y los apellidos cuando aparezca el aviso azul. <b>Cancelar edición</b> descarta cambios no guardados.<br><b>Bajas:</b> usa Fecha sacado para conservarlo en Sacados; Fecha de fallecimiento para archivarlo en Fallecidos; o <b>Traslado a otra congregación</b> para archivarlo sin borrar su ficha ni sus informes.</div></details>
                 <details><summary>2. Lista General · Consultar miembros</summary><div>Consulta publicadores activos y totales por grupo. Usa los contadores para ver publicadores, precursores, inactivos o irregulares. El administrador puede abrir <b>Editar</b> y descargar listados por grupo, precursores o toda la congregación.</div></details>
                 <details><summary>3. Informes · Registrar actividad mensual</summary><div>Selecciona grupo, mes y año. Marca participación y registra horas, cursos, precursor auxiliar y notas. Pulsa <b>Guardar</b>. El mes anterior permanece disponible hasta el día 20; solo el administrador puede desbloquear meses cerrados. Si aparecen datos en el mes en curso o en un mes futuro, el administrador puede desbloquearlo para corregirlos o eliminarlos, pero no crear informes nuevos.</div></details>
                 <details><summary>4. Asistencia · Registrar reuniones</summary><div>Selecciona mes y año, escribe la asistencia de cada reunión de entre semana y fin de semana, y pulsa <b>Guardar asistencia</b>. Estos datos alimentan el Registro S-88 y el informe anual S-10.</div></details>
@@ -5513,12 +5581,12 @@ window.toggleConnection = async function() {
                 <details><summary>7. Registro Asistencia · Generar S-88</summary><div>Selecciona el año de servicio y pulsa <b>Ver</b>. Comprueba los promedios mensuales registrados en Asistencia y usa <b>PDF</b> para descargar el registro.</div></details>
                 <details><summary>8. S-10 anual · Preparar el informe</summary><div>Selecciona el año de servicio, registra territorios sin abarcar y pulsa <b>Calcular informe</b>. Corrige datos faltantes antes de <b>Cerrar informe anual</b>; al cerrarlo, sus cifras quedan conservadas. Descárgalo en PDF y envíalo por JW Hub antes del 20 de septiembre.</div></details>
                 <details><summary>9. Resumen · Analizar un mes</summary><div>Selecciona mes y año y pulsa <b>Analizar datos</b>. Consulta totales y resultados mensuales para revisar que los informes estén completos.</div></details>
-                <details><summary>10. Sacados · Conservar bajas y fallecidos</summary><div><b>Sacados:</b> consulta fecha e historial; usa <b>Editar</b> para corregir datos o <b>Reactivar</b> si vuelve. Si un sacado fallece, edítalo y agrega la fecha de fallecimiento: pasará a Fallecidos sin perder su historial.<br><b>Fallecidos:</b> se conservan aparte y no cuentan como miembros activos.</div></details>
+                <details><summary>10. Historial de salidas</summary><div><b>Sacados:</b> consulta fecha e historial; usa <b>Editar</b> para corregir datos o <b>Reactivar</b> si vuelve.<br><b>Trasladados:</b> se conservan con su fecha, ficha e informes históricos, pero dejan de contar desde el mes del traslado.<br><b>Fallecidos:</b> se conservan aparte y no cuentan como miembros activos.</div></details>
                 <details><summary>11. Inactivos · Detectar seguimiento pendiente</summary><div>Consulta inactivos, informes faltantes dentro del plazo e irregulares. La app calcula estas listas desde el mes real de ingreso; no cuenta meses anteriores a que la persona comenzara o llegara.</div></details>
                 <details><summary>12. Inf-Visita Circuito · Guardar observaciones</summary><div>Registra fecha, nombre del superintendente y observaciones; pulsa <b>Guardar</b>. Usa <b>Editar</b> para corregir o <b>Eliminar</b> para borrar una observación.</div></details>
             </div>
             <div style="margin-top:16px; padding:12px; border-radius:10px; background:var(--bg-body); color:var(--text-muted); font-size:.88rem;"><b>Ajustes:</b> administra nube, accesos, grupos y respaldos. Al importar un respaldo total, usa <b>Restaurar copia completa</b> para recuperar también la asistencia; <b>Fusionar publicadores e informes</b> conserva la base actual y no incorpora asistencia. Consulta también <b>Uso independiente y privacidad</b>: la app no es oficial, el desarrollador no recibe los datos y el usuario debe estar autorizado para tratar información de terceros. Para migrar, carga cualquier Excel, relaciona sus columnas, revisa la vista previa y confirma. La plantilla es opcional y la app omite informes del mes en curso o futuros. En Android, al crear un respaldo elige dónde guardarlo o compartirlo y verifica el archivo.</div>
-            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.1</small></div>
+            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.2</small></div>
         </div>
 
         <div style="display:none; padding:0; overflow-y:auto; flex:1; background:var(--surface);">
@@ -5746,7 +5814,7 @@ window.toggleConnection = async function() {
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.1</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.2</span>
             </div>
         </div>
     </div>
