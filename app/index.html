@@ -397,7 +397,7 @@
                 </div>
             </div>
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.2 • Web/App</span>
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.3 • Web/App</span>
                 
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
@@ -879,7 +879,7 @@
     };
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
-    const APP_VERSION = "1.6.2";
+    const APP_VERSION = "1.6.3";
     window.versionBlocked = false;
     // ... debajo de const CICLO_S88 ...
 
@@ -2545,7 +2545,7 @@ window.processCanonicalExcelInput = function(input) {
     }
 
     async function syncGroupPendingReports() {
-        if (groupSyncRunning || currentSession.role !== 'group' || !window.cloudConnected || !db || !window.fbRunTransaction) return;
+        if (groupSyncRunning || currentSession.role !== 'group' || !window.cloudConnected || !db || !window.fbRunTransaction) return false;
         groupSyncRunning = true;
         let conflicts = 0;
         try {
@@ -2641,6 +2641,8 @@ window.processCanonicalExcelInput = function(input) {
         if (conflicts) {
             alert(`⚠️ NO SE GUARDÓ TU CAMBIO\n\nOtra persona actualizó ${conflicts === 1 ? 'este informe' : 'estos informes'} antes que tú. Para no borrar su información, la aplicación detuvo el guardado.\n\nLa pantalla ya muestra los datos más recientes. Revísalos y vuelve a escribir tu cambio si todavía hace falta.`);
         }
+        return conflicts === 0 && !Object.values(pendingReportChanges).some(change =>
+            change && String(change.group) === String(currentSession.group));
     }
 
     function splitStorageEnabled() {
@@ -2812,7 +2814,9 @@ window.processCanonicalExcelInput = function(input) {
 
         const peopleQuery = window.fbQuery(
             window.fbCollection(db,'publicadores'),
-            window.fbWhere('grupo','==',groupNumber)
+            // Las fichas antiguas usan números; los formularios y las
+            // importaciones también guardan texto. Ambos representan el grupo.
+            window.fbWhere('grupo','in',[groupNumber, groupText])
         );
         const reportsQuery = window.fbQuery(
             window.fbCollection(db,'informes'),
@@ -2973,7 +2977,11 @@ window.processCanonicalExcelInput = function(input) {
             if (window.cloudConnected && db && window.fbSetDoc) {
                 try {
                     if (currentSession.role === 'group') {
-                        await syncGroupPendingReports();
+                        const uploaded = await syncGroupPendingReports();
+                        if (!uploaded) {
+                            if (!silent) showToast('💾 Guardado en este dispositivo. Envío a la Nube sin confirmar.');
+                            return false;
+                        }
                     } else if (currentSession.role === 'admin') {
                         try {
                             await syncSplitShadowState(state);
@@ -3577,6 +3585,9 @@ window.renderActividad = function() {
         if (document.visibilityState === 'hidden') window.flushPendingActivityUpdates();
     });
     window.addEventListener('pagehide',() => window.flushPendingActivityUpdates());
+    window.addEventListener('online',() => {
+        if (currentSession.role === 'group') window.save();
+    });
 
     window.updAct = async (pid, f, v, period = null) => {
         if (!window.canEditActivity(pid)) return;
@@ -5737,7 +5748,7 @@ window.toggleConnection = async function() {
                 <details><summary>12. Inf-Visita Circuito · Guardar observaciones</summary><div>Registra fecha, nombre del superintendente y observaciones; pulsa <b>Guardar</b>. Usa <b>Editar</b> para corregir o <b>Eliminar</b> para borrar una observación.</div></details>
             </div>
             <div style="margin-top:16px; padding:12px; border-radius:10px; background:var(--bg-body); color:var(--text-muted); font-size:.88rem;"><b>Ajustes:</b> administra nube, accesos, grupos y respaldos. Al importar un respaldo total, usa <b>Restaurar copia completa</b> para recuperar también la asistencia; <b>Fusionar publicadores e informes</b> conserva la base actual y no incorpora asistencia. Consulta también <b>Uso independiente y privacidad</b>: la app no es oficial, el desarrollador no recibe los datos y el usuario debe estar autorizado para tratar información de terceros. Para migrar, carga cualquier Excel, relaciona sus columnas, revisa la vista previa y confirma. La plantilla es opcional y la app omite informes del mes en curso o futuros. En Android, al crear un respaldo elige dónde guardarlo o compartirlo y verifica el archivo.</div>
-            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.2</small></div>
+            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.3</small></div>
         </div>
 
         <div style="display:none; padding:0; overflow-y:auto; flex:1; background:var(--surface);">
@@ -5965,7 +5976,7 @@ window.toggleConnection = async function() {
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.2</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.3</span>
             </div>
         </div>
     </div>
