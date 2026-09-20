@@ -619,3 +619,10 @@
         border-color: #000000 !important;
     }
     
+/* Sugerencias en el flujo de la página: nunca cubren el buscador. */
+.name-suggestions { margin-top:8px; border:1px solid var(--border-light); border-radius:10px; background:var(--surface); }
+.name-suggestions[hidden] { display:none; }
+.name-suggestions [role="listbox"] { max-height:180px; overflow-y:auto; overscroll-behavior:contain; }
+.name-suggestion { padding:11px 12px; min-height:44px; box-sizing:border-box; cursor:pointer; color:var(--text-main); overflow-wrap:anywhere; border-bottom:1px solid var(--border-light); }
+.name-suggestion:hover, .name-suggestion[aria-selected="true"] { background:var(--bg-body); color:var(--primary); }
+.name-suggestions-status { padding:8px 12px; font-size:.78rem; color:var(--text-muted); }

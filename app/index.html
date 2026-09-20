@@ -57,9 +57,9 @@
     <div class="card" style="width:min(360px, 92vw); max-width:90%; text-align:center; margin-bottom:0; padding: 40px 20px; max-height: 90vh; overflow-y: auto; max-height: 90vh; overflow-y: auto; padding-bottom: 18px;">
         <div style="background:var(--primary); width:60px; height:60px; border-radius:16px; margin:0 auto 20px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:1.8rem;">🔐</div>
         <h2 style="font-weight:800; margin-bottom:20px; color:var(--primary); font-size: 1.8rem; text-align:center;">Bienvenido</h2>
-        
+
         <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; text-align: left;">
-            
+
             <div class="info-card offline-info" style="background: #e2e8f0; border: 1px solid #94a3b8; border-radius: 12px; padding: 15px; display: flex; gap: 12px; align-items: flex-start;">
                 <span style="font-size: 1.5rem;">✈️</span>
                 <div style="line-height: 1.4;">
@@ -157,7 +157,7 @@
         <button class="btn ghost" onclick="document.getElementById('modalResetPwd').style.display='none'" style="position:absolute; right:15px; top:15px; border:none; font-size:1.5rem; padding:0 10px;">&times;</button>
         <div style="font-size:2.5rem; margin-bottom:15px; margin-top:10px;">🛟</div>
         <h2 style="font-weight:800; color:var(--primary); margin:0;">Recuperar Acceso</h2>
-        
+
         <div id="stepRescue1">
             <p style="font-size:0.9rem; color:var(--text-muted); margin: 15px 0;">Escribe tu <b>frase de rescate</b> secreta.</p>
             <input type="password" id="pTryRescue" autocomplete="current-password" placeholder="Frase de rescate..." style="text-align:center; font-size:1.1rem; margin-bottom:15px; width:100%; padding:12px; border: 1px solid #ccc; border-radius:8px;">
@@ -194,13 +194,13 @@
             <h3 style="margin:0; font-size: 1.2rem;">⚙️ Ajustes</h3>
             <button class="btn ghost" onclick="closeSettings()" style="padding:6px 12px; border-radius:50%; border:none; font-size:1.2rem;">✕</button>
         </div>
-        
+
         <div class="settings-body">
-            
+
             <details id="secConexion" class="settings-group settings-collapsible">
                 <summary>☁️ Conexión, nube y dispositivos</summary>
                 <div style="padding:15px;">
-                    
+
                     <div id="cloudStatusCard" class="status-card offline">
                         <div class="status-icon" id="cloudIcon">⚡</div>
                         <div class="status-text"><h4 id="cloudTitle">Modo Local</h4><p id="cloudDesc">Sin sincronización.</p></div>
@@ -262,6 +262,8 @@
 
                     <div class="admin-only" style="margin-top:15px; padding:14px; border:1px solid #a5b4fc; border-radius:10px; background:#eef2ff;">
                         <b style="display:block; color:#3730a3; margin-bottom:5px;">🛡️ Almacenamiento seguro (preparación)</b>
+                        <p style="font-size:.82rem; color:#4338ca;">¿Es tu primera vez? Abre la guía y empieza por el paso 1 antes de preparar los datos.</p>
+                        <button class="btn ghost" type="button" style="width:100%; margin-bottom:12px;" onclick="openFirebaseWizard()">📖 Configurar Firebase: paso a paso</button>
                         <p style="font-size:.78rem; color:#4338ca; margin:0 0 10px;">Crea la estructura dividida sin borrar ni reemplazar la base actual. Requiere activar primero el acceso anónimo en Firebase Authentication.</p>
                         <details style="margin-bottom:10px;"><summary style="cursor:pointer; color:#3730a3; font-size:.78rem; font-weight:700;">Cómo activar el acceso anónimo</summary><ol style="font-size:.76rem; color:#4338ca; padding-left:20px; line-height:1.5;"><li>Abre tu proyecto en Firebase.</li><li>Ve a <b>Authentication</b> y pulsa <b>Comenzar</b>.</li><li>En <b>Método de acceso</b>, abre <b>Anónimo</b>, actívalo y guarda.</li><li>Regresa aquí y pulsa el botón inferior.</li></ol></details>
                         <button id="btnPrepareSecureStorage" class="btn primary" type="button" onclick="prepareSecureStorageMigration()" style="width:100%;">Preparar y verificar almacenamiento</button>
@@ -279,7 +281,7 @@
             <details id="secRespaldo" class="settings-group settings-collapsible">
                 <summary>💾 Respaldo local</summary>
                 <div style="padding:15px;">
-                    
+
                     <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: 10px; padding: 12px; margin-bottom: 15px; display: flex; gap: 12px; align-items: flex-start;">
                         <span style="font-size: 1.2rem; line-height: 1;">💡</span>
                         <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
@@ -303,7 +305,7 @@
                     <p style="font-size:0.8rem; color:#14532d; margin-bottom:15px;">
                         Importa cualquier Excel y relaciona sus columnas antes de guardar. La plantilla es opcional.
                     </p>
-                    
+
                     <div class="action-row">
                         <button class="icon-btn" onclick="downloadExcelTemplate()" style="border:1px solid #86efac; background:white;">
                             <span style="font-size:1.5rem;">📥</span>
@@ -397,8 +399,8 @@
                 </div>
             </div>
             <div style="padding:15px; text-align:center; margin-top: 10px;">
-                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.3 • Web/App</span>
-                
+                <span style="font-size:0.7rem; color:#94a3b8; display:block; margin-bottom:10px;">v1.6.4 • Web/App</span>
+
                 <button onclick="document.getElementById('modalSupport').style.display='flex'" 
                     style="
                         width: 100%;
@@ -425,7 +427,7 @@
 <div id="modalSupport" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10001; align-items:center; justify-content:center; padding: 20px;">
     <div style="background:white; width:100%; max-width:380px; border-radius:15px; padding:25px; position:relative; text-align:center; font-family: 'Inter', sans-serif;">
         <button class="btn ghost" onclick="document.getElementById('modalSupport').style.display='none'" style="position:absolute; right:15px; top:15px; border:none; background:none; font-size:22px; cursor:pointer;">&times;</button>
-        
+
         <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; border:none;">ℹ️ Acerca de la App</h3>
         <p style="font-size: 0.95rem; margin-bottom: 20px; color: #444;">Tu apoyo voluntario ayuda a mantener este proyecto gratuito y sin anuncios.</p>
 
@@ -451,14 +453,14 @@
 <div id="modalPwd" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10002; align-items:center; justify-content:center;">
     <div class="card" style="width:320px; text-align: center; padding: 25px;">
         <h3 style="margin-top:0;">🔐 Gestión de Claves</h3>
-        
+
         <label style="text-align:left; width:100%; font-size:0.8rem; font-weight:bold;">Administrador (Secretario)</label>
         <input type="password" id="pNew" placeholder="Nueva clave (Opcional)" style="margin-bottom:20px; text-align: center;">
         <input type="password" id="pNewConfirm" placeholder="Repite la nueva clave" style="margin-bottom:20px; text-align: center;">
-        
+
         <div style="text-align:left; border-top:1px dashed #ddd; padding-top:15px; margin-top:5px;">
             <label style="color:#059669; font-size:0.8rem; font-weight:bold;">Invitado (Solo Lectura)</label>
-            
+
             <div style="background:#f0fdf4; padding:8px; border-radius:6px; margin: 5px 0 10px 0; font-size:0.85rem; color:#166534; border:1px solid #bbf7d0;">
                 Clave de invitado: <b id="lblShowGuest">configurada</b>
             </div>
@@ -514,9 +516,9 @@
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <div style="display:flex; gap:5px;">
             <button class="btn ghost" onclick="toggleTheme()" id="btnTheme" style="padding:6px 10px; font-size:1.2rem;" title="Cambiar Tema">🌙</button>
-            
+
             <button class="btn ghost" onclick="document.getElementById('modalManual').style.display='flex'">📘 Guía</button>
-            
+
             <button class="btn ghost" onclick="openSettings()">⚙️ Ajustes</button>
         </div>
 
@@ -578,7 +580,7 @@
                 <div class="admin-tools-grid">
                     <div><label>Fecha Nacimiento</label><input type="date" id="pNac"></div>
                     <div><label>Fecha Bautismo</label><input type="date" id="pBau"></div>
-                    
+
                     <div>
                         <label>Mes de ingreso/reactivación</label>
                         <input type="month" id="pInicio" title="Mes en que comenzó a informar, llegó trasladado o se reactivó. Antes de esta fecha no contará fallas.">
@@ -628,7 +630,7 @@
                     <div style="grid-column: span 2;">
                         <label>Buscar Miembro para Editar</label>
                         <div style="display:flex; gap:10px;">
-                            <input type="search" id="qPersona" list="pList" placeholder="Escribe para buscar..." style="flex:1;">
+                            <input type="search" id="qPersona" autocomplete="off" placeholder="Escribe para buscar..." style="flex:1; min-width:0;">
                             <button class="btn primary" id="btnQEdit">✏️ Editar</button>
                         </div>
                     </div>
@@ -700,7 +702,7 @@
                 </select>
             </div>
             <div>
-                <label>Año</label>
+                <label>Año de servicio</label>
                 <select id="precAno" class="form-control" style="font-weight:bold;"></select>
             </div>
             <div style="display:flex; align-items:flex-end;">
@@ -709,6 +711,8 @@
         </div>
 
         <div class="table-container">
+            <p id="regularMonthLabel" style="color:var(--text-muted);"></p>
+            <p id="regularHistoryNotice" style="color:var(--text-muted);" hidden></p>
             <table class="table" id="tblPrecursores">
            <thead>
     <tr>
@@ -717,7 +721,7 @@
         <th style="text-align:center; width: 30%;">Meta</th>
     </tr>
       </thead>
-           
+
     <tbody></tbody>
 </table></div>
 
@@ -734,7 +738,7 @@
                 <h3>📇 Tarjeta de Publicador</h3>
                 <div class="admin-tools-grid">
                     <div><label>Modo</label><select id="s21Mode" onchange="toggleS21Inputs()"><option value="individual">Individual</option><option value="group">Por Grupo</option><option value="pr">Solo Precursores</option><option value="all">Todos</option></select></div>
-                    <div id="s21InputIndiv"><label>Buscar Persona</label><input id="s21Search" list="pList" placeholder="Escribe nombre..."></div>
+                    <div id="s21InputIndiv"><label>Buscar Persona</label><input id="s21Search" autocomplete="off" placeholder="Escribe nombre..."></div>
                     <div id="s21InputGroup" style="display:none;"><label>Grupo</label><select id="s21GroupSel" class="dynamic-group-select"></select></div>
                     <div><label>Año Servicio</label><select id="s21Year" style="font-weight:bold;"></select></div>
                     <div style="display:flex; align-items:flex-end; gap:10px;"><button class="btn primary" onclick="previewS21()">👁️ Ver</button><button id="btnPdfS21" class="btn success download-action" onclick="downloadPDFS21()">📥 PDF</button></div>
@@ -879,7 +883,7 @@
     };
     const MESES_NOM = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const CICLO_S88 = [9,10,11,12,1,2,3,4,5,6,7,8];
-    const APP_VERSION = "1.6.3";
+    const APP_VERSION = "1.6.4";
     window.versionBlocked = false;
     // ... debajo de const CICLO_S88 ...
 
@@ -1210,7 +1214,10 @@
         const start = person.prInicio || '';
         const end = person.prFin || '';
 
-        // Compatibilidad con fichas antiguas que solo guardaban true/false.
+        // Sin fecha de inicio, el estado actual no debe sobrescribir un
+        // informe histórico que identifica explícitamente el servicio auxiliar.
+        if (!start && state.activity?.[key]?.[person.id]?.pa) return false;
+        // Compatibilidad con fichas antiguas sin más información histórica.
         if (!start && !end) return Boolean(person.pr);
         if (start && key < start) return false;
         if (end && key > end) return false;
@@ -1406,7 +1413,7 @@
         // 2. Si la tiene configurada, procedemos a compartir
         const urlWeb = "https://soporte-apps-pro.github.io/app/";
         const msg = `Hola, puedes usar la App "Congregación Pro" desde tu iPhone o PC entrando aquí:\n${urlWeb}\n\n(Recuerda pedirle la Llave de Acceso al secretario para conectarte).`;
-        
+
         if (navigator.share) {
             navigator.share({
                 title: 'Congregación Pro Web',
@@ -1607,15 +1614,15 @@
         if ($('#backupSecondDeviceSetup')) $('#backupSecondDeviceSetup').style.display = isAuthorizedAdminDevice ? 'none' : 'block';
         updateSecureDeviceStatus();
         refreshSecureDeviceAccess();
-        
+
         const stored = localStorage.getItem(CRED_KEY);
         const isForcedOffline = localStorage.getItem('cong_pro_force_offline') === 'true';
-        
+
         if(stored) {
             const c = JSON.parse(stored);
             $('#fbApiKey').value = c.apiKey; 
             $('#fbProjectId').value = c.projectId;
-            
+
             // Solo pintamos de verde si NO está offline Y la base de datos arrancó
             // PASAMOS "false" PARA NO TOCAR EL HEADER
             if(!isForcedOffline && db) {
@@ -1626,7 +1633,7 @@
         } else { 
             updateCloudUI(false, null, false); 
         }
-        
+
         if (window.isAdmin(false)) loadGroupPassword();
         const splitReady = localStorage.getItem('cong_pro_split_storage_ready');
         if ($('#secureStorageStatus') && splitReady) {
@@ -1688,7 +1695,7 @@
     function updateCloudUI(connected, pid, updateHeader = true) {
         const card = $('#cloudStatusCard'); const title = $('#cloudTitle'); const desc = $('#cloudDesc'); const icon = $('#cloudIcon');
         const badge = $('#headerStatus');
-        
+
         // 1. Actualizar SIEMPRE la tarjeta dentro de Ajustes
         if(connected) { 
             card.className = 'status-card'; icon.innerText = '🟢'; title.innerText = 'Conectado a Nube'; desc.innerText = 'ID: ' + pid; 
@@ -2033,9 +2040,9 @@ window.processCanonicalExcelInput = function(input) {
                     }
                 });
             }
-            
+
             save();
-            
+
             // AQUI ESTA EL TRUCO: renderAll() en vez de reload()
             const errorPreview = errores.length ? `\n\n⚠️ Filas o valores omitidos: ${errores.length}\n${errores.slice(0, 6).join('\n')}${errores.length > 6 ? `\n... y ${errores.length - 6} más.` : ''}` : '';
             alert(`✅ IMPORTACIÓN FINALIZADA\n\n🆕 Nuevos: ${countNuevos}\n✏️ Actualizados: ${countEditados}\n📊 Informes procesados: ${countInformes}\n🚫 Datos del mes en curso o futuros omitidos: ${countMesesOmitidos}${errorPreview}`);
@@ -2051,7 +2058,7 @@ window.processCanonicalExcelInput = function(input) {
     reader.readAsArrayBuffer(file);
     input.value = ''; 
 };
-    
+
     window.init = function() {
         populateSelects(); // <--- ¡IMPORTANTE! Esto llena los huecos vacíos
         document.querySelectorAll('#modalSettings details.settings-collapsible').forEach(section => {
@@ -2082,7 +2089,7 @@ window.processCanonicalExcelInput = function(input) {
 
         // El encabezado (headerYear) se queda con el año calendario para navegar hoy
         if($('#headerYear')) $('#headerYear').value = curY; 
-        
+
         // El informe mensual (actYearInput) también suele ser calendario
         if($('#actMonthSelect')) $('#actMonthSelect').value = actM;
         if($('#actYearInput')) $('#actYearInput').value = actY; 
@@ -2113,7 +2120,7 @@ window.processCanonicalExcelInput = function(input) {
         if($('#asistMonthSelect')) $('#asistMonthSelect').onchange = (e) => { asistM=parseInt(e.target.value); renderAsistInputs(); };
         if($('#asistYearInput')) $('#asistYearInput').onchange = (e) => { asistY=parseInt(e.target.value); renderAsistInputs(); };
         if($('#btnSearchRes')) $('#btnSearchRes').onclick = () => renderResumenMensual(parseInt($('#resYear').value), parseInt($('#resMonth').value));
-        
+
         if($('#btnSaveP')) $('#btnSaveP').onclick = savePersona;
         if($('#btnDeleteP')) $('#btnDeleteP').onclick = deletePersona;
 // Lógica mejorada para el botón EDITAR
@@ -2123,7 +2130,7 @@ window.processCanonicalExcelInput = function(input) {
 
             // Buscamos la persona (ignorando mayúsculas/minúsculas para facilitar)
             const p = state.personas.find(x => x.nombre.toLowerCase() === n.toLowerCase()); 
-            
+
             if(p) { 
                 editP(p.id); 
                 // Aseguramos que se vea el formulario arriba
@@ -2136,7 +2143,7 @@ window.processCanonicalExcelInput = function(input) {
         };
         if($('#btnSaveReports')) $('#btnSaveReports').onclick = () => { if (!window.canWrite()) return; save(); showToast("Guardado ☁️"); };
         if($('#btnSaveAsist')) $('#btnSaveAsist').onclick = () => { if (!window.isAdmin()) return; save(); showToast("Asistencia Guardada"); renderS88Preview(); };
-        
+
         document.querySelectorAll('.tabs button').forEach(b => {
             b.onclick = () => {
                 document.querySelectorAll('.tabs button, .tab').forEach(el=>el.classList.remove('active'));
@@ -2439,13 +2446,13 @@ window.processCanonicalExcelInput = function(input) {
 
         const statusSpan = $('#statusIndicator');
         if(statusSpan) statusSpan.innerHTML = '🟡...';
-        
+
         try {
             // 🚀 MAGIA: Descargamos Firebase oficial solo en este instante
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js");
             const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js");
             const { getFirestore, collection, query, where, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, FieldPath, runTransaction, writeBatch } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-            
+
             // Guardamos las herramientas globalmente para que la app las use
             window.fbDoc = doc; window.fbSetDoc = setDoc; window.fbUpdateDoc = updateDoc; window.fbFieldPath = FieldPath; window.fbOnSnapshot = onSnapshot;
             window.fbRunTransaction = runTransaction;
@@ -2458,7 +2465,7 @@ window.processCanonicalExcelInput = function(input) {
             window.fbWhere = where;
 
             const firebaseConfig = { apiKey: apiKey, authDomain: `${projectId}.firebaseapp.com`, projectId: projectId, storageBucket: `${projectId}.firebasestorage.app` };
-            
+
             if (!app) app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             firebaseAuth = getAuth(app);
@@ -2488,14 +2495,14 @@ window.processCanonicalExcelInput = function(input) {
             } catch (migrationCheckError) {
                 console.warn('No se pudo comprobar la estructura dividida:',migrationCheckError);
             }
-            
+
             startRealtimeSync(); // Iniciamos la escucha de datos
-            
+
             window.cloudConnected = true;
             updateCloudUI(true, projectId, true);
             if($('#modalSettings').style.display === 'flex') showToast("Conectado 🟢");
             return true;
-            
+
         } catch(e) {
             console.error("Error crítico de Firebase:", e);
             window.cloudConnected = false;
@@ -2928,7 +2935,7 @@ window.processCanonicalExcelInput = function(input) {
             startAdminDividedSync();
             return;
         }
-        
+
         window.unsubscribeSync = window.fbOnSnapshot(window.fbDoc(db, "congregacion", "datos_generales"), async (docSnap) => {
             if(docSnap.exists()) {
                 const cloudData = docSnap.data();
@@ -2939,16 +2946,16 @@ window.processCanonicalExcelInput = function(input) {
                 state = mergePendingChangesIntoState(cloudData);
                 if (dividedReports) state.activity = dividedReports;
                 window.state = state;
-                
+
                 if(!state.personas) state.personas = [];
                 if(!state.activity) state.activity = {};
                 if(!state.attendance) state.attendance = {};
                 if(!state.s303Observaciones) state.s303Observaciones = [];
                 if(!state.config) state.config = { pwd: '12345', totalGroups: 5, groups: {} };
                 rebuildCalculatedMemberEvents();
-                
+
                 enforceVersionPolicy();
-                
+
                 try { await saveLocalState(); } catch(e){}
                 renderAll();
                 if (currentSession.role === 'group') syncGroupPendingReports();
@@ -2972,7 +2979,7 @@ window.processCanonicalExcelInput = function(input) {
             rebuildCalculatedMemberEvents();
             // 1. Guardar localmente
             await saveLocalState();
-            
+
             // 2. Subir a la Nube
             if (window.cloudConnected && db && window.fbSetDoc) {
                 try {
@@ -3008,7 +3015,7 @@ window.processCanonicalExcelInput = function(input) {
             alert("Hubo un problema al guardar los datos en tu dispositivo.");
         }
     };
-    
+
 // --- SISTEMA DE RESCATE Y OLVIDO DE CLAVES ---
 window.handleForgotPwd = function() {
     // Si no tienen frase de rescate, mostramos el mensaje antiguo
@@ -3016,7 +3023,7 @@ window.handleForgotPwd = function() {
         alert("🔒 RECUPERACIÓN DE ACCESO\n\nAún no has configurado una frase de rescate. La clave no puede visualizarse porque está protegida.\n\n👉 Si todavía tienes una sesión abierta en otro dispositivo autorizado, entra allí a Ajustes y establece una clave nueva.\n\n👉 Si no tienes otra sesión abierta, contacta a soporte.");
         return;
     }
-    
+
     // Si la tienen, abrimos la ventana de rescate moderna
     document.getElementById('stepRescue1').style.display = 'block';
     document.getElementById('stepRescue2').style.display = 'none';
@@ -3045,11 +3052,11 @@ window.saveRescueWord = async function() {
     const confirmation = document.getElementById('pRescueWordConfirm').value.trim();
     if (word.length < 8) return alert("⚠️ La frase de rescate debe tener al menos 8 caracteres.");
     if (word !== confirmation) return alert("⚠️ Las frases de rescate no coinciden.");
-    
+
     if(!window.state.config) window.state.config = {};
     window.state.config.rescueWord = await window.createRescueHash(word);
     await window.save();
-    
+
     document.getElementById('modalForceRescue').style.display = 'none';
     document.getElementById('btnCancelRescueChange').style.display = 'none';
     alert("✅ Frase de rescate guardada. Recuerda escribirla exactamente igual cuando la necesites.");
@@ -3093,10 +3100,10 @@ window.confirmNewAdminPwd = async function() {
     if (newPwd.length < 4) return alert("❌ Mínimo 4 caracteres.");
     if (newPwd === '12345') return alert("❌ No uses la clave inicial.");
     if (newPwd !== confirmPwd) return alert("❌ Las claves no coinciden. Escríbelas nuevamente.");
-    
+
     window.state.config.pwd = await window.hashPassword(newPwd);
     await window.save();
-    
+
     document.getElementById('modalResetPwd').style.display = 'none';
     alert("✅ Clave restablecida. Vuelve a intentar entrar con tu nueva clave.");
 };
@@ -3186,12 +3193,12 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
 
     if (!window.state) window.state = {};
     if (!window.state.config) window.state.config = { pwd: '12345', groups: {}, totalGroups: 5 };
-    
+
     const config = window.state.config;
-    
+
     // 🔐 0. Encriptamos lo que el usuario acaba de escribir
     const hashedInput = await window.hashPassword(pwd);
-    
+
     // 1. SI ES ADMIN (Clave Maestra)
     // -----------------------------
     const adminStored = config.pwd || '12345';
@@ -3200,7 +3207,7 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
         if (splitStorageEnabled() && window.cloudAccess?.active && window.cloudAccess.role !== 'admin') {
             return alert('Este dispositivo está autorizado para otro rol, no como administrador.');
         }
-        
+
        // Magia: Si entró con texto plano, lo pasamos a código secreto
         if (pwd === adminStored && adminStored !== '12345') {
             config.pwd = hashedInput; 
@@ -3230,10 +3237,10 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
         if (pwd === guestKey && guestKey !== 'visita') {
             config.guestPwd = hashedInput; window.save();
         }
-        
+
         window.CURRENT_ROLE = 'GUEST'; 
         document.body.classList.add('guest-mode'); 
-        
+
         currentSession = { role: 'guest', group: null }; 
         await registerSecureDeviceRequest('guest');
         enterApp(); 
@@ -3252,7 +3259,7 @@ window.attemptLogin = async function() { // <-- Solo le agregamos "async" aquí
 
         // Probamos si la clave coincide con algún grupo (ya sea el código secreto o texto plano)
         if ((storedPwd && (hashedInput === String(storedPwd) || pwd === String(storedPwd))) || (!storedPwd && pwd === defaultPwd)) {
-            
+
             if (storedPwd && pwd === String(storedPwd)) {
                 config.groups[i] = hashedInput; window.save();
             }
@@ -3287,13 +3294,13 @@ window.forceUpdatePassword = async function() {
     if (newP.length < 4) return alert("❌ Mínimo 4 caracteres.");
     if (newP === '12345') return alert("❌ No uses la clave inicial.");
     if (newP !== confirmP) return alert("❌ Las claves no coinciden. Escríbelas nuevamente.");
-    
+
     if(!window.state) window.state = {};
     if(!window.state.config) window.state.config = {};
     window.state.config.pwd = await window.hashPassword(newP);
-    
+
     if (typeof window.save === 'function') { await window.save(); }
-    
+
     document.getElementById('modalForcePass').style.display = 'none';
     document.getElementById('modalAuth').style.display = 'none'; 
     window.CURRENT_ROLE = 'ADMIN';
@@ -3315,11 +3322,11 @@ function enterApp() {
     if (window.CURRENT_ROLE === 'GUEST') {
         document.body.classList.add('guest-mode'); 
     }
-    
+
     const badge = $('#roleBadge');
     const inactiveReportsTab = $('#tabInactiveReports');
     if (inactiveReportsTab) inactiveReportsTab.innerText = currentSession && currentSession.role === 'group' ? '11. Informes faltantes' : '11. Inactivos';
-    
+
     if (window.CURRENT_ROLE === 'ADMIN') {
         badge.innerText = 'Administrador';
         badge.style.background = '#e0e7ff';
@@ -3329,7 +3336,7 @@ function enterApp() {
             document.getElementById('modalForcePass').style.display = 'flex';
             return;
         }
-        
+
         // --- 🛡️ SISTEMA DE ONBOARDING OBLIGATORIO (BLOQUEANTE) ---
     // Se ejecuta si no hay frase de rescate guardada
         if (!window.state.config.rescueWord) {
@@ -3337,7 +3344,7 @@ function enterApp() {
              const modalRescue = document.getElementById('modalForceRescue');
              modalRescue.style.display = 'flex';
              modalRescue.style.zIndex = '999999'; // Nivel más alto posible
-             
+
              // NOTA IMPORTANTE: Si falta la palabra, NO renderizamos el resto 
              // de la app hasta que el usuario termine el proceso y guarde.
              return; 
@@ -3348,14 +3355,14 @@ function enterApp() {
         badge.style.background = '#f3f4f6'; 
         badge.style.color = '#4b5563';      
         badge.style.border = '1px solid #d1d5db';
-        
+
     } else {
         const g = window.CURRENT_ROLE.replace('G', '');
         badge.innerText = `Encargado Grupo ${g}`;
         badge.style.background = '#d1fae5';
         badge.style.color = '#065f46';
     }
-    
+
     renderAll();
     if (currentSession.role === 'group') syncGroupPendingReports();
     if (currentSession.role === 'admin') setTimeout(() => window.showBackupDeviceNotice?.(), 250);
@@ -3438,12 +3445,12 @@ window.renderActividad = function() {
     const tb = document.querySelector('#tblActividad tbody');
     if(!tb) return;
     tb.innerHTML = '';
-    
+
    // 2. LÓGICA DE CONTROL (AÑO FUTURO + MES DE GRACIA)
         const hoy = new Date();
         const diaDelMes = hoy.getDate(); 
         const difMeses = (hoy.getFullYear() - actY) * 12 + (hoy.getMonth() - (actM - 1));
-        
+
         let esPasado = false;
         let puedeDesbloquear = false;
         let mensajeError = "";
@@ -3465,7 +3472,7 @@ window.renderActividad = function() {
             puedeDesbloquear = window.isAdmin(false);
             mensajeError = "⏰ PLAZO VENCIDO: Los 20 días de gracia han terminado.";
         }
-    
+
     // ESTADO DEL CANDADO: Bloqueado si es pasado Y no hemos pulsado el botón de desbloquear
 // BLOQUEO: Solo si es pasado Y no estamos en el periodo de gracia, ni se ha desbloqueado manualmente
         const isLocked = esPasado && (!puedeDesbloquear || !window.forceUnlock);
@@ -3506,11 +3513,11 @@ window.renderActividad = function() {
     // 4. GENERAR TABLA
     const k = ymKey(actY, actM);
     const list = state.personas.filter(p => p.grupo == g && isCurrentMember(p)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
-    
+
     const cEl = document.getElementById('cAct'); if(cEl) cEl.innerText = `Publicadores: ${list.length}`;
     const regularPioneers = list.filter(person => person.pr).length;
     const cPrEl = document.getElementById('cActPR'); if(cPrEl) cPrEl.innerText = `Precursores regulares: ${regularPioneers}`;
-    
+
     if(list.length === 0) { 
         tb.innerHTML = `<tr><td colspan="6" style="padding:25px; text-align:center; color:#6b7280;">No hay miembros en el Grupo ${escapeHTML(g)}.</td></tr>`; 
         return; 
@@ -3523,31 +3530,31 @@ window.renderActividad = function() {
         const disableAttr = rowIsLocked ? 'disabled' : '';
         const styleAttr = rowIsLocked ? 'background-color:#f3f4f6; color:#9ca3af; cursor:not-allowed;' : '';
         const safeId = safeInlineId(p.id);
-        
+
         tb.innerHTML += `
             <tr>
-                <td style="font-weight:600; color:#374151;">${escapeHTML(p.nombre)}</td>
-                
+                <td style="font-weight:600; color:#374151;">${wasRegularPioneer(p, actY, actM) ? '<span title="Precursor regular en este mes" aria-label="Precursor regular en este mes" style="display:inline-block; margin-right:5px; padding:2px 5px; border-radius:4px; background:#dbeafe; color:#1e40af; font-size:.65rem; font-weight:700; vertical-align:middle;">REG</span>' : ''}<span id="activityAux-${safeId}" title="Precursor auxiliar en este mes" aria-label="Precursor auxiliar en este mes" ${r.pa ? '' : 'hidden'} style="margin-right:5px; padding:2px 5px; border-radius:4px; background:#fef3c7; color:#92400e; font-size:.65rem; font-weight:700; vertical-align:middle;">AUX</span>${escapeHTML(p.nombre)}</td>
+
                 <td style="text-align:center;">
                     <input type="checkbox" ${r.part?'checked':''} ${disableAttr} 
                     onchange="updAct(decodeURIComponent('${safeId}'),'part',this.checked)" style="transform:scale(1.2); ${rowIsLocked ? 'opacity:0.5' : ''}">
                 </td>
-                
+
                 <td style="text-align:center;">
                     <input type="number" value="${escapeHTML(r.horas)}" ${disableAttr} onfocus="prepareZeroInput(this)" onclick="prepareZeroInput(this)" oninput="normalizeLeadingZero(this); scheduleActivityUpdate(decodeURIComponent('${safeId}'),'horas',this.value)"
                     style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
                 </td>
-                
+
                 <td style="text-align:center;">
                     <input type="number" value="${escapeHTML(r.est)}" ${disableAttr} onfocus="prepareZeroInput(this)" onclick="prepareZeroInput(this)" oninput="normalizeLeadingZero(this); scheduleActivityUpdate(decodeURIComponent('${safeId}'),'est',this.value)"
                     style="width:50px; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; ${styleAttr}">
                 </td>
-                
+
                 <td style="text-align:center;">
                     <input type="checkbox" ${r.pa?'checked':''} ${disableAttr} 
                     onchange="updAct(decodeURIComponent('${safeId}'),'pa',this.checked)" style="transform:scale(1.2); ${rowIsLocked ? 'opacity:0.5' : ''}">
                 </td>
-                
+
                 <td>
                     <input type="text" value="${escapeHTML(r.nota || '')}" ${disableAttr} 
                     oninput="scheduleActivityUpdate(decodeURIComponent('${safeId}'),'nota',this.value)" placeholder="..." 
@@ -3613,6 +3620,10 @@ window.renderActividad = function() {
         const previousValue = currentReportFieldValue(state.activity[k][pid], f);
         const normalizedValue = safeReportFieldValue(f, v);
         state.activity[k][pid][f] = normalizedValue;
+        if (f === 'pa' && editYear === actY && editMonth === actM) {
+            const badge = document.getElementById('activityAux-' + safeInlineId(pid));
+            if (badge) badge.hidden = !normalizedValue;
+        }
         if (currentSession.role === 'group') {
             await registerPendingReportField(k, pid, f, normalizedValue, previousValue);
         } else if (currentSession.role === 'admin') {
@@ -3727,7 +3738,7 @@ window.renderActividad = function() {
     }
     const exitDateValue = $('#pFSac').value;
     const deathDateValue = $('#pFallecimiento').value;
-     
+
     // 1. Recopilamos los datos (Igual que antes)
     const data = {
         id: id || 'p' + Date.now(),
@@ -3788,7 +3799,7 @@ window.renderActividad = function() {
         return alert("❌ El último mes como precursor no puede ser anterior al inicio.");
     }
     if (data.pr) {
-        if (!data.prInicio && !existingPerson?.pr) data.prInicio = currentMonth;
+        if (!data.prInicio) return alert("❌ Indica el mes de inicio como precursor regular. Así los meses anteriores como auxiliar se conservan correctamente.");
         data.prFin = '';
     } else if (existingPerson?.pr && !data.prFin) {
         return alert("❌ Indica el último mes en que sirvió como precursor regular.");
@@ -3859,7 +3870,7 @@ window.renderActividad = function() {
 
         const id = $('#pId').value; 
         if(!id) return; 
-        
+
         if(confirm("¿Eliminar definitivamente esta ficha y sus informes mensuales?\n\nEsta acción no se puede deshacer.")) {
             purgePersonRecord(id);
             save(); 
@@ -3909,7 +3920,7 @@ window.renderActividad = function() {
         resetPForm();
         showToast('✅ Traslado archivado; historial conservado');
     };
-    
+
 window.resetPForm = function() { 
         $('#pId').value=''; 
         $('#pOriginalGrupo').value='';
@@ -3938,7 +3949,7 @@ window.resetPForm = function() {
         const detail = $('#memberStatsDetail'); if (detail) detail.style.display = 'none';
         renderMemberStats();
     }
-    
+
     window.getPrivilegesString = function(p) { return [p.anciano?'Anciano':'', p.sm?'SM':'', p.pr?'PR':'', p.pe?'PE':''].filter(Boolean).join(', '); }
     window.getIrregularMonths = function(person, today = new Date()) {
         if (getInactivityInfo(person, today).inactive) return [];
@@ -4128,11 +4139,11 @@ window.editP = (id) => {
     // 2. CAMBIAR A LA PESTAÑA DE GESTIÓN (ID "personas")
     // Desactivamos todas las pestañas primero
     document.querySelectorAll('.tabs button, .tab').forEach(el => el.classList.remove('active'));
-    
+
     // Activamos el botón de la pestaña 1
     const btnTab = document.querySelector('button[data-tab="personas"]');
     if(btnTab) btnTab.classList.add('active');
-    
+
     // Activamos el contenido de la pestaña 1
     const secTab = document.getElementById('personas');
     if(secTab) secTab.classList.add('active');
@@ -4162,13 +4173,13 @@ window.editP = (id) => {
 window.exportBackup = async function() {
     if (!window.canWrite()) return;
     const isApp = window.hasOwnProperty('Capacitor');
-    
+
     // 1. Crear una copia profunda de los datos para no afectar la app en vivo
     let exportData = JSON.parse(JSON.stringify(state));
-    
+
     // 2. 🛡️ SEGURIDAD CRÍTICA: NUNCA exportar las contraseñas ni API keys
     delete exportData.config;
-    
+
     let fileName = "";
 
     // 3. 🎯 LÓGICA DE ROLES: Filtrar si es un Encargado
@@ -4176,15 +4187,15 @@ window.exportBackup = async function() {
         const miGrupo = currentSession.group;
         const reportMonth = getPreviousMonthKey();
         fileName = `Informes_Grupo${miGrupo}_${reportMonth}.json`;
-        
+
         // A. Dejar solo a las personas de su grupo
         const miembrosDeMiGrupo = exportData.personas.filter(p => String(p.grupo) === String(miGrupo));
         const idsPermitidos = new Set(miembrosDeMiGrupo.map(p => String(p.id)));
         exportData.personas = miembrosDeMiGrupo;
-        
+
         // B. Borrar la asistencia (no le compete al encargado)
         delete exportData.attendance; 
-        
+
         // C. El archivo del encargado contiene exclusivamente el mes que debe
         // entregar. El historial continúa visible en la app, pero nunca viaja.
         const monthlyReports = {};
@@ -4262,7 +4273,7 @@ window.exportBackup = async function() {
         }
     }
 };
-   
+
     // --- FUNCIÓN PARA ABRIR EL MODAL Y MOSTRAR CLAVE ACTUAL ---
 window.openPwdModal = function() {
     if (!window.isAdmin()) return;
@@ -4270,7 +4281,7 @@ window.openPwdModal = function() {
     const guestConfigured = Boolean(window.state.config && window.state.config.guestPwd);
     const label = document.getElementById('lblShowGuest');
     if(label) label.innerText = guestConfigured ? 'configurada' : 'predeterminada';
-    
+
     // 3. Limpiamos los inputs para que estén vacíos y listos para escribir
     document.getElementById('pNew').value = '';
     document.getElementById('pNewConfirm').value = '';
@@ -4285,14 +4296,14 @@ window.openPwdModal = function() {
 window.updatePassword = async function() {
     if (!window.isAdmin()) return;
     console.log("🔵 Guardando claves...");
-    
+
     const inputAdmin = document.getElementById('pNew');
     const inputAdminConfirm = document.getElementById('pNewConfirm');
     const inputGuest = document.getElementById('pGuestNew');
-    
+
     // Protección por si no existen los inputs en el HTML todavía
     if (!inputAdmin || !inputAdminConfirm || !inputGuest) return; 
-    
+
     const newAdminPwd = inputAdmin.value.trim();
     const confirmAdminPwd = inputAdminConfirm.value.trim();
     const newGuestPwd = inputGuest.value.trim();
@@ -4324,9 +4335,9 @@ window.updatePassword = async function() {
 
     // 4. Guardar en Nube y Local
     await window.save();
-    
+
     alert("✅ Claves actualizadas correctamente.");
-    
+
     // Limpiar y cerrar
     inputAdmin.value = '';
     inputAdminConfirm.value = '';
@@ -4437,7 +4448,7 @@ window.updatePassword = async function() {
         renderAll();
         showToast("✅ Persona reactivada correctamente");
     }
-    
+
 // ==========================================
 // FUNCIÓN MAESTRA: Lee el botón "Ver Datos"
 // ==========================================
@@ -4450,7 +4461,8 @@ window.renderAuxiliaresMes = function(serviceYear, monthIndex) {
     const key = ymKey(calendarYear, selectedMonthIndex + 1);
     const list = state.personas.filter(person => {
         const report = state.activity[key]?.[person.id];
-        return Boolean(report?.pa) && isMemberInS10Month(person, key);
+        return Boolean(report?.pa) && isMemberInS10Month(person, key)
+            && !wasRegularPioneer(person, calendarYear, selectedMonthIndex + 1);
     }).sort((a,b) => a.nombre.localeCompare(b.nombre));
 
     const counter = $('#cAuxMes');
@@ -4467,7 +4479,7 @@ window.renderAllPrecursores = function() {
     // 1. LEER lo que el usuario seleccionó en las cajitas
     const elAno = document.getElementById('precAno');
     const elMes = document.getElementById('precMes');
-    
+
     // Convertir a números
     let y = parseInt(elAno.value);
     let m = parseInt(elMes.value);
@@ -4488,7 +4500,7 @@ window.renderAllPrecursores = function() {
     console.log("Buscando datos para:", y, m); 
     window.renderPrecursores(y, m);
     window.renderAuxiliaresMes(y, m);
-    
+
 
 };
 window.renderPrecursores = function(yearIn, monthIn) {
@@ -4499,7 +4511,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
         if (section) tb = section.querySelector('table tbody');
     }
     if (!tb) return;
-    
+
     // Títulos de Tabla (Se generan solos para asegurar que estén bien)
     const table = tb.closest('table');
     const thead = table.querySelector('thead');
@@ -4523,7 +4535,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
     if (isNaN(curM)) curM = new Date().getMonth();
 
     const selectedServiceIndex = (curM >= 8) ? (curM - 8) : (curM + 4);
-    
+
     // Lógica de tiempo
     const hoyReal = new Date();
     const valorMesHoy = (hoyReal.getFullYear() * 12) + hoyReal.getMonth();
@@ -4536,16 +4548,22 @@ window.renderPrecursores = function(yearIn, monthIn) {
     // 3. OBTENER DATOS
     if (!state || !state.personas) return;
     const list = state.personas.filter(p =>
-        isMemberInS10Month(p, selectedMonthKey) && (
-            wasRegularPioneer(p, anioDelMesSeleccionado, curM + 1) ||
-            state.activity[selectedMonthKey]?.[p.id]?.pa
-        )
+        isMemberInS10Month(p, selectedMonthKey)
+            && wasRegularPioneer(p, anioDelMesSeleccionado, curM + 1)
     ).sort((a,b) => a.nombre.localeCompare(b.nombre));
     const cEl = document.getElementById('cPre'); if (cEl) cEl.innerText = list.length;
+    const monthLabel = document.getElementById('regularMonthLabel');
+    if (monthLabel) monthLabel.textContent = `${MESES_NOM[curM]} ${anioDelMesSeleccionado}`;
+    const historyNotice = document.getElementById('regularHistoryNotice');
+    if (historyNotice) {
+        const missingStart = state.personas.filter(p => p.pr && !p.prInicio && isMemberInS10Month(p, selectedMonthKey)).length;
+        historyNotice.hidden = missingStart === 0;
+        historyNotice.textContent = missingStart ? `Hay ${missingStart} ficha(s) de regulares sin mes de inicio. Completa «Inicio como precursor regular» en Gestión para precisar su historial. Los meses marcados como auxiliar se muestran abajo.` : '';
+    }
     window.renderAuxiliaresMes(curY, curM);
 
     if (list.length === 0) {
-        tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#9ca3af;">No hay datos.</td></tr>';
+        tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#9ca3af;">No hay precursores regulares en el mes seleccionado.</td></tr>';
         return;
     }
 
@@ -4571,7 +4589,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
                         : Boolean(reg.pa);
                     if (!countsForPioneer) return;
                     let h = parseFloat(reg.horas) || 0;
-                    
+
                     // 🔥 CORRECCIÓN AQUÍ: Leemos 'nota' (singular) O 'notas' (plural)
                     // Y convertimos a minúsculas
                     const txt = (reg.nota || reg.notas || "").toLowerCase();
@@ -4579,7 +4597,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
 
                     // Regex Mágico (Busca "16ldc", "ldc 16", "escuela 30", etc)
                     const match = txt.match(/(?:ldc|escuela)\s*(\d+)|(\d+)\s*(?:ldc|escuela)/);
-                    
+
                     if (match) {
                         ldc = parseInt(match[1] || match[2]);
                     }
@@ -4639,7 +4657,7 @@ window.renderPrecursores = function(yearIn, monthIn) {
                 <div style="font-weight:700; color:#334155; font-size:0.95rem;">${escapeHTML(p.nombre)}</div>
                 <div style="margin-top:2px;">${tipoBadge} <span style="font-size:0.75rem; color:#94a3b8;">G-${escapeHTML(p.grupo)}</span></div>
             </td>
-            
+
             <td style="text-align:center;">
              <div style="font-weight:800; font-size:1.1rem; color: var(--text-main);">${Math.round(totalSincronizado)}</div>
              <div style="font-size:0.65rem; color: var(--text-muted);">(C:${Math.round(detalleCampo)} + L:${Math.round(detalleLDC)})</div>
@@ -4681,10 +4699,10 @@ window.renderEstadoEspiritual = function() {
         const tbIn=$('#tblInactivos tbody'), tbFal=$('#tblFaltantes tbody'), tbIrr=$('#tblIrregulares tbody'); 
         if(!tbIn)return; 
         tbIn.innerHTML=''; tbFal.innerHTML=''; tbIrr.innerHTML=''; 
-        
+
         // 1. AQUI LA MAGIA: Usamos el Año de Servicio (Septiembre)
         const serviceYear = getServiceYear(); 
-        
+
         const today = new Date();
         const graceOpen = today.getDate() <= 20;
         const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
@@ -4692,15 +4710,15 @@ window.renderEstadoEspiritual = function() {
         const previousMonthNumber = previousMonth.getMonth() + 1;
         const previousKey = ymKey(previousYear, previousMonthNumber);
         let countIna = 0, countFal = 0, countIrr = 0;
-        
+
         const visiblePeople = state.personas.filter(p =>
             isCurrentMember(p) && (currentSession.role !== 'group' || p.grupo == currentSession.group)
         );
         visiblePeople.sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(p=>{
-            
+
             // --- A. CÁLCULO DE INACTIVOS (Regla: 6 meses sin reportar, sin importar el año) ---
             const inactivity = getInactivityInfo(p, today);
-             
+
             if(inactivity.inactive){ 
                 countIna++;
                 tbIn.innerHTML+=`<tr><td><b>${escapeHTML(p.nombre)}</b></td><td>G${escapeHTML(p.grupo)}</td><td>${escapeHTML(inactivity.lastActivity)}</td><td><span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:4px; font-weight:bold;">Inactivo</span></td></tr>`; 
@@ -4717,11 +4735,11 @@ window.renderEstadoEspiritual = function() {
 
                 // --- C. CÁLCULO DE IRREGULARES (solo meses con plazo vencido) ---
                 let fail=[]; 
-                
+
                 // Calculamos cuándo empezó el ciclo actual (1 Sept del año anterior)
                 const startOfCycle = new Date(serviceYear - 1, 8, 1); 
                 let pointer = new Date(startOfCycle);
-                
+
                 // Recorremos mes a mes hasta HOY
                 while (pointer < today) {
                     // No contamos el mes actual como falla todavía
@@ -4730,9 +4748,9 @@ window.renderEstadoEspiritual = function() {
                     let py = pointer.getFullYear();
                     let pm = pointer.getMonth() + 1; // 1-12
                     const key = ymKey(py, pm);
-                    
+
                     const currentCheckKey = `${py}-${String(pm).padStart(2,'0')}`;
-                    
+
                     // Si la persona ya estaba en la congregación en esa fecha...
                     if (!p.inicio || currentCheckKey >= p.inicio) {
                          const act = state.activity[key]?.[p.id];
@@ -4746,7 +4764,7 @@ window.renderEstadoEspiritual = function() {
                     // Avanzar al siguiente mes
                     pointer.setMonth(pointer.getMonth() + 1);
                 }
-                
+
                 if(fail.length > 0){ 
                     countIrr++;
                     tbIrr.innerHTML+=`<tr><td>${escapeHTML(p.nombre)}</td><td>G${escapeHTML(p.grupo)}</td><td><span style="color:var(--warning); font-weight:600;">${escapeHTML(fail.join(', '))}</span></td></tr>`; 
@@ -4823,7 +4841,7 @@ window.renderEstadoEspiritual = function() {
         // Recuperamos nota o notas, y ponemos un string vacío por defecto
         const r = state.activity[ymKey(y, m)]?.[p.id] || {horas: 0, est: 0, pa: false, part: false, nota: ''}; 
         tH += (r.horas || 0); 
-        
+
         rows += `<tr>
             <td>${MESES_NOM[m - 1]}</td>
             <td>${(r.horas || r.part) ? '[X]' : ''}</td>
@@ -4834,7 +4852,7 @@ window.renderEstadoEspiritual = function() {
     }); 
 
     const privs = [p.anciano ? 'Anciano' : '', p.sm ? 'SM' : '', p.pr ? 'PR' : '', p.pe ? 'PE' : ''].filter(Boolean).join(', '); 
-    
+
     return `<div class="print-canvas">
         <div style="text-align:center; font-weight:800; font-size:12pt; margin-bottom:10px;">REGISTRO DE PUBLICADOR</div>
         <div class="s21-header-box">
@@ -4942,7 +4960,7 @@ window.renderEstadoEspiritual = function() {
             }
         }
     }
-    
+
     window.downloadPDFS21 = async function() { 
     if (currentSession?.role === 'guest') return alert('🔒 El modo invitado es únicamente de lectura y no permite descargar archivos.');
     const el = document.getElementById('preview-viewport');
@@ -4980,13 +4998,13 @@ window.renderEstadoEspiritual = function() {
             try {
                 const base64Content = pdfBase64.split(',')[1];
                 const { Filesystem } = Capacitor.Plugins;
-                
+
                 await Filesystem.writeFile({
                     path: fileName,
                     data: base64Content,
                     directory: 'DOCUMENTS'
                 });
-                
+
                 // Restauramos el estilo original
                 el.style.background = '#525252'; 
                 el.style.padding = '20px';
@@ -5327,7 +5345,7 @@ window.renderS88Preview = function() {
     // Guardamos estilo original
     const oldBg = el.style.background;
     const oldPad = el.style.padding;
-    
+
     // Ponemos fondo blanco para la foto
     el.style.background = 'white'; 
     el.style.padding = '0';
@@ -5347,13 +5365,13 @@ window.renderS88Preview = function() {
             try {
                 const base64 = pdfBase64.split(',')[1];
                 const { Filesystem } = Capacitor.Plugins;
-                
+
                 await Filesystem.writeFile({
                     path: fileName,
                     data: base64,
                     directory: 'DOCUMENTS'
                 });
-                
+
                 showToast("✅ S-88 guardado en Documentos");
             } catch (e) {
                 alert("Error App: " + e.message);
@@ -5371,11 +5389,11 @@ window.renderS88Preview = function() {
         });
     }
 }
-    
+
     window.renderResumenMensual = function(y, m) {
         const k=ymKey(y,m), act=state.activity[k]||{}, att=state.attendance[k]||{es:[],fs:[]};
         let tM=0,activos=0,pubC=0,pubE=0,prC=0,prH=0,prE=0,paC=0,paH=0,paE=0;
-        
+
         // 1. CREAMOS LA FECHA DEL RESUMEN QUE ESTAMOS MIRANDO 📅
         const viewDate = `${y}-${String(m).padStart(2,'0')}`;
 
@@ -5390,7 +5408,7 @@ window.renderS88Preview = function() {
         }); 
         const avgES=att.es.filter(n=>n>0).length?Math.round(att.es.reduce((a,b)=>a+b,0)/att.es.filter(n=>n>0).length):0; 
         const avgFS=att.fs.filter(n=>n>0).length?Math.round(att.fs.reduce((a,b)=>a+b,0)/att.fs.filter(n=>n>0).length):0; 
-        
+
         $('#resumenContent').innerHTML=`
         <div class="dash-grid">
             <div class="dash-card">
@@ -5458,13 +5476,13 @@ window.importData = (input) => {
     if(!file) return; 
 
     const reader = new FileReader(); 
-    
+
     reader.onload = async function(e) { 
         try { 
             const dataImportada = JSON.parse(e.target.result);
 
             if(dataImportada.personas && Array.isArray(dataImportada.personas)) {
-                
+
                 // 1. DETECTAR QUIÉN ESTÁ USANDO LA APP
                 let esAdmin = (currentSession && currentSession.role === 'admin');
                 let miGrupo = (currentSession && currentSession.role === 'group') ? currentSession.group : null;
@@ -5547,7 +5565,7 @@ window.importData = (input) => {
                     // A. Fusionar personas
                     dataImportada.personas.forEach(pImp => {
                         let existe = state.personas.find(p => p.id === pImp.id);
-                        
+
                         // Blindaje: Si hay filtro de grupo, el encargado SOLO puede importar personas de SU grupo
                         if (grupoFiltro !== "" && String(pImp.grupo) !== String(grupoFiltro)) return;
 
@@ -5564,12 +5582,12 @@ window.importData = (input) => {
                                 continue;
                             }
                             if(!state.activity[keyMes]) state.activity[keyMes] = {};
-                            
+
                             for (const [pid, infImportada] of Object.entries(grupoActividad)) {
-                                
+
                                 // Buscamos en la base local, o en la importada si es nuevo
                                 const personaLocal = state.personas.find(p => String(p.id) === String(pid)) || dataImportada.personas.find(p => String(p.id) === String(pid));
-                                
+
                                 // Blindaje: Ignoramos la actividad de personas que no sean del grupo autorizado
                                 if (grupoFiltro !== "" && personaLocal && String(personaLocal.grupo) !== String(grupoFiltro)) {
                                     continue; 
@@ -5629,11 +5647,11 @@ window.importData = (input) => {
             input.value = '';
         } 
     }; 
-    
+
     reader.readAsText(file); 
     input.value = ''; 
 };
-    
+
 // ==========================================
 // 🕹️ INTERRUPTOR ONLINE / OFFLINE
 // ==========================================
@@ -5665,7 +5683,7 @@ window.toggleConnection = async function() {
 
         // Llamamos a la versión blindada (con window.)
         const ok = await window.connectFirebase(c.apiKey, c.projectId); 
-        
+
         if (!ok) {
             localStorage.setItem('cong_pro_force_offline', 'true');
             updateCloudUI(false, null, true);
@@ -5679,14 +5697,14 @@ window.toggleConnection = async function() {
 
     // Si ya está conectado -> desconectar
     if (confirm("¿Desconectar de la Nube y trabajar Offline?\n\n💡 Recuerda: Sin conexión, deberás ir a Ajustes > Respaldo Local para enviar o recibir los informes mediante archivos.\n\n¿Deseas continuar?")) {
-        
+
         localStorage.setItem('cong_pro_force_offline', 'true');
-        
+
         if (window.unsubscribeSync) {
             window.unsubscribeSync(); 
             window.unsubscribeSync = null;
         }
-        
+
         window.cloudConnected = false;
         updateCloudUI(false, null, true); 
         showToast("⚪ Modo Offline");
@@ -5720,7 +5738,7 @@ window.toggleConnection = async function() {
 </script>
 <div id="modalManual" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(5px); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:var(--surface); width:95%; max-width:750px; height:90vh; border-radius:24px; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); overflow:hidden; border:1px solid var(--border-light); font-family:'Inter', sans-serif;">
-        
+
         <div style="padding:25px; background:var(--bg-body); border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <h2 style="margin:0; font-size:1.6rem; color:var(--text-main); font-weight:800; display:flex; align-items:center; gap:10px;">
@@ -5733,6 +5751,214 @@ window.toggleConnection = async function() {
 
         <div style="padding:20px; overflow-y:auto; flex:1; background:var(--surface);">
             <p style="margin:0 0 14px; color:var(--text-muted);">Toca una sección para ver sus acciones principales.</p>
+            <button class="btn primary" type="button" onclick="openFirebaseWizard()" style="width:100%; margin-bottom:12px;">Abrir asistente de Firebase</button>
+            <details id="firebaseSetupGuide" style="margin-bottom:8px; border:1px solid #cbd5e1; border-radius:12px; background:var(--surface);">
+                        <summary style="background:#f8fafc; color:#1e293b; padding:15px; cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:10px;">
+                            ☁️ Configurar Firebase: paso a paso
+                        </summary>
+                        <div style="padding:20px; border-top:1px solid #cbd5e1; font-size:0.9em; line-height:1.6; color:#334155;">
+
+                            <p><b>☁️ Guarda una copia en internet</b></p>
+                            <p>Firebase es el lugar donde tu congregación guarda sus datos en internet. Así, los dispositivos autorizados pueden trabajar con la misma información.</p>
+                            <p><b>Solo el responsable hace la configuración.</b> Los demás hermanos se conectan después. Usa un proyecto diferente para cada congregación.</p>
+                            <p><b>¿Se acaba después de un mes?</b> El plan gratuito no vence al mes. Lo que puede vencer es el permiso del «modo de prueba». Sigue estos pasos para usar permisos sin fecha de vencimiento.</p>
+
+                            <p><b>1. Crea el espacio de tu congregación</b></p>
+                            <ol style="padding-left:20px;">
+                                <li>Abre <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer">Firebase Console</a>. Entra con la cuenta de Google del responsable.</li>
+                                <li>Pulsa <b>Añadir proyecto</b>. Escribe un nombre para tu congregación.</li>
+                                <li>Sigue los pasos de la pantalla. Puedes dejar Google Analytics desactivado.</li>
+                                <li>Para empezar gratis, usa el plan <b>Spark</b>. Tiene límites de uso que explicamos al final.</li>
+                            </ol>
+                            <p><b>2. Crea la base de datos</b></p>
+                            <ol style="padding-left:20px;">
+                                <li>Abre <b>Firestore Database</b>. Pulsa <b>Crear base de datos</b>.</li>
+                                <li>Si pregunta por la edición, elige <b>Standard</b>. Deja el nombre de la base como <code>(default)</code>.</li>
+                                <li>Elige una ubicación cercana a donde viven la mayoría de los hermanos.</li>
+                                <li>Elige <b>Modo de producción</b> y termina la creación. Por ahora, la puerta está cerrada. En los siguientes pasos darás permiso a tus dispositivos.</li>
+                            </ol>
+                            <p><b>3. Permite que Firebase reconozca cada dispositivo</b></p>
+                            <ol style="padding-left:20px;">
+                                <li>Abre <b>Authentication</b>. Si aparece <b>Comenzar</b>, púlsalo.</li>
+                                <li>Abre <b>Método de acceso</b>. Busca <b>Anónimo</b>.</li>
+                                <li>Actívalo y pulsa <b>Guardar</b>. La app lo usa para dar un número de identificación a cada dispositivo.</li>
+                                <li>Si ves <b>Limpieza automática de cuentas anónimas</b>, déjala <b>desactivada</b>. Esa opción puede borrar las identificaciones después de 30 días. Si no aparece, sigue al paso 4.</li>
+                            </ol>
+                            <p><b>4. Coloca las reglas de acceso</b></p>
+                            <p>Las reglas dicen quién puede entrar y qué puede hacer. Estas reglas no tienen fecha de vencimiento.</p>
+                            <ol style="padding-left:20px;">
+                                <li>Abre el recuadro de abajo. Selecciona y copia <b>todo</b> el texto. No necesitas cambiarlo.</li>
+                                <li>En Firebase, abre <b>Firestore Database → Reglas</b>.</li>
+                                <li>Reemplaza el texto que hay allí por el que copiaste.</li>
+                                <li>Pulsa <b>Publicar</b>.</li>
+                            </ol>
+                            <details style="margin-bottom:12px;">
+                                <summary style="cursor:pointer; font-weight:bold;">📋 Abrir las reglas para copiarlas</summary>
+                                <textarea readonly aria-label="Reglas completas de Firebase para copiar" spellcheck="false" style="width:100%; box-sizing:border-box; min-height:280px; margin-top:10px; font-family:monospace; font-size:12px;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function accessDoc() {
+      return get(/databases/$(database)/documents/accesos/$(request.auth.uid));
+    }
+
+    function activeUser() {
+      return signedIn() &amp;&amp; accessDoc().data.active == true;
+    }
+
+    function hasRole(roleName) {
+      return activeUser()
+        &amp;&amp; (accessDoc().data.role == roleName
+          || (accessDoc().data.roles is list &amp;&amp; accessDoc().data.roles.hasAny([roleName])));
+    }
+
+    function isAdmin() {
+      return hasRole('admin');
+    }
+
+    function isGuest() {
+      return hasRole('guest');
+    }
+
+    function isGroup(groupId) {
+      return hasRole('group')
+        &amp;&amp; (accessDoc().data.group == groupId || accessDoc().data.groupNumber == groupId);
+    }
+
+    match /accesos/{uid} {
+      allow get: if signedIn() &amp;&amp; (request.auth.uid == uid || isAdmin());
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    match /solicitudes_acceso/{uid} {
+      allow get: if signedIn() &amp;&amp; (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if signedIn()
+        &amp;&amp; request.auth.uid == uid
+        &amp;&amp; request.resource.data.uid == request.auth.uid
+        &amp;&amp; request.resource.data.status == 'pending'
+        &amp;&amp; request.resource.data.requestedRole in ['admin', 'group', 'guest'];
+      allow delete: if isAdmin();
+    }
+
+    match /pruebas_conexion/{uid} {
+      allow create, get, delete: if activeUser() &amp;&amp; request.auth.uid == uid;
+      allow list, update: if false;
+    }
+
+    match /publicadores/{personId} {
+      allow read: if isAdmin() || isGuest() || isGroup(resource.data.grupo);
+      allow write: if isAdmin();
+    }
+
+    match /informes/{reportId} {
+      allow read: if isAdmin() || isGuest() || isGroup(resource.data.group);
+      // La transacción lee antes de crear. Un informe inexistente no tiene
+      // resource.data.group; permitir solo comprobar su ausencia, nunca leer
+      // informes existentes de otro grupo. Las escrituras conservan sus reglas.
+      allow get: if hasRole('group')
+        &amp;&amp; !exists(/databases/$(database)/documents/informes/$(reportId));
+      allow create: if isAdmin() || isGroup(request.resource.data.group);
+      allow update: if isAdmin() || (isGroup(resource.data.group) &amp;&amp; isGroup(request.resource.data.group));
+      allow delete: if isAdmin();
+    }
+
+    match /asistencia/{monthId} {
+      allow read: if isAdmin() || isGuest();
+      allow write: if isAdmin();
+    }
+
+    match /observaciones_visita/{observationId} {
+      allow read: if isAdmin() || isGuest();
+      allow write: if isAdmin();
+    }
+
+    match /configuracion/{documentId} {
+      allow read: if isAdmin() || isGuest();
+      allow write: if isAdmin();
+    }
+
+    match /sistema/{documentId} {
+      allow get: if signedIn();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /congregacion/{documentId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+</textarea>
+                            </details>
+                            <p><b>No dejes la puerta abierta para todos.</b> No uses <code>allow read, write: if true;</code> ni cambies la fecha cada mes para seguir en modo de prueba.</p>
+                            <p><b>5. Conecta el dispositivo del responsable</b></p>
+                            <ol style="padding-left:20px;">
+                                <li>En Firebase, pulsa la rueda de <b>Configuración del proyecto</b>.</li>
+                                <li>Busca <b>Tus aplicaciones</b>. Pulsa <b>&lt;/&gt;</b>, que significa aplicación web.</li>
+                                <li>Escribe un nombre y pulsa <b>Registrar app</b>.</li>
+                                <li>Busca <code>apiKey</code> y <code>projectId</code>. Copia el valor de cada uno, sin las comillas. Son los datos para encontrar tu proyecto.</li>
+                                <li>En Congregación App, abre <b>Ajustes → Configuración Técnica</b>. Pega cada valor en su casilla y pulsa <b>Guardar Manualmente</b>. El modo sin conexión debe estar desactivado.</li>
+                                <li>Por ahora, conecta solo este dispositivo. Puede salir un error de permisos: todavía falta darte permiso en el paso 6.</li>
+                            </ol>
+                            <p><b>6. Dale permiso al primer administrador</b></p>
+                            <p>Este paso se hace una sola vez para el primer dispositivo. Hazlo desde la cuenta de Google que creó el proyecto.</p>
+                            <ol style="padding-left:20px;">
+                                <li>En Firebase, abre <b>Authentication → Usuarios</b>. Busca el usuario anónimo que acaba de aparecer.</li>
+                                <li>Copia su <b>UID completo</b>. Es su identificación larga. No copies el código corto que muestra la app. Si aparecen varios usuarios, confirma cuál es tu dispositivo antes de darle permiso.</li>
+                                <li>Abre <b>Firestore Database → Datos → Iniciar colección</b>. Escribe <code>accesos</code> como nombre de la colección.</li>
+                                <li>En <b>ID del documento</b>, pega el UID completo que copiaste.</li>
+                                <li>Añade un campo llamado <code>role</code>. Elige el tipo <b>string</b> (texto) y escribe <code>admin</code> como valor.</li>
+                                <li>Añade otro campo llamado <code>active</code>. Elige el tipo <b>boolean</b> y el valor <code>true</code>. No lo guardes como texto.</li>
+                                <li>Pulsa <b>Guardar</b>. Vuelve a conectar la app. Debe mostrar <b>Administrador autorizado</b>.</li>
+                                <li>Pulsa <b>Probar permiso de escritura</b>. Espera el mensaje de éxito. Que diga «Online» no basta: esta prueba confirma que puedes guardar.</li>
+                            </ol>
+                            <p><b>7. Prepara los datos para compartirlos</b></p>
+                            <ol style="padding-left:20px;">
+                                <li>Comprueba que la app muestra los datos correctos de tu congregación. Guarda un respaldo local antes de seguir.</li>
+                                <li>En Ajustes, busca <b>Almacenamiento seguro (preparación)</b>.</li>
+                                <li>Pulsa <b>Preparar y verificar almacenamiento</b>. Espera a que confirme que la copia fue verificada. Si falla, no sigas: conserva tu respaldo y revisa el mensaje.</li>
+                                <li>Cierra y abre la app. Comprueba tus datos y vuelve a probar el permiso de escritura. Si el almacenamiento ya estaba preparado, no repitas la copia.</li>
+                            </ol>
+                            <p>Al preparar los datos puede aparecer «No publiques reglas nuevas todavía». Ese aviso recuerda que preparar la copia no basta. En esta guía también debes completar el permiso del administrador y comprobar que puedes guardar.</p>
+                            <p><b>8. Conecta a los demás hermanos</b></p>
+                            <ol style="padding-left:20px;">
+                                <li>En el dispositivo del responsable, usa <b>Compartir Llave de Acceso</b>.</li>
+                                <li>En el otro dispositivo, abre <b>Conexión Rápida</b>, pega el código y solicita acceso.</li>
+                                <li>En el dispositivo del responsable, pulsa <b>Revisar dispositivos pendientes</b>.</li>
+                                <li>Confirma de quién es el dispositivo. Autoriza su función y, si corresponde, su grupo.</li>
+                                <li>Comprueba que ese hermano ya puede entrar. Compartir la llave conecta con el proyecto; el responsable también debe autorizar el dispositivo.</li>
+                                <li>Autoriza un dispositivo de respaldo del secretario. Así tendrás otro acceso si pierdes el principal.</li>
+                            </ol>
+                            <details style="margin:15px 0;">
+                                <summary style="cursor:pointer; font-weight:bold;">Ya usaba Firebase o se bloqueó después de un mes</summary>
+                                <ol style="padding-left:20px;">
+                                    <li>No borres el proyecto ni la base de datos. Guarda un respaldo de los datos que tienes en la app.</li>
+                                    <li>Activa el acceso anónimo del paso 3, si falta. Conecta el dispositivo del responsable para que aparezca en Authentication.</li>
+                                    <li>Antes de cambiar las reglas, dale permiso al responsable como indica el paso 6. Si la colección <code>accesos</code> ya existe, ábrela y crea o revisa el documento de ese UID.</li>
+                                    <li>Si todavía puedes trabajar, comprueba que tienes los datos actuales y prepara el almacenamiento del paso 7, si falta. Después publica las reglas del paso 4.</li>
+                                    <li>Si los permisos ya vencieron, publica las reglas del paso 4 después de autorizar al responsable. Vuelve a conectar, comprueba los datos y completa el paso 7 si falta.</li>
+                                    <li>Abre otra vez la app y prueba la escritura. No reemplaces datos recientes con un respaldo antiguo.</li>
+                                </ol>
+                            </details>
+                            <p><b>Para que siga funcionando</b></p>
+                            <ul style="padding-left:20px;">
+                                <li><b>Cuida la identificación:</b> no actives la limpieza automática de cuentas anónimas. Si borras los datos de la app o la reinstalas, puede necesitar permiso otra vez.</li>
+                                <li><b>Revisa el uso:</b> Firebase → Firestore Database → Uso muestra el consumo. El plan gratuito tiene límites. Si los alcanzas, algunas operaciones pueden detenerse.</li>
+                                <li><b>Pagar es una decisión aparte:</b> el plan Blaze cobra según el consumo. Pagar no arregla reglas vencidas. Si lo eliges, configura alertas de presupuesto; esas alertas avisan, pero no frenan el gasto.</li>
+                                <li><b>Si falla:</b> revisa internet, los dos datos de conexión, el acceso anónimo, las reglas, el permiso del dispositivo y los límites de uso.</li>
+                            </ul>
+                            <p style="margin-bottom:0;">Ayuda oficial de Firebase: <a href="https://firebase.google.com/docs/firestore/security/get-started" target="_blank" rel="noopener noreferrer">reglas</a>, <a href="https://firebase.google.com/docs/auth/web/anonymous-auth" target="_blank" rel="noopener noreferrer">identificación anónima</a> y <a href="https://firebase.google.com/docs/firestore/quotas" target="_blank" rel="noopener noreferrer">límites de uso</a>.</p>
+
+                        </div>
+                    </details>
             <div class="manual-sections">
                 <details><summary>1. Gestión · Crear y actualizar fichas</summary><div><b>Nuevo:</b> escribe nombres, primer apellido y, si tiene, segundo apellido; completa grupo, mes y tipo de ingreso y pulsa <b>Guardar miembro</b>. Elige <b>Nuevo publicador</b> o <b>Traslado</b>. Si es traslado, registra los informes anteriores cuando la app lo pregunte.<br><b>Editar:</b> busca la persona, abre su ficha y pulsa <b>Actualizar</b>. En registros anteriores, distribuye manualmente el nombre y los apellidos cuando aparezca el aviso azul. <b>Cancelar edición</b> descarta cambios no guardados.<br><b>Bajas:</b> usa Fecha sacado para conservarlo en Sacados; Fecha de fallecimiento para archivarlo en Fallecidos; o <b>Traslado a otra congregación</b> para archivarlo sin borrar su ficha ni sus informes.</div></details>
                 <details><summary>2. Lista General · Consultar miembros</summary><div>Consulta publicadores activos y totales por grupo. Usa los contadores para ver publicadores, precursores, inactivos o irregulares. El administrador puede abrir <b>Editar</b> y descargar listados por grupo, precursores o toda la congregación.</div></details>
@@ -5748,7 +5974,7 @@ window.toggleConnection = async function() {
                 <details><summary>12. Inf-Visita Circuito · Guardar observaciones</summary><div>Registra fecha, nombre del superintendente y observaciones; pulsa <b>Guardar</b>. Usa <b>Editar</b> para corregir o <b>Eliminar</b> para borrar una observación.</div></details>
             </div>
             <div style="margin-top:16px; padding:12px; border-radius:10px; background:var(--bg-body); color:var(--text-muted); font-size:.88rem;"><b>Ajustes:</b> administra nube, accesos, grupos y respaldos. Al importar un respaldo total, usa <b>Restaurar copia completa</b> para recuperar también la asistencia; <b>Fusionar publicadores e informes</b> conserva la base actual y no incorpora asistencia. Consulta también <b>Uso independiente y privacidad</b>: la app no es oficial, el desarrollador no recibe los datos y el usuario debe estar autorizado para tratar información de terceros. Para migrar, carga cualquier Excel, relaciona sus columnas, revisa la vista previa y confirma. La plantilla es opcional y la app omite informes del mes en curso o futuros. En Android, al crear un respaldo elige dónde guardarlo o compartirlo y verifica el archivo.</div>
-            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.3</small></div>
+            <div style="padding:18px 0 2px; text-align:center; color:var(--text-muted);"><small>Congregación Pro · Guía v1.6.4</small></div>
         </div>
 
         <div style="display:none; padding:0; overflow-y:auto; flex:1; background:var(--surface);">
@@ -5797,7 +6023,7 @@ window.toggleConnection = async function() {
                         </summary>
                         <div style="padding:20px; background:white; border-top:1px solid #10b981; color:#334155; line-height:1.6;">
                             <p style="margin-top:0;">Puedes dar acceso al Cuerpo de Ancianos para que consulten tarjetas e informes <strong>sin riesgo</strong> (Modo Solo Lectura).</p>
-                            
+
                             <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:15px;">
                                 <strong>Pasos para conectarlos:</strong>
                                 <ol style="margin:10px 0 0 20px; padding:0;">
@@ -5820,7 +6046,7 @@ window.toggleConnection = async function() {
                         </summary>
                         <div style="padding:20px; background:white; border-top:1px solid #3b82f6; color:#334155; line-height:1.6;">
                             <p style="margin-top:0;">El sistema permite que los encargados recolecten informes y los envíen al secretario de dos formas:</p>
-                            
+
                             <div style="margin-bottom:15px;">
                                 <strong style="color:#1e40af;">🌐 Opción A (Con Internet - Automático):</strong><br>
                                 Si tienen la "Llave de Acceso" configurada, todo lo que anoten en su celular aparecerá en el del secretario al instante gracias a la Nube.
@@ -5829,7 +6055,7 @@ window.toggleConnection = async function() {
                             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:15px;">
                                 <strong style="color:#0f172a; display:block; margin-bottom:8px;">📱 Opción B (Sin Internet - Archivo por WhatsApp):</strong>
                                 <p style="font-size:0.9em; margin-top:0; margin-bottom:10px;">Si trabajan fuera de línea (Offline), la información se puede pasar manualmente mediante un archivo seguro:</p>
-                                
+
                                 <ol style="font-size:0.9em; padding-left:20px; margin-top:5px; margin-bottom:0; color:#475569;">
                                     <li style="margin-bottom:8px;"><b>Generar el archivo:</b> El encargado anota los informes en su celular. Luego va a <b>⚙️ Ajustes > 💾 Respaldo Local</b> y toca <b>"📥 Descargar"</b>. El archivo incluye únicamente el mes anterior.</li>
                                     <li style="margin-bottom:8px;"><b>Enviar los datos:</b> El encargado comparte ese archivo recién descargado con el secretario (por ejemplo, vía WhatsApp).</li>
@@ -5879,7 +6105,7 @@ window.toggleConnection = async function() {
                             <br>Para <b>editar</b>: Usa el buscador (abajo) o ve a la Lista General y toca el lápiz ✏️.
                         </div>
                     </details>
-                    
+
                     <details style="margin-bottom:8px; border:1px solid var(--border-light); border-radius:12px; background:var(--surface);">
                         <summary style="padding:15px; cursor:pointer; font-weight:600; color:var(--text-main);">🖨️ ¿Cómo descargo las Tarjetas (PDF)?</summary>
                         <div style="padding:15px 20px; border-top:1px solid var(--border-light); font-size:0.95em; color:var(--text-muted);">
@@ -5909,59 +6135,14 @@ window.toggleConnection = async function() {
                     <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                         ⚙️ Configuración Avanzada
                     </label>
-<details style="margin-bottom:8px; border:1px solid #cbd5e1; border-radius:12px; background:var(--surface);">
-                        <summary style="background:#f8fafc; color:#1e293b; padding:15px; cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:10px;">
-                            ☁️ Configuración de la Nube (Tutorial Técnico)
-                        </summary>
-                        <div style="padding:20px; border-top:1px solid #cbd5e1; font-size:0.9em; line-height:1.6; color:#334155;">
-                            
-                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 1: Crear el espacio (Proyecto)</p>
-                            <ol style="padding-left:20px; margin-bottom:15px;">
-                                <li>Entra a <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary);">console.firebase.google.com</a>.</li>
-                                <li>Haz clic en <b>"Añadir proyecto"</b>.</li>
-                                <li>Ponle un nombre y haz clic en Continuar.</li>
-                                <li>Apaga el interruptor de <i>Google Analytics</i> y haz clic en <b>"Crear Proyecto"</b>.</li>
-                            </ol>
 
-                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 2: Activar la Base de Datos</p>
-                            <ol style="padding-left:20px; margin-bottom:15px;">
-                                <li>En el menú izquierdo, ve a <b>"Compilación"</b> (o Build) y haz clic en <b>"Firestore Database"</b>.</li>
-                                <li>Haz clic en el botón <b>"Crear base de datos"</b>.</li>
-                                <li>Deja la ubicación sugerida y dale a Siguiente.</li>
-                                <li>Selecciona <b>"Comenzar en modo de prueba"</b> y haz clic en Crear.</li>
-                            </ol>
-
-                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 3: Obtener tus Claves Secretas</p>
-                            <ol style="padding-left:20px; margin-bottom:15px;">
-                                <li>Arriba a la izquierda, haz clic en la <b>rueda de engranaje ⚙️</b> y elige <b>"Configuración del proyecto"</b>.</li>
-                                <li>Baja hasta "Tus aplicaciones" y haz clic en el icono <b><code>&lt;/&gt;</code></b> (Aplicación Web).</li>
-                                <li>Ponle un apodo y haz clic en "Registrar app".</li>
-                                <li>Del código que aparece, <b>solo copia dos valores</b> (lo que está dentro de las comillas):<br>
-                                    • Tu <code>apiKey</code> <i>(ej: AIzaSyA...)</i><br>
-                                    • Tu <code>projectId</code> <i>(ej: congregacion-app-123)</i>
-                                </li>
-                            </ol>
-
-                            <p style="margin-top:0; font-weight:bold; color:#0f172a;">Paso 4: Conectar la Aplicación</p>
-                            <ol style="padding-left:20px; margin-bottom:15px;">
-                                <li>Vuelve a los ⚙️ Ajustes de esta App y abre la "Configuración Técnica".</li>
-                                <li>Pega tu <code>apiKey</code> y tu <code>projectId</code> y presiona <b>"Guardar Manualmente"</b>.</li>
-                                <li>El indicador debería ponerse Verde (🟢 Online).</li>
-                            </ol>
-
-                            <p style="margin-bottom:0; margin-top:20px; color:#166534; font-weight:bold; text-align:center;">
-                                ✅ ¡Listo! Usa el botón "Compartir Llave de Acceso" arriba para darle conexión a los demás hermanos rápidamente.
-                            </p>
-
-                        </div>
-                    </details>
                 </div>
 
                 <div>
                     <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                         💙 Colaboración
                     </label>
-                    
+
                     <details style="margin-bottom:8px; border:1px solid #bfdbfe; border-radius:12px; background:var(--surface);">
                         <summary style="background:#eff6ff; color:#1e40af; padding:15px; cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:10px;">
                             ☕ ¿La App es gratis? ¿Cómo puedo apoyar?
@@ -5976,12 +6157,27 @@ window.toggleConnection = async function() {
             </div>
 
             <div style="padding:20px; text-align:center; color:var(--text-muted); border-top:1px solid var(--border-light); background:var(--surface);">
-                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.3</span>
+                <span style="font-size:0.8em;">Congregación Pro - Manual v1.6.4</span>
             </div>
         </div>
     </div>
 </div>
 
 
+<div id="firebaseWizard" role="dialog" aria-modal="true" aria-labelledby="firebaseWizardTitle" style="display:none; position:fixed; inset:0; z-index:10020; background:rgba(15,23,42,.8); align-items:center; justify-content:center; padding:12px; box-sizing:border-box;">
+    <div style="width:100%; max-width:620px; height:90vh; height:90dvh; display:flex; flex-direction:column; background:var(--surface); color:var(--text-main); border-radius:18px; overflow:hidden; box-shadow:0 20px 60px #0005;">
+        <div style="padding:16px; border-bottom:1px solid var(--border-light); display:flex; align-items:center; gap:12px;">
+            <div style="flex:1; min-width:0;"><h2 id="firebaseWizardTitle" style="font-size:1.15rem; margin:0 0 5px;">☁️ Vamos a configurar Firebase</h2><p id="firebaseWizardProgress" tabindex="-1" aria-live="polite" style="margin:0; color:var(--text-muted);"></p></div>
+            <button class="btn ghost" type="button" aria-label="Cerrar asistente" onclick="closeFirebaseWizard()">✕</button>
+        </div>
+        <div id="firebaseWizardContent" style="padding:18px; overflow-y:auto; flex:1; min-height:0; line-height:1.65; overflow-wrap:anywhere;"></div>
+        <div style="padding:12px 16px; border-top:1px solid var(--border-light);">
+            <p style="font-size:.78rem; color:var(--text-muted); margin:0 0 10px;">Haz lo que indica la pantalla y luego pulsa Siguiente. El asistente te guía; no realiza ni verifica cambios en tu cuenta de Firebase.</p>
+            <div style="display:flex; gap:10px;"><button id="firebaseWizardBack" class="btn ghost" type="button" onclick="moveFirebaseWizard(-1)" style="flex:1;">Anterior</button><button id="firebaseWizardNext" class="btn primary" type="button" onclick="moveFirebaseWizard(1)" style="flex:1;">Empezar</button></div>
+        </div>
+    </div>
+</div>
+<script src="js/firebase-guide.js"></script>
+<script src="js/name-suggestions.js"></script>
 </body>
 </html>
